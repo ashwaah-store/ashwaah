@@ -19,7 +19,7 @@ export default function MyStory() {
             <div className="absolute -inset-4 bg-[#C5A059]/20 rounded-[3rem] blur-2xl group-hover:bg-[#C5A059]/30 transition-all duration-700"></div>
             <div className="relative rounded-[2.5rem] overflow-hidden border border-[#C5A059]/10 shadow-xl aspect-square">
               <img 
-                src="/images/Owner-profile.jpg" 
+                src="/images/owner-profile.jpg" 
                 alt="Boutique Owner" 
                 className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-1000 scale-105 hover:scale-100"
               />
@@ -80,17 +80,17 @@ Fashion, to me, is not just about trends—it is about identity, confidence, and
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Call Us</p>
-                  <p className="text-lg font-bold">+91 76739 63808</p>
+                  <p className="text-lg font-bold">+91 96115 26047</p>
                 </div>
               </div>
               
-              <a href="https://wa.me/917673963808" target="_blank" rel="noopener noreferrer" className="flex items-center gap-6 group">
+              <a href="https://wa.me/919611526047" target="_blank" rel="noopener noreferrer" className="flex items-center gap-6 group">
                 <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[#25D366] transition-all duration-500">
                   <MessageCircle size={20} className="text-[#C5A059] group-hover:text-white" />
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-white/40">WhatsApp Us</p>
-                  <p className="text-lg font-bold">+91 76739 63808</p>
+                  <p className="text-lg font-bold">+91 96115 26047</p>
                 </div>
               </a>
             </div>

@@ -26,7 +26,6 @@ interface Product {
   isFeatured: boolean | number | null;
   isCustomizable: boolean | number | null;
   enabledMeasurements: string | null; // JSON string array
-  gender: string | null;
   variations: Variation[];
 }
 

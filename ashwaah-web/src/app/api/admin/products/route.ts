@@ -105,8 +105,8 @@ export async function POST(request: Request) {
     const baseSalePrice = variations && variations.length > 0 ? Math.min(...variations.map((v: any) => Number(v.salePrice) || 0)) : 0;
 
     // 1 & 2. Insert Product and Variations in a Transaction
-    const newProduct = await db.transaction(async (tx) => {
-      const productResult = await tx.insert(products).values({
+    const newProduct = db.transaction((tx) => {
+      const productResult = tx.insert(products).values({
         name,
         description: description || null,
         basePrice: basePriceValue,
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
           salePrice: Number(v.salePrice) || 0,
           sku: v.sku || `${insertedProduct.id}-${v.size}${v.color && v.color !== "Default" ? `-${v.color}` : ""}`
         }));
-        await tx.insert(productVariations).values(variationValues).run();
+        tx.insert(productVariations).values(variationValues).run();
       }
       return insertedProduct;
     });
@@ -198,13 +198,13 @@ export async function PATCH(request: Request) {
     if (enabledMeasurements !== undefined) updateData.enabledMeasurements = enabledMeasurements;
 
     // 1 & 2. Update Product and Variations in a Transaction
-    await db.transaction(async (tx) => {
+    db.transaction((tx) => {
       if (Object.keys(updateData).length > 0) {
-        await tx.update(products).set(updateData).where(eq(products.id, id)).run();
+        tx.update(products).set(updateData).where(eq(products.id, id)).run();
       }
 
       if (variations) {
-        await tx.delete(productVariations).where(eq(productVariations.productId, id)).run();
+        tx.delete(productVariations).where(eq(productVariations.productId, id)).run();
         if (variations.length > 0) {
           const variationValues = variations.map((v: any) => ({
             productId: id,
@@ -215,7 +215,7 @@ export async function PATCH(request: Request) {
             salePrice: Number(v.salePrice) || 0,
             sku: v.sku || `${id}-${v.size}${v.color && v.color !== "Default" ? `-${v.color}` : ""}`
           }));
-          await tx.insert(productVariations).values(variationValues).run();
+          tx.insert(productVariations).values(variationValues).run();
         }
       }
     });
@@ -267,17 +267,17 @@ export async function DELETE(request: Request) {
     }
 
     // 3. Perform deletion in a transaction
-    await db.transaction(async (tx) => {
+    db.transaction((tx) => {
       // Nullify productId in completed order items to preserve order history
       if (relatedOrderItems.length > 0) {
-        await tx.update(orderItems).set({ productId: null }).where(eq(orderItems.productId, id)).run();
+        tx.update(orderItems).set({ productId: null }).where(eq(orderItems.productId, id)).run();
       }
       // Delete variations
-      await tx.delete(productVariations).where(eq(productVariations.productId, id)).run();
+      tx.delete(productVariations).where(eq(productVariations.productId, id)).run();
       // Remove from any active carts
-      await tx.delete(cartItems).where(eq(cartItems.productId, id)).run();
+      tx.delete(cartItems).where(eq(cartItems.productId, id)).run();
       // Finally delete the product itself
-      await tx.delete(products).where(eq(products.id, id)).run();
+      tx.delete(products).where(eq(products.id, id)).run();
     });
 
     return NextResponse.json({ success: true });

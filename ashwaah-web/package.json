@@ -15,7 +15,6 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/playfair-display": "^5.2.8",
-    "@libsql/client": "^0.17.3",
     "better-sqlite3": "^12.9.0",
     "drizzle-orm": "^0.45.2",
     "firebase": "^12.12.1",
