@@ -25,6 +25,7 @@ type NavItem = {
   id: number;
   label: string;
   href: string;
+  imageUrl?: string;
   order: number;
   isActive: boolean;
 };
@@ -39,7 +40,7 @@ export default function AdminNavigation() {
 
   // Form State
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ label: "", href: "", order: 0, isActive: true });
+  const [formData, setFormData] = useState({ label: "", href: "", imageUrl: "", order: 0, isActive: true });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -70,16 +71,16 @@ export default function AdminNavigation() {
 
   const handleEdit = (item: NavItem) => {
     setEditingId(item.id);
-    setFormData({ label: item.label, href: item.href, order: item.order, isActive: item.isActive });
+    setFormData({ label: item.label, href: item.href, imageUrl: item.imageUrl || "", order: item.order, isActive: item.isActive });
   };
 
   const handleCancel = () => {
     setEditingId(null);
-    setFormData({ label: "", href: "", order: 0, isActive: true });
+    setFormData({ label: "", href: "", imageUrl: "", order: 0, isActive: true });
   };
 
   const handleAddNew = () => {
-    setFormData({ label: "", href: "", order: items.length, isActive: true });
+    setFormData({ label: "", href: "", imageUrl: "", order: items.length, isActive: true });
     setEditingId(0);
   };
 
@@ -216,9 +217,24 @@ export default function AdminNavigation() {
                   value={formData.label}
                   onChange={(e) => setFormData({ ...formData, label: e.target.value })}
                   placeholder="e.g. New Arrivals"
-                  className="w-full bg-brand/5 border border-brand/10 rounded-xl py-3 px-4 text-sm font-bold text-brand focus:outline-none focus:border-[#C5A059]/30 focus:ring-4 focus:ring-[#C5A059]/10 transition-all"
+                  className="w-full bg-brand/5 border border-brand/10 rounded-xl py-3 px-4 text-sm font-bold text-brand focus:outline-none focus:border-[#C5A059]/30 focus:ring-4 focus:ring-[#C5A059]/10 transition-all mb-4"
                   required
                 />
+                <label className="block text-[10px] font-bold text-brand/40 uppercase tracking-widest mb-2 ml-1">Category Image URL</label>
+                <div className="flex gap-4 items-center">
+                  {formData.imageUrl && (
+                    <div className="w-12 h-12 rounded-xl overflow-hidden border border-brand/10 shrink-0">
+                      <img src={formData.imageUrl} alt="preview" className="w-full h-full object-cover" onError={e => (e.currentTarget.src = "/images/placeholder.png")} />
+                    </div>
+                  )}
+                  <input 
+                    type="text" 
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    placeholder="https://example.com/image.jpg"
+                    className="flex-1 bg-brand/5 border border-brand/10 rounded-xl py-3 px-4 text-sm font-bold text-brand focus:outline-none focus:border-[#C5A059]/30 focus:ring-4 focus:ring-[#C5A059]/10 transition-all"
+                  />
+                </div>
               </div>
               <div className="flex flex-col">
                 <label className="block text-[10px] font-bold text-brand/40 uppercase tracking-widest mb-2 ml-1">Status</label>

@@ -45,6 +45,7 @@ export async function POST(request: Request) {
     const result = await db.insert(navigationMenu).values({
       label: body.label,
       href: body.href,
+      imageUrl: body.imageUrl,
       order: body.order || 0,
       isActive: body.isActive !== undefined ? body.isActive : true,
     }).returning();

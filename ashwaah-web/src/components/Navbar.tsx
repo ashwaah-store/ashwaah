@@ -136,31 +136,8 @@ export default function Navbar() {
               </Link>
             </div>
 
-            {/* Desktop Navigation (Dynamic from DB) */}
+            {/* Desktop Navigation (Dynamic from DB - moved to home page) */}
             <nav className="hidden lg:flex items-center space-x-6 mr-4">
-              {isLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-4 w-16 bg-white/10 rounded-full animate-pulse"></div>
-                ))
-              ) : (
-                navItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      className={`text-[12px] font-bold uppercase tracking-[0.15em] transition-all duration-300 relative group py-1 whitespace-nowrap ${
-                        isActive ? "text-[#C5A059]" : "text-white hover:text-[#C5A059]"
-                      }`}
-                    >
-                      {item.label}
-                      <span className={`absolute -bottom-1 left-0 h-0.5 bg-[#C5A059] transition-all duration-300 ${
-                        isActive ? "w-full" : "w-0 group-hover:w-full"
-                      }`}></span>
-                    </Link>
-                  );
-                })
-              )}
             </nav>
 
             <div className="hidden md:flex items-center space-x-4 ml-auto text-white">
@@ -245,29 +222,7 @@ export default function Navbar() {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-[#1B3022] border-t border-white/10 animate-in slide-in-from-top duration-300">
             <div className="px-6 pt-8 pb-12 space-y-4">
-              {isLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="block h-12 bg-white/5 rounded-xl animate-pulse"></div>
-                ))
-              ) : (
-                navItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      className={`block px-6 py-4 rounded-2xl text-sm font-bold uppercase tracking-widest transition-all ${
-                        isActive 
-                          ? "bg-[#C5A059] text-white shadow-lg shadow-[#C5A059]/20 translate-x-2" 
-                          : "text-white/60 hover:text-white hover:bg-white/5"
-                      }`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })
-              )}
+              {/* Dynamic categories moved to home page */}
               
               <div className="pt-8 border-t border-white/10">
                 {user ? (

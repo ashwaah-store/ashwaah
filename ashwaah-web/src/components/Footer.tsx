@@ -1,4 +1,7 @@
+"use client";
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ShieldCheck, Undo2 } from 'lucide-react';
 
 const Facebook = ({ size = 20, strokeWidth = 1.5 }) => (
@@ -29,6 +32,13 @@ const Instagram = ({ size = 20, strokeWidth = 1.5 }) => (
 );
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Hide Footer for Admin Portal
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="w-full bg-[#fafbfc] pt-12 pb-6 px-4 md:px-8 border-t border-brand/10 text-[#282c3f]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">

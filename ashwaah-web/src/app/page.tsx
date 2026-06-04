@@ -1,12 +1,53 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import ProductGrid from "@/components/ProductGrid";
+import { useState, useEffect, useRef } from "react";
+
+type NavItem = {
+  id: number;
+  label: string;
+  href: string;
+  imageUrl?: string;
+  order: number;
+  isActive: boolean;
+};
 
 import { motion } from "framer-motion";
 
 export default function Home() {
+  const [navItems, setNavItems] = useState<NavItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (carouselRef.current) {
+      const scrollAmount = 300;
+      carouselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  useEffect(() => {
+    const fetchNavItems = async () => {
+      try {
+        const res = await fetch("/api/admin/nav");
+        const data = await res.json();
+        if (data.success) {
+          setNavItems(data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch nav items:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchNavItems();
+  }, []);
+
   return (
     <div className="min-h-screen bg-white text-brand font-sans selection:bg-brand-accent/30">
       {/* Hero Section */}
@@ -50,24 +91,56 @@ export default function Home() {
 
       {/* Featured Collections Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        {/* Category Banners */}
-        <section className="max-w-4xl mx-auto">
-          <div className="flex justify-center gap-12 md:gap-24 mt-12">
-            {/* Men's Circle */}
-            <Link href="/category/mens" className="group flex flex-col items-center">
-              <div className="w-40 h-40 md:w-56 md:h-56 rounded-full overflow-hidden border-2 border-brand/10 shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:border-brand-accent">
-                <img src="/images/mens_banner.png" alt="Men" className="w-full h-full object-cover" />
-              </div>
-              <span className="mt-4 text-xs font-black uppercase tracking-[0.2em] text-brand/60 group-hover:text-brand-accent transition-colors">Men</span>
-            </Link>
+        {/* Dynamic Category Row */}
+        <section className="w-full mx-auto mt-12 mb-16 relative group">
+          {/* Navigation Arrows */}
+          <button 
+            onClick={() => scroll('left')}
+            className="absolute left-2 top-1/2 -translate-y-1/2 -mt-4 z-10 bg-white/90 p-2 rounded-full shadow-lg text-brand hidden group-hover:flex hover:bg-white hover:scale-110 transition-all border border-brand/10"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button 
+            onClick={() => scroll('right')}
+            className="absolute right-2 top-1/2 -translate-y-1/2 -mt-4 z-10 bg-white/90 p-2 rounded-full shadow-lg text-brand hidden group-hover:flex hover:bg-white hover:scale-110 transition-all border border-brand/10"
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={24} />
+          </button>
 
-            {/* Women's Circle */}
-            <Link href="/category/womens" className="group flex flex-col items-center">
-              <div className="w-40 h-40 md:w-56 md:h-56 rounded-full overflow-hidden border-2 border-brand/10 shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:border-brand-accent">
-                <img src="/images/womens_banner.png" alt="Women" className="w-full h-full object-cover" />
-              </div>
-              <span className="mt-4 text-xs font-black uppercase tracking-[0.2em] text-brand/60 group-hover:text-brand-accent transition-colors">Women</span>
-            </Link>
+          <div 
+            ref={carouselRef}
+            className="flex gap-6 overflow-x-auto pb-6 pt-4 px-8 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
+          >
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex flex-col items-center shrink-0 animate-pulse">
+                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl bg-brand/5 mb-4"></div>
+                  <div className="h-4 w-20 bg-brand/5 rounded-full"></div>
+                </div>
+              ))
+            ) : (
+              navItems.map((item) => (
+                <Link 
+                  key={item.id} 
+                  href={item.href} 
+                  className="group flex flex-col items-center shrink-0 snap-center"
+                >
+                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden border-2 border-[#8B5CF6]/30 shadow-lg transition-transform duration-500 group-hover:scale-105 group-hover:border-[#8B5CF6] group-hover:shadow-[#8B5CF6]/20 relative">
+                    <img 
+                      src={item.imageUrl || "/images/placeholder.png"} 
+                      alt={item.label} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                      onError={e => (e.currentTarget.src = "/images/placeholder.png")}
+                    />
+                  </div>
+                  <span className="mt-4 text-xs md:text-sm font-bold tracking-wide text-brand/80 group-hover:text-[#8B5CF6] transition-colors text-center w-full max-w-[12rem] truncate">
+                    {item.label}
+                  </span>
+                </Link>
+              ))
+            )}
           </div>
         </section>
 

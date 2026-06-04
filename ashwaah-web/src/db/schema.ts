@@ -74,6 +74,7 @@ export const navigationMenu = sqliteTable("navigation_menu", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   label: text("label").notNull(),
   href: text("href").notNull(),
+  imageUrl: text("image_url"),
   order: integer("order").notNull().default(0),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 });
