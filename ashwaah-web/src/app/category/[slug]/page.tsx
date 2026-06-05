@@ -140,6 +140,8 @@ export default async function CategoryPage({ params }: PageProps) {
               name: p.name,
               description: p.description || "",
               price: p.salePrice || p.basePrice,
+              basePrice: p.basePrice,
+              salePrice: p.salePrice,
               imageUrl: firstImage,
               categorySlug: slug,
               isCustomizable: p.isCustomizable || false

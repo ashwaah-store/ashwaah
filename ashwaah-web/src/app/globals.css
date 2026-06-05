@@ -3,7 +3,7 @@
 @theme {
   --color-brand: #1B3022;       /* Deep Forest Green */
   --color-brand-hover: #142419; /* Darker Forest Green */
-  --color-brand-light: #FFFFFF; /* Pure White */
+  --color-brand-light: #FFFBDB; /* Warm Light Ivory/Cream */
   --color-brand-dark: #333333;  /* Deep Charcoal */
   --color-brand-accent: #C5A059; /* Gold/Accent color */
   --font-inter: var(--font-inter);

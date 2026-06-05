@@ -78,6 +78,8 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
                   name: product.name,
                   description: product.description || "",
                   price: product.salePrice || product.basePrice || 0,
+                  basePrice: product.basePrice,
+                  salePrice: product.salePrice,
                   imageUrl: firstImage,
                   categorySlug: product.category || ""
                 }} 

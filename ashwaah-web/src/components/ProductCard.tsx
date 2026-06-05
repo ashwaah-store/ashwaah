@@ -1,27 +1,40 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
 
 interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price?: number;
+  basePrice?: number;
+  salePrice?: number;
   imageUrl: string;
   categorySlug: string;
   isCustomizable?: boolean;
 }
 
 export default function ProductCard({ product }: { product: Product }) {
+  const basePrice = product.basePrice ?? product.price ?? 0;
+  const salePrice = product.salePrice ?? product.price ?? 0;
+  
+  // Active price to display
+  const activePrice = salePrice > 0 && salePrice < basePrice ? salePrice : basePrice;
+  const originalPrice = basePrice;
+  
+  // Calculate discount percentage automatically
+  const discount = originalPrice > 0 && activePrice < originalPrice
+    ? Math.round(((originalPrice - activePrice) / originalPrice) * 100)
+    : 0;
+
   return (
     <Link 
       href={`/product/${product.id}`} 
-      className="group flex flex-col w-full bg-white rounded-2xl overflow-hidden shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 transition-all duration-300"
+      className="group flex flex-col w-full bg-[#F5EBE0] rounded-3xl p-3 border border-brand/5 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300"
     >
       {/* Top Image Section */}
-      <div className="relative w-full aspect-[4/5] overflow-hidden">
+      <div className="relative w-full aspect-[4/5] overflow-hidden rounded-2xl bg-brand-light/50 border border-brand/5 shadow-sm">
         {product.isCustomizable && (
-          <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full border border-brand/10 shadow-sm">
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-brand">Customizable</span>
+          <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-brand/10 shadow-sm">
+            <span className="text-[8px] font-black uppercase tracking-[0.15em] text-brand">Customizable</span>
           </div>
         )}
         <img 
@@ -32,23 +45,28 @@ export default function ProductCard({ product }: { product: Product }) {
       </div>
       
       {/* Bottom Content Section */}
-      <div className="p-5 md:p-6 flex flex-col flex-1 bg-white">
-        <h3 className="text-xl md:text-2xl font-playfair font-bold text-[#01353c] mb-2 line-clamp-1">
+      <div className="pt-3 pb-0.5 px-0.5 flex flex-col flex-1">
+        <h3 className="text-xs md:text-sm font-black tracking-widest text-[#1B3022] uppercase mb-0.5 line-clamp-1">
           {product.name}
         </h3>
-        <p className="text-sm text-gray-500 font-inter line-clamp-1 mb-5">
+        <p className="text-[10px] md:text-xs text-[#1B3022]/60 font-inter line-clamp-1 mb-1.5">
           {product.description || "Designer piece"}
         </p>
         
-        <div className="w-full h-px bg-gray-100/80 mb-5"></div>
-        
-        <div className="flex items-center justify-between mt-auto">
-          <div className="text-lg md:text-xl font-bold text-[#01353c]">
-            ₹{(product.price || 0).toLocaleString()}
-          </div>
-          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-[#01353c] group-hover:bg-[#01353c] group-hover:text-white transition-colors duration-300">
-            <ArrowRight size={18} strokeWidth={2.5} />
-          </div>
+        <div className="flex items-center gap-2 mt-auto">
+          <span className="text-xs md:text-sm font-black text-[#1B3022]">
+            ₹{activePrice.toLocaleString()}
+          </span>
+          {discount > 0 && (
+            <>
+              <span className="text-[10px] md:text-xs text-[#1B3022]/40 line-through">
+                ₹{originalPrice.toLocaleString()}
+              </span>
+              <span className="text-[10px] md:text-xs font-bold text-[#cd5533]">
+                ({discount}% OFF)
+              </span>
+            </>
+          )}
         </div>
       </div>
     </Link>

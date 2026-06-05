@@ -51,6 +51,7 @@ export default function ProductManagement() {
   const [description, setDescription] = useState("");
   const [gender, setGender] = useState("unisex");
   const [category, setCategory] = useState("");
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   // Removed overall mrp and salePrice
   const [avgRating, setAvgRating] = useState("4.3");
   const [numReviews, setNumReviews] = useState("1");
@@ -71,7 +72,10 @@ export default function ProductManagement() {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [variations, setVariations] = useState<Variation[]>([]);
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => { 
+    fetchProducts(); 
+    fetchAvailableCategories();
+  }, []);
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -80,6 +84,25 @@ export default function ProductManagement() {
       const data = await res.json();
       if (data.success) setProducts(data.data);
     } catch { } finally { setIsLoading(false); }
+  };
+
+  const fetchAvailableCategories = async () => {
+    try {
+      // Fetch Homepage Categories only
+      const resHomeCat = await fetch("/api/admin/homepage-categories");
+      const dataHomeCat = await resHomeCat.json();
+      const homeCatLabels = dataHomeCat.success ? dataHomeCat.data.map((item: any) => item.name) : [];
+
+      // Sort alphabetically and filter out duplicates
+      const uniqueNames = Array.from(new Set(homeCatLabels))
+        .map(name => String(name).trim())
+        .filter(name => name !== "")
+        .sort((a, b) => a.localeCompare(b));
+
+      setAvailableCategories(uniqueNames);
+    } catch (error) {
+      console.error("Failed to load categories for dropdown:", error);
+    }
   };
 
   // Filtered products
@@ -434,8 +457,20 @@ export default function ProductManagement() {
                     </select>
                   </div>
                   <div>
-                    <label className={LABEL}>Category</label>
-                    <input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Ethnic Wear, Dresses…" className={INPUT} />
+                    <label className={LABEL}>Category *</label>
+                    <select
+                      value={category}
+                      onChange={e => setCategory(e.target.value)}
+                      className={INPUT}
+                      required
+                    >
+                      <option value="">Select Category...</option>
+                      {availableCategories.map((catName) => (
+                        <option key={catName} value={catName}>
+                          {catName}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div>
@@ -760,6 +795,11 @@ export default function ProductManagement() {
                               }`} 
                               placeholder="699" 
                             />
+                            {v.basePrice && v.salePrice && Number(v.salePrice) < Number(v.basePrice) && (
+                              <span className="block text-[9px] font-bold text-green-600 mt-1 pl-1">
+                                {Math.round((1 - Number(v.salePrice) / Number(v.basePrice)) * 100)}% OFF
+                              </span>
+                            )}
                           </td>
                           <td className="px-5 py-3">
                             <input type="number" value={v.stock ?? ""} onChange={e => updateVariation(v.size, v.color, "stock", e.target.value === "" ? "" : parseInt(e.target.value))} className="w-16 bg-brand/5 border border-transparent focus:border-[#C5A059]/40 rounded-lg px-3 py-2 text-xs font-bold outline-none" />

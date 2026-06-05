@@ -112,6 +112,8 @@ function SearchResults() {
                   name: product.name,
                   description: product.description || "",
                   price: product.salePrice || product.basePrice,
+                  basePrice: product.basePrice,
+                  salePrice: product.salePrice,
                   imageUrl: firstImage,
                   categorySlug: product.category || "all"
                 }} 
@@ -126,7 +128,7 @@ function SearchResults() {
 
 export default function SearchPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-brand-light">
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-screen">
           <Loader2 className="animate-spin text-[#C5A059]" size={40} />

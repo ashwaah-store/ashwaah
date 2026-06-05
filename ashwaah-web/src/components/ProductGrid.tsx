@@ -69,11 +69,11 @@ export default function ProductGrid() {
   return (
     <section className="py-20">
       <motion.div 
-        initial={{ opacity: 0, x: -20 }}
-        whileInView={{ opacity: 1, x: 0 }}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-brand/10 pb-6"
+        className="flex flex-col items-center text-center mb-12 border-b border-brand/10 pb-6"
       >
         <div>
           <h2 className="text-4xl font-playfair font-bold mb-3 text-brand">Featured Collections</h2>
@@ -105,6 +105,8 @@ export default function ProductGrid() {
                     name: product.name,
                     description: product.description || "",
                     price: product.salePrice || product.basePrice,
+                    basePrice: product.basePrice,
+                    salePrice: product.salePrice,
                     imageUrl: firstImage,
                     categorySlug: product.category || "all",
                     isCustomizable: product.isCustomizable

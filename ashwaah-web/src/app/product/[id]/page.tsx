@@ -218,10 +218,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               {product.name}
             </h1>
 
-            <div className="flex items-baseline space-x-3 mb-6">
+            <div className="flex items-baseline space-x-3 mb-6 gap-2">
               <span className="text-2xl font-bold text-brand">₹{displayPrice.toLocaleString()}</span>
               {mrp > displayPrice && (
-                <span className="text-lg text-brand/40 line-through font-medium">₹{mrp.toLocaleString()}</span>
+                <>
+                  <span className="text-lg text-brand/40 line-through font-medium">₹{mrp.toLocaleString()}</span>
+                  <span className="text-base font-bold text-[#cd5533]">({Math.round(((mrp - displayPrice) / mrp) * 100)}% OFF)</span>
+                </>
               )}
             </div>
 

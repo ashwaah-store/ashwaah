@@ -88,9 +88,9 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [offers.length]);
   return (
-    <div className="min-h-screen bg-white text-brand font-sans selection:bg-brand-accent/30">
+    <div className="min-h-screen bg-brand-light text-brand font-sans selection:bg-brand-accent/30">
       {/* Hero Section */}
-      <header className="relative w-full min-h-[70vh] flex flex-col items-center justify-center overflow-hidden border-b border-brand/10 bg-white pt-16">
+      <header className="relative w-full min-h-[70vh] flex flex-col items-center justify-center overflow-hidden border-b border-brand/10 bg-brand-light pt-16">
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -211,7 +211,7 @@ export default function Home() {
                   href={item.href} 
                   className="group flex flex-col items-center shrink-0 snap-center"
                 >
-                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden border-2 border-[#8B5CF6]/30 shadow-lg transition-transform duration-500 group-hover:scale-105 group-hover:border-[#8B5CF6] group-hover:shadow-[#8B5CF6]/20 relative">
+                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden border-2 border-[#3E5622]/30 shadow-lg transition-transform duration-500 group-hover:scale-105 group-hover:border-[#3E5622] group-hover:shadow-[#3E5622]/20 relative">
                     <img 
                       src={item.imageUrl || "/images/placeholder.png"} 
                       alt={item.label} 
@@ -219,7 +219,7 @@ export default function Home() {
                       onError={e => (e.currentTarget.src = "/images/placeholder.png")}
                     />
                   </div>
-                  <span className="mt-4 text-xs md:text-sm font-bold tracking-wide text-brand/80 group-hover:text-[#8B5CF6] transition-colors text-center w-full max-w-[12rem] truncate">
+                  <span className="mt-4 text-xs md:text-sm font-bold tracking-wide text-brand/80 group-hover:text-[#3E5622] transition-colors text-center w-full max-w-[12rem] truncate">
                     {item.label}
                   </span>
                 </Link>
@@ -233,11 +233,11 @@ export default function Home() {
           <section className="w-full mx-auto mb-20">
             {/* Categories Heading */}
             <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-brand/10 pb-6"
+              className="flex flex-col items-center text-center mb-12 border-b border-brand/10 pb-6"
             >
               <div>
                 <h2 className="text-4xl font-playfair font-bold mb-3 text-brand">Categories</h2>
