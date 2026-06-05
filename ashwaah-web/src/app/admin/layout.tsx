@@ -16,7 +16,8 @@ import {
   BarChart3,
   AlertTriangle,
   X,
-  Settings
+  Settings,
+  LayoutGrid
 } from "lucide-react";
 
 const sidebarLinks = [
@@ -26,6 +27,7 @@ const sidebarLinks = [
   { name: "Orders", href: "/admin/orders", icon: Package },
   { name: "Navbar Settings", href: "/admin/navigation", icon: Map },
   { name: "Products", href: "/admin/products", icon: Shirt },
+  { name: "Category Settings", href: "/admin/categories", icon: LayoutGrid },
   { name: "Customers", href: "/admin/customers", icon: Users },
   { name: "Site Settings", href: "/admin/settings", icon: Settings },
 ];

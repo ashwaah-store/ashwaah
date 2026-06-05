@@ -124,4 +124,15 @@ export const offerBanners = sqliteTable("offer_banners", {
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
+export const homepageCategories = sqliteTable("homepage_categories", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  imageUrl: text("image_url").notNull(),
+  promoText: text("promo_text").notNull(),
+  actionText: text("action_text").default("Shop Now"),
+  link: text("link"),
+  order: integer("order").notNull().default(0),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
+
 

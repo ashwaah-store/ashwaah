@@ -1,8 +1,8 @@
 import { db } from "@/db";
-import { navigationMenu, pageSections, products } from "@/db/schema";
-import { eq, inArray, asc } from "drizzle-orm";
+import { navigationMenu, pageSections, products, homepageCategories } from "@/db/schema";
+import { eq, inArray, asc, or } from "drizzle-orm";
 import ProductCarousel from "@/components/ProductCarousel";
-import ProductGrid from "@/components/ProductGrid";
+import ProductCard from "@/components/ProductCard";
 import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 
@@ -13,16 +13,37 @@ interface PageProps {
 export default async function CategoryPage({ params }: PageProps) {
   const { slug } = await params;
   
-  // 1. Find the menu item by href
+  // 1. Find the category item (first check navigation menu)
   const href = `/category/${slug}`;
   const menuResult = await db.select()
     .from(navigationMenu)
     .where(eq(navigationMenu.href, href))
     .limit(1);
 
-  const menuItem = menuResult[0];
+  let categoryName = "";
+  let isFromNav = false;
 
-  if (!menuItem) {
+  if (menuResult.length > 0) {
+    categoryName = menuResult[0].label;
+    isFromNav = true;
+  } else {
+    // Check homepage category grid cards
+    const homeCatResult = await db.select()
+      .from(homepageCategories)
+      .limit(100);
+      
+    // Find item matching the slug
+    const matchingHomeCat = homeCatResult.find(
+      (item) => item.name.toLowerCase().trim().replace(/\s+/g, "-") === slug || item.link === href
+    );
+
+    if (matchingHomeCat) {
+      categoryName = matchingHomeCat.name;
+    }
+  }
+
+  // 2. If not found in either, show Not Found
+  if (!categoryName) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center px-4">
         <h1 className="text-4xl font-playfair font-bold text-brand mb-4">Category Not Found</h1>
@@ -31,35 +52,50 @@ export default async function CategoryPage({ params }: PageProps) {
     );
   }
 
-  // 2. Fetch sections for this menu item
-  const sections = await db.select()
-    .from(pageSections)
-    .where(eq(pageSections.menuId, menuItem.id))
-    .orderBy(asc(pageSections.displayOrder));
+  // 3. Fetch sections for this category (if it is a navigation item)
+  let sectionsWithProducts: any[] = [];
+  if (isFromNav && menuResult.length > 0) {
+    const sections = await db.select()
+      .from(pageSections)
+      .where(eq(pageSections.menuId, menuResult[0].id))
+      .orderBy(asc(pageSections.displayOrder));
 
-  // 3. Hydrate products for each section
-  const sectionsWithProducts = await Promise.all(
-    sections.map(async (section) => {
-      const productIds = section.productIds
-        .split(",")
-        .map(id => parseInt(id.trim()))
-        .filter(id => !isNaN(id));
+    sectionsWithProducts = await Promise.all(
+      sections.map(async (section) => {
+        const productIds = section.productIds
+          .split(",")
+          .map(id => parseInt(id.trim()))
+          .filter(id => !isNaN(id));
 
-      let hydratedProducts: any[] = [];
-      if (productIds.length > 0) {
-        hydratedProducts = await db.select()
-          .from(products)
-          .where(inArray(products.id, productIds));
-      }
+        let hydratedProducts: any[] = [];
+        if (productIds.length > 0) {
+          hydratedProducts = await db.select()
+            .from(products)
+            .where(inArray(products.id, productIds));
+        }
 
-      return {
-        ...section,
-        products: hydratedProducts
-      };
-    })
-  );
+        return {
+          ...section,
+          products: hydratedProducts
+        };
+      })
+    );
+  }
 
-  const categoryName = menuItem.label;
+  // 4. If no custom sections exist, dynamically query all products matching this category name
+  let displayProducts: any[] = [];
+  if (sectionsWithProducts.length === 0) {
+    const categorySlug = categoryName.toLowerCase().trim().replace(/\s+/g, "-");
+    displayProducts = await db.select()
+      .from(products)
+      .where(
+        or(
+          eq(products.category, categoryName),
+          eq(products.category, slug),
+          eq(products.category, categorySlug)
+        )
+      );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12">
@@ -73,7 +109,7 @@ export default async function CategoryPage({ params }: PageProps) {
         </p>
       </div>
       
-      {/* Dynamic Sections */}
+      {/* Rendering: Sections (Carousel) or Product Grid */}
       {sectionsWithProducts.length > 0 ? (
         <div className="space-y-0">
           {sectionsWithProducts.map((section) => (
@@ -84,8 +120,35 @@ export default async function CategoryPage({ params }: PageProps) {
             />
           ))}
         </div>
+      ) : displayProducts.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-8">
+          {displayProducts.map((p) => {
+            let firstImage = "/images/placeholder.png";
+            try {
+              const parsedImages = JSON.parse(p.images || "[]");
+              if (parsedImages.length > 0) {
+                firstImage = parsedImages[0];
+              } else if (p.imageUrl) {
+                firstImage = p.imageUrl;
+              }
+            } catch (e) {
+              if (p.imageUrl) firstImage = p.imageUrl;
+            }
+
+            const productProps = {
+              id: String(p.id),
+              name: p.name,
+              description: p.description || "",
+              price: p.salePrice || p.basePrice,
+              imageUrl: firstImage,
+              categorySlug: slug,
+              isCustomizable: p.isCustomizable || false
+            };
+            return <ProductCard key={p.id} product={productProps} />;
+          })}
+        </div>
       ) : (
-        <section className="py-4 text-center bg-brand/5 rounded-[3rem] border border-brand/10 px-8">
+        <section className="py-20 text-center bg-brand/5 rounded-[3rem] border border-brand/10 px-8">
           <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
             <ShoppingBag className="text-[#C5A059]" size={32} />
           </div>
@@ -95,9 +158,6 @@ export default async function CategoryPage({ params }: PageProps) {
           </p>
         </section>
       )}
-
-      {/* Footer Grid - Optional/Default if no sections? Or just extra products? */}
-      {/* For now, we'll just show the dynamic sections as requested */}
     </div>
   );
 }

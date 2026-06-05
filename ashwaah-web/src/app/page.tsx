@@ -24,6 +24,7 @@ export default function Home() {
   const [bannerUrl, setBannerUrl] = useState("");
   const [offers, setOffers] = useState<any[]>([]);
   const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
+  const [homepageCatCards, setHomepageCatCards] = useState<any[]>([]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (carouselRef.current) {
@@ -66,8 +67,14 @@ export default function Home() {
         if (dataOffers.success) {
           setOffers(dataOffers.data);
         }
+
+        const resCatCards = await fetch("/api/admin/homepage-categories");
+        const dataCatCards = await resCatCards.json();
+        if (dataCatCards.success) {
+          setHomepageCatCards(dataCatCards.data);
+        }
       } catch (err) {
-        console.error("Failed to fetch settings/offers", err);
+        console.error("Failed to fetch settings/offers/categories", err);
       }
     }
     fetchData();
@@ -220,6 +227,64 @@ export default function Home() {
             )}
           </div>
         </section>
+
+        {/* Dynamic Category Promo Grid Cards (Grid of aspect-3/4 blocks) */}
+        {homepageCatCards.length > 0 && (
+          <section className="w-full mx-auto mb-20">
+            {/* Categories Heading */}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-brand/10 pb-6"
+            >
+              <div>
+                <h2 className="text-4xl font-playfair font-bold mb-3 text-brand">Categories</h2>
+                <p className="text-brand/60 italic">Pre-made or personalized, always perfect for you.</p>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              {homepageCatCards.map((item) => {
+                const CardContent = (
+                  <div className="group relative w-full aspect-[3/4] rounded-3xl overflow-hidden shadow-lg border border-brand/5 flex flex-col justify-end transition-all duration-500 hover:scale-[1.03] hover:shadow-xl">
+                    <img 
+                      src={item.imageUrl} 
+                      alt={item.name} 
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                      onError={e => (e.currentTarget.src = "/images/placeholder.png")}
+                    />
+                    {/* Shadow overlay for depth */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none"></div>
+                    
+                    {/* Overlaid coral-orange card at bottom */}
+                    <div className="relative z-10 m-4 p-4 bg-[#cd5533]/90 backdrop-blur-sm text-white rounded-2xl shadow-md text-center transition-all duration-300 group-hover:bg-[#cd5533] flex flex-col items-center justify-center">
+                      <span className="text-[10px] md:text-xs tracking-wider uppercase font-medium line-clamp-1">
+                        {item.name}
+                      </span>
+                      <span className="text-sm md:text-base font-bold font-playfair tracking-tight leading-tight my-0.5 uppercase line-clamp-1">
+                        {item.promoText}
+                      </span>
+                      <span className="text-[9px] font-bold tracking-widest uppercase border-t border-white/20 pt-1.5 mt-1.5 w-full block transition-colors group-hover:text-white">
+                        {item.actionText || "Shop Now"}
+                      </span>
+                    </div>
+                  </div>
+                );
+
+                // If link is empty, construct a dynamic fallback path like /category/ethnic-wear
+                const targetLink = item.link || `/category/${item.name.toLowerCase().trim().replace(/\s+/g, "-")}`;
+
+                return (
+                  <Link key={item.id} href={targetLink} className="block">
+                    {CardContent}
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         <ProductGrid />
       </main>
