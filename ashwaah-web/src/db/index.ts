@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import * as schema from "./schema";
 
-const url = process.env.DATABASE_URL;
+const url = process.env.DATABASE_URL || process.env.DATABASE_URI;
 const authToken = process.env.DATABASE_AUTH_TOKEN;
 
 // Initialize the client based on the environment
