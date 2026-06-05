@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, User, Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+
 
 export default function Login() {
   const router = useRouter();
@@ -16,22 +15,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [timer, setTimer] = useState(0);
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && !(window as any).recaptchaVerifier) {
-      try {
-        (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-          'callback': () => {
-            // reCAPTCHA solved
-          }
-        });
-      } catch (err) {
-        console.error("Recaptcha init error:", err);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -63,17 +47,22 @@ export default function Login() {
     setError("");
     
     try {
-      const appVerifier = (window as any).recaptchaVerifier;
-      const formattedPhone = `+91${phone}`;
+      const res = await fetch("/api/auth/otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send", phone, portal: "user" }),
+      });
+      const data = await res.json();
       
-      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
-      setConfirmationResult(confirmation);
+      if (!data.success) {
+        throw new Error(data.error || "Failed to send OTP");
+      }
       
       setStep("otp");
       setTimer(60);
     } catch (err: any) {
       console.error("OTP Error:", err);
-      setError("Failed to send OTP. Please try again.");
+      setError(err.message || "Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -81,19 +70,24 @@ export default function Login() {
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length !== 6 || !confirmationResult) return;
+    if (otp.length !== 6) return;
     
     setLoading(true);
     setError("");
     
     try {
-      const result = await confirmationResult.confirm(otp);
-      const user = result.user;
+      const res = await fetch("/api/auth/otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", phone, otp, portal: "user" }),
+      });
+      const data = await res.json();
       
-      // Optionally notify backend about successful firebase login here if needed
-      // For now, we rely on Firebase Auth
+      if (!data.success) {
+        throw new Error(data.error || "Invalid OTP");
+      }
       
-      if (!user.displayName) {
+      if (data.isNewUser) {
         setStep("profile");
       } else {
         router.push("/");
@@ -101,7 +95,7 @@ export default function Login() {
       }
     } catch (err: any) {
       console.error("Verification error:", err);
-      setError("Invalid OTP. Please try again.");
+      setError(err.message || "Invalid OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -115,22 +109,22 @@ export default function Login() {
     setError("");
     
     try {
-      if (auth.currentUser) {
-        const { updateProfile } = await import("firebase/auth");
-        await updateProfile(auth.currentUser, { displayName: fullName });
-      }
-      
-      // Keep syncing with backend just in case
-      await fetch("/api/auth/profile", {
+      const res = await fetch("/api/auth/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, fullName }),
-      }).catch(console.error);
+      });
+      const data = await res.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || "Failed to save profile");
+      }
       
       router.push("/");
       router.refresh();
-    } catch (err) {
-      setError("Failed to complete profile.");
+    } catch (err: any) {
+      console.error("Profile error:", err);
+      setError(err.message || "Failed to complete profile.");
     } finally {
       setLoading(false);
     }
@@ -138,7 +132,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-brand-light flex flex-col justify-center items-center p-4 selection:bg-brand-accent/30 font-inter">
-      <div id="recaptcha-container"></div>
       <div className="absolute top-8 left-8">
         <Link href="/" className="inline-flex items-center space-x-2 text-brand/60 hover:text-brand transition text-sm font-medium">
           <ArrowLeft size={16} />
