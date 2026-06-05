@@ -1,5 +1,5 @@
 import { db } from "./index";
-import { navigationMenu, products, users } from "./schema";
+import { navigationMenu, products, users, siteSettings, offerBanners } from "./schema";
 
 async function seed() {
   console.log("Seeding database...");
@@ -18,6 +18,19 @@ async function seed() {
       { label: "Men", href: "/category/men", order: 1 },
       { label: "Women", href: "/category/women", order: 2 },
       { label: "Ethnic Wear", href: "/category/ethnic-wear", order: 3 },
+    ]);
+
+    // Default Site Settings (Homepage Banner)
+    await db.insert(siteSettings).values({
+      key: "homepage_banner",
+      value: "/uploads/banner_1780578895587.avif",
+    }).onConflictDoNothing();
+
+    // Default Offers
+    await db.insert(offerBanners).values([
+      { text: "Curated for All. Customized for You.", link: "/my-story", order: 1 },
+      { text: "Standard Sizes. Perfected Fits.", link: "/", order: 2 },
+      { text: "Flat 10% Off on Your First Order! Use Code: WELCOME10", link: null, order: 3 },
     ]);
 
     // Products
