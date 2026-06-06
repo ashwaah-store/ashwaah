@@ -108,6 +108,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const sizesForColor = variations.filter(v => v.color === selectedColor);
   const availableSizes = Array.from(new Set(sizesForColor.map(v => v.size)));
 
+  const isSingleSize = availableSizes.length === 1 && (
+    availableSizes[0] === "Standard" || 
+    availableSizes[0] === "One Size" || 
+    availableSizes[0] === "No Size" || 
+    availableSizes[0] === "Default"
+  );
+
   // Current selected variation
   const currentVariation = variations.find(
     v => v.color === selectedColor && v.size === selectedSize
@@ -245,7 +252,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     key={color}
                     onClick={() => {
                       setSelectedColor(color);
-                      setSelectedSize(null); // Reset size when color changes
+                      const colorSizes = variations.filter(v => v.color === color).map(v => v.size);
+                      const isSingle = colorSizes.length === 1 && (
+                        colorSizes[0] === "Standard" || 
+                        colorSizes[0] === "One Size" || 
+                        colorSizes[0] === "No Size" || 
+                        colorSizes[0] === "Default"
+                      );
+                      if (isSingle) {
+                        setSelectedSize(colorSizes[0]);
+                      } else {
+                        setSelectedSize(null);
+                      }
                     }}
                     className={`relative w-12 h-12 rounded-full border-2 p-1 transition-all ${selectedColor === color
                         ? "border-brand-accent scale-110 shadow-lg"
@@ -269,41 +287,43 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
 
             {/* Size Selector */}
-            <div className="mb-12">
-              <div className="flex justify-between items-center mb-5">
-                <span className="text-sm font-bold text-brand uppercase tracking-widest flex items-center gap-2">
-                  2. Select Size <span className="text-brand/30">—</span> <span className="text-brand-accent">{selectedSize || "None"}</span>
-                </span>
-                <button
-                  onClick={() => setIsSizeGuideOpen(true)}
-                  className="text-[10px] text-brand/40 hover:text-brand-accent font-bold uppercase tracking-widest transition-colors underline underline-offset-4"
-                >
-                  Size Guide
-                </button>
+            {!isSingleSize && (
+              <div className="mb-12">
+                <div className="flex justify-between items-center mb-5">
+                  <span className="text-sm font-bold text-brand uppercase tracking-widest flex items-center gap-2">
+                    2. Select Size <span className="text-brand/30">—</span> <span className="text-brand-accent">{selectedSize || "None"}</span>
+                  </span>
+                  <button
+                    onClick={() => setIsSizeGuideOpen(true)}
+                    className="text-[10px] text-brand/40 hover:text-brand-accent font-bold uppercase tracking-widest transition-colors underline underline-offset-4"
+                  >
+                    Size Guide
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {availableSizes.map((size) => {
+                    const variation = variations.find(v => v.color === selectedColor && v.size === size);
+                    const isOutOfStock = variation ? variation.stock === 0 : true;
+  
+                    return (
+                      <button
+                        key={size}
+                        disabled={isOutOfStock}
+                        onClick={() => setSelectedSize(size)}
+                        className={`min-w-[48px] h-12 rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 ${selectedSize === size
+                            ? "bg-brand text-white border-brand scale-105 shadow-md"
+                            : isOutOfStock
+                              ? "bg-brand/5 text-brand/20 border-transparent cursor-not-allowed line-through opacity-50"
+                              : "bg-white text-brand/70 border-brand/5 hover:border-brand-accent hover:text-brand shadow-sm"
+                          }`}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-3">
-                {availableSizes.map((size) => {
-                  const variation = variations.find(v => v.color === selectedColor && v.size === size);
-                  const isOutOfStock = variation ? variation.stock === 0 : true;
-
-                  return (
-                    <button
-                      key={size}
-                      disabled={isOutOfStock}
-                      onClick={() => setSelectedSize(size)}
-                      className={`min-w-[48px] h-12 rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 ${selectedSize === size
-                          ? "bg-brand text-white border-brand scale-105 shadow-md"
-                          : isOutOfStock
-                            ? "bg-brand/5 text-brand/20 border-transparent cursor-not-allowed line-through opacity-50"
-                            : "bg-white text-brand/70 border-brand/5 hover:border-brand-accent hover:text-brand shadow-sm"
-                        }`}
-                    >
-                      {size}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            )}
 
             {/* Custom Fit Section - Interactive Dropdown */}
             {product.isCustomizable && enabledMeasurementsList.length > 0 && (

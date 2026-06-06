@@ -4,7 +4,37 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Plus, Package, Trash2, Edit3, X, Star, Loader2, Check, Tag, Sparkles, Search, Scissors } from "lucide-react";
 import { MALE_MEASUREMENTS, FEMALE_MEASUREMENTS } from "@/constants/measurements";
 
-const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
+const SIZE_SYSTEMS = {
+  apparel: {
+    label: "Standard Apparel (S/M/L)",
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"]
+  },
+  waist: {
+    label: "Pants / Waist (Numeric)",
+    sizes: ["28", "30", "32", "34", "36", "38", "40"]
+  },
+  footwear: {
+    label: "Footwear UK Sizes (Shoes/Flip Flops)",
+    sizes: ["5", "6", "7", "8", "9", "10", "11", "12"]
+  },
+  oneSize: {
+    label: "Free Size (One Size)",
+    sizes: ["One Size"]
+  },
+  standard: {
+    label: "No Size (Watches, Bags, Accessories)",
+    sizes: ["Standard"]
+  }
+};
+
+const inferSizeSystem = (sizes: string[]): keyof typeof SIZE_SYSTEMS => {
+  if (sizes.includes("One Size")) return "oneSize";
+  if (sizes.includes("Standard")) return "standard";
+  if (sizes.some(s => SIZE_SYSTEMS.waist.sizes.includes(s))) return "waist";
+  if (sizes.some(s => SIZE_SYSTEMS.footwear.sizes.includes(s))) return "footwear";
+  return "apparel";
+};
+
 const PRESET_COLORS = [
   { name: "Black", hex: "#000000" },
   { name: "White", hex: "#FFFFFF" },
@@ -71,6 +101,7 @@ export default function ProductManagement() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [variations, setVariations] = useState<Variation[]>([]);
+  const [sizeSystem, setSizeSystem] = useState<keyof typeof SIZE_SYSTEMS>("apparel");
 
   useEffect(() => { 
     fetchProducts(); 
@@ -160,6 +191,7 @@ export default function ProductManagement() {
     setAvgRating("4.3"); setNumReviews("1");
     setIsFeatured(false); setIsCustomizable(false); setTags(""); setImages([]);
     setSelectedSizes([]); setSelectedColors([]); setVariations([]);
+    setSizeSystem("apparel");
     setEnabledMeasurements([]);
     setCustomMeasurements([]);
     setNewMeasurementInput("");
@@ -189,6 +221,10 @@ export default function ProductManagement() {
         if (p.variations) {
           const sizes = Array.from(new Set(p.variations.map((v: any) => v.size))).filter(s => s !== "Default") as string[];
           const colors = Array.from(new Set(p.variations.map((v: any) => v.color))).filter(c => c !== "Default") as string[];
+          
+          const system = inferSizeSystem(sizes);
+          setSizeSystem(system);
+          
           setSelectedSizes(sizes);
           setSelectedColors(colors);
           setVariations(p.variations);
@@ -646,16 +682,64 @@ export default function ProductManagement() {
             </div>
 
             {/* ── Section 5: Sizes ── */}
-            <div>
-              <h3 className="text-xs font-black text-brand/30 uppercase tracking-[0.3em] mb-6 flex items-center gap-2"><span className="w-5 h-5 rounded-full bg-brand text-white text-[8px] flex items-center justify-center font-black">5</span> Available Sizes</h3>
-              <div className="flex flex-wrap gap-2">
-                {SIZES.map(size => (
-                  <button key={size} type="button" onClick={() => toggleSize(size)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${selectedSizes.includes(size) ? "bg-[#1B3022] text-white border-[#1B3022]" : "bg-brand/5 text-brand/50 border-transparent hover:border-brand/20"}`}>
-                    {size}
-                  </button>
-                ))}
+            <div className="space-y-4">
+              <h3 className="text-xs font-black text-brand/30 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-brand text-white text-[8px] flex items-center justify-center font-black">5</span> 
+                Available Sizes
+              </h3>
+              
+              <div>
+                <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-2">
+                  Select Size Chart System
+                </label>
+                <select
+                  value={sizeSystem}
+                  onChange={(e) => {
+                    const newSystem = e.target.value as keyof typeof SIZE_SYSTEMS;
+                    setSizeSystem(newSystem);
+                    if (newSystem === "oneSize") {
+                      setSelectedSizes(["One Size"]);
+                    } else if (newSystem === "standard") {
+                      setSelectedSizes(["Standard"]);
+                    } else {
+                      setSelectedSizes([]);
+                    }
+                  }}
+                  className="bg-brand/5 border border-transparent focus:border-[#C5A059]/40 rounded-xl px-4 py-3 text-xs font-semibold text-brand outline-none transition-all w-full max-w-xs cursor-pointer"
+                >
+                  {Object.entries(SIZE_SYSTEMS).map(([key, system]) => (
+                    <option key={key} value={key}>
+                      {system.label}
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              {sizeSystem !== "oneSize" && sizeSystem !== "standard" ? (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {SIZE_SYSTEMS[sizeSystem].sizes.map(size => (
+                    <button 
+                      key={size} 
+                      type="button" 
+                      onClick={() => toggleSize(size)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        selectedSizes.includes(size) 
+                          ? "bg-[#1B3022] text-white border-[#1B3022]" 
+                          : "bg-brand/5 text-brand/50 border-transparent hover:border-brand/20"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 bg-brand/5 rounded-xl border border-brand/10 text-xs font-semibold text-brand/60 max-w-sm leading-relaxed">
+                  {sizeSystem === "oneSize" 
+                    ? "Free size product. The size 'One Size' has been automatically selected for all color variations." 
+                    : "No size product. The default size 'Standard' has been automatically selected for all color variations."
+                  }
+                </div>
+              )}
             </div>
 
             {/* ── Section 6: Available Colors ── */}
