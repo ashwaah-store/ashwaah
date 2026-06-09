@@ -277,7 +277,7 @@ export default function CategoryFilterSection({
 
       {/* Left Column: Filter Sidebar Panel */}
       <aside
-        className={`w-full lg:w-64 flex-shrink-0 bg-white border border-brand/10 p-6 rounded-3xl shadow-sm self-start lg:block ${
+        className={`w-full lg:w-64 flex-shrink-0 bg-[#FFFDF6] border border-brand/10 p-6 rounded-3xl shadow-sm self-start lg:sticky lg:top-20 lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto custom-scrollbar lg:block ${
           isMobileFiltersOpen ? "block" : "hidden"
         }`}
       >
