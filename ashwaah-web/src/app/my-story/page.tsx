@@ -55,7 +55,7 @@ export default function MyStory() {
       </section>
 
       {/* Connect Section */}
-      <section className="bg-[#FFFDF6] py-24 text-[#1B3022] overflow-hidden relative border-t border-brand/5 shadow-sm">
+      <section id="contact" className="bg-[#FFFDF6] py-24 text-[#1B3022] overflow-hidden relative border-t border-brand/5 shadow-sm">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#C5A059]/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
 
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center relative z-10">

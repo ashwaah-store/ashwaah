@@ -101,7 +101,7 @@ export default function Footer() {
         <div className="md:col-span-3">
           <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C5A059] mb-4">Customer Care</h4>
           <ul className="space-y-2.5 text-xs text-[#F5EBE0]/80 font-semibold">
-            <li><Link href="#" className="hover:text-white transition">Contact Us</Link></li>
+            <li><Link href="/my-story#contact" className="hover:text-white transition">Contact Us</Link></li>
             <li><Link href="#" className="hover:text-white transition">Shipping & Delivery</Link></li>
             <li><Link href="#" className="hover:text-white transition">Cancellation & Returns</Link></li>
             <li><Link href="#" className="hover:text-white transition">Privacy Policy & Terms</Link></li>
