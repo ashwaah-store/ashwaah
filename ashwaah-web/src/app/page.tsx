@@ -121,7 +121,7 @@ export default function Home() {
     <div className="min-h-screen bg-brand-light text-brand font-sans selection:bg-brand-accent/30">
       {/* Dynamic Offer Announcement Bar (Carousel, 1cm - 2cm Height) */}
       {offers.length > 0 && (
-        <div className="w-full bg-[#1B3022] text-[#C5A059] h-12 flex items-center justify-center overflow-hidden border-y border-[#C5A059]/10 relative z-30 shadow-md">
+        <div className="w-full bg-[#3D120B] text-[#C5A059] h-12 flex items-center justify-center overflow-hidden border-y border-[#C5A059]/10 relative z-30 shadow-md">
           <div className="max-w-7xl mx-auto px-4 w-full text-center flex items-center justify-center h-full relative">
             <AnimatePresence mode="wait">
               {offers.map((offer, idx) => (
@@ -231,7 +231,7 @@ export default function Home() {
                   href={item.href} 
                   className="group flex flex-col items-center shrink-0"
                 >
-                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden border-2 border-[#3E5622]/30 shadow-lg transition-transform duration-500 group-hover:scale-105 group-hover:border-[#3E5622] group-hover:shadow-[#3E5622]/20 relative">
+                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden border-2 border-[#5C1D16]/30 shadow-lg transition-transform duration-500 group-hover:scale-105 group-hover:border-[#5C1D16] group-hover:shadow-[#5C1D16]/20 relative">
                     <img 
                       src={item.imageUrl || "/images/placeholder.png"} 
                       alt={item.label} 
@@ -239,7 +239,7 @@ export default function Home() {
                       onError={e => (e.currentTarget.src = "/images/placeholder.png")}
                     />
                   </div>
-                  <span className="mt-4 text-xs md:text-sm font-bold tracking-wide text-brand/80 group-hover:text-[#3E5622] transition-colors text-center w-full max-w-[12rem] break-words block">
+                  <span className="mt-4 text-xs md:text-sm font-bold tracking-wide text-brand/80 group-hover:text-[#5C1D16] transition-colors text-center w-full max-w-[12rem] break-words block">
                     {item.label}
                   </span>
                 </Link>
