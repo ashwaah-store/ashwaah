@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Sparkles, ChevronLeft, ChevronRight, Megaphone } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import ProductGrid from "@/components/ProductGrid";
 
 type NavItem = {
@@ -64,15 +64,7 @@ export default function Home() {
     };
   }, [isLoading, navItems, isHovered]);
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (carouselRef.current) {
-      const scrollAmount = 300;
-      carouselRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
+
 
   useEffect(() => {
     const fetchNavItems = async () => {
@@ -215,21 +207,7 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         {/* Dynamic Category Row */}
         <section className="w-full mx-auto mt-12 mb-4 relative group">
-          {/* Navigation Arrows */}
-          <button 
-            onClick={() => scroll('left')}
-            className="absolute left-2 top-1/2 -translate-y-1/2 -mt-4 z-10 bg-white/90 p-2 rounded-full shadow-lg text-brand hidden group-hover:flex hover:bg-white hover:scale-110 transition-all border border-brand/10"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <button 
-            onClick={() => scroll('right')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 -mt-4 z-10 bg-white/90 p-2 rounded-full shadow-lg text-brand hidden group-hover:flex hover:bg-white hover:scale-110 transition-all border border-brand/10"
-            aria-label="Scroll right"
-          >
-            <ChevronRight size={24} />
-          </button>
+
 
           <div 
             ref={carouselRef}
