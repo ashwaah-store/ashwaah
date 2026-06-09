@@ -6,7 +6,7 @@ import { Mail, Phone, Camera, Share2, Send, MessageCircle, Sparkles } from "luci
 
 export default function MyStory() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#FCFBF8] via-[#FDFBF7] to-[#F7F3EB] text-brand">
+    <main className="min-h-screen bg-gradient-to-br from-[#FCFBF8] via-[#FDFBF7] to-[#F7F3EB] text-brand-dark">
 
 
 
@@ -35,7 +35,7 @@ export default function MyStory() {
               <div className="w-20 h-1 bg-[#C5A059] rounded-full"></div>
             </div>
 
-            <div className="space-y-4 text-lg text-brand/70 font-medium leading-relaxed">
+            <div className="space-y-4 text-lg text-brand-dark/70 font-medium leading-relaxed">
               <p>
                 I am Ashwini Gowda, a woman whose journey began in the serene village of Siddhapura, Karnataka, a place known for the breathtaking Jog Falls. From these humble roots, my passion for fashion grew into a mission—to redefine style by blending fashion with comfort and making it accessible, sustainable, and empowering.
 
@@ -112,15 +112,12 @@ export default function MyStory() {
                 href="https://www.facebook.com/share/1Ddd2P38UR/?mibextid=wwXIfr" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="flex items-center justify-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-brand-dark transition-all group"
+                className="flex items-center justify-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-brand-hover transition-all group"
               >
                 <Share2 size={20} />
                 <span className="text-xs font-bold uppercase tracking-widest">Facebook</span>
               </a>
-              <a 
-                href="#" 
-                className="flex items-center justify-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-blue-400 transition-all group"
-              >
+              <a href="#" className="flex items-center justify-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-blue-400 transition-all group">
                 <Send size={20} />
                 <span className="text-xs font-bold uppercase tracking-widest">Twitter</span>
               </a>
