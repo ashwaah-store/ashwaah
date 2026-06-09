@@ -26,6 +26,44 @@ export default function Home() {
   const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
   const [homepageCatCards, setHomepageCatCards] = useState<any[]>([]);
 
+  const [isHovered, setIsHovered] = useState(false);
+  const scrollPosRef = useRef(0);
+
+  useEffect(() => {
+    if (isLoading || navItems.length === 0 || !carouselRef.current) return;
+
+    let animationFrameId: number;
+    const scrollContainer = carouselRef.current;
+    const scrollSpeed = 0.6; // Very slow speed (pixels per frame)
+
+    const updateScroll = () => {
+      if (!isHovered) {
+        scrollPosRef.current += scrollSpeed;
+        const maxScroll = scrollContainer.scrollWidth / 2;
+
+        if (scrollPosRef.current >= maxScroll) {
+          scrollPosRef.current = 0;
+        }
+        scrollContainer.scrollLeft = scrollPosRef.current;
+      }
+      animationFrameId = requestAnimationFrame(updateScroll);
+    };
+
+    const handleScroll = () => {
+      if (Math.abs(scrollContainer.scrollLeft - scrollPosRef.current) > 2) {
+        scrollPosRef.current = scrollContainer.scrollLeft;
+      }
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll);
+    animationFrameId = requestAnimationFrame(updateScroll);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      scrollContainer.removeEventListener("scroll", handleScroll);
+    };
+  }, [isLoading, navItems, isHovered]);
+
   const scroll = (direction: 'left' | 'right') => {
     if (carouselRef.current) {
       const scrollAmount = 300;
@@ -195,21 +233,25 @@ export default function Home() {
 
           <div 
             ref={carouselRef}
-            className="flex gap-6 overflow-x-auto pb-6 pt-4 px-8 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onTouchStart={() => setIsHovered(true)}
+            onTouchEnd={() => setIsHovered(false)}
+            className="flex gap-6 overflow-x-auto pb-6 pt-4 px-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           >
             {isLoading ? (
-              Array.from({ length: 4 }).map((_, i) => (
+               Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="flex flex-col items-center shrink-0 animate-pulse">
                   <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl bg-brand/5 mb-4"></div>
                   <div className="h-4 w-20 bg-brand/5 rounded-full"></div>
                 </div>
               ))
             ) : (
-              navItems.map((item) => (
+              [...navItems, ...navItems].map((item, index) => (
                 <Link 
-                  key={item.id} 
+                  key={`${item.id}-${index}`} 
                   href={item.href} 
-                  className="group flex flex-col items-center shrink-0 snap-center"
+                  className="group flex flex-col items-center shrink-0"
                 >
                   <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden border-2 border-[#3E5622]/30 shadow-lg transition-transform duration-500 group-hover:scale-105 group-hover:border-[#3E5622] group-hover:shadow-[#3E5622]/20 relative">
                     <img 
