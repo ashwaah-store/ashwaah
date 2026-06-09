@@ -48,6 +48,7 @@ export async function POST(request: Request) {
       imageUrl: body.imageUrl,
       order: body.order || 0,
       isActive: body.isActive !== undefined ? body.isActive : true,
+      filterTypes: body.filterTypes || null,
     }).returning();
     
     const newItem = result[0];

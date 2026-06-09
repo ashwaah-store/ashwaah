@@ -18,6 +18,7 @@ interface Product {
   category: string | null;
   gender: string | null;
   isCustomizable: boolean | null;
+  tags?: string | null;
 }
 
 interface Section {
@@ -34,6 +35,7 @@ interface CategoryFilterSectionProps {
   initialDisplayProducts: Product[];
   categoryName: string;
   slug: string;
+  filterTypes?: string | null;
 }
 
 const COLOR_MAP: Record<string, string> = {
@@ -60,6 +62,7 @@ export default function CategoryFilterSection({
   initialDisplayProducts,
   categoryName,
   slug,
+  filterTypes,
 }: CategoryFilterSectionProps) {
   // 1. Flatten and deduplicate all products for filtering
   const allProducts = useMemo(() => {
@@ -78,56 +81,89 @@ export default function CategoryFilterSection({
     return Array.from(map.values());
   }, [initialSections, initialDisplayProducts]);
 
+  // Parse admin configured filter types
+  const adminFilterTypes = useMemo(() => {
+    if (!filterTypes) return null;
+    return filterTypes
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+  }, [filterTypes]);
+
+  // Helper for default type classification
+  const classifyTypeFallback = (name: string, category: string) => {
+    if (name.includes("t-shirt") || name.includes("tshirt") || name.includes("polo") || name.includes("tee")) {
+      return "T-Shirt";
+    } else if (name.includes("shirt")) {
+      return "Shirt";
+    } else if (
+      category.includes("ethnic") ||
+      name.includes("kurta") ||
+      name.includes("kurti") ||
+      name.includes("lehenga") ||
+      name.includes("saree") ||
+      name.includes("sharara") ||
+      name.includes("anarkali")
+    ) {
+      return "Ethnic Wear";
+    } else if (
+      category.includes("suitings") ||
+      category.includes("work wear") ||
+      category.includes("office wear") ||
+      category.includes("corporate") ||
+      name.includes("blazer") ||
+      name.includes("suit") ||
+      name.includes("formal")
+    ) {
+      return "Workwear";
+    } else if (name.includes("dress") || name.includes("gown") || name.includes("bodycon") || category.includes("dresses")) {
+      return "Dresses";
+    } else if (name.includes("jogger") || name.includes("pants") || name.includes("cargo") || name.includes("trousers")) {
+      return "Pants & Joggers";
+    }
+    return category || "Other";
+  };
+
   // 2. Classify product types dynamically
   const productsWithTypes = useMemo(() => {
     return allProducts.map((p) => {
       let type = "Other";
       const name = (p.name || "").toLowerCase();
       const category = (p.category || "").toLowerCase();
+      const tags = (p.tags || "").toLowerCase();
 
-      if (name.includes("t-shirt") || name.includes("tshirt") || name.includes("polo") || name.includes("tee")) {
-        type = "T-Shirt";
-      } else if (name.includes("shirt")) {
-        type = "Shirt";
-      } else if (
-        category.includes("ethnic") ||
-        name.includes("kurta") ||
-        name.includes("kurti") ||
-        name.includes("lehenga") ||
-        name.includes("saree") ||
-        name.includes("sharara") ||
-        name.includes("anarkali")
-      ) {
-        type = "Ethnic Wear";
-      } else if (
-        category.includes("suitings") ||
-        category.includes("work wear") ||
-        category.includes("office wear") ||
-        category.includes("corporate") ||
-        name.includes("blazer") ||
-        name.includes("suit") ||
-        name.includes("formal")
-      ) {
-        type = "Workwear";
-      } else if (name.includes("dress") || name.includes("gown") || name.includes("bodycon") || category.includes("dresses")) {
-        type = "Dresses";
-      } else if (name.includes("jogger") || name.includes("pants") || name.includes("cargo") || name.includes("trousers")) {
-        type = "Pants & Joggers";
+      if (adminFilterTypes && adminFilterTypes.length > 0) {
+        // Sort types by length descending to match most specific first
+        const sortedAdminTypes = [...adminFilterTypes].sort((a, b) => b.length - a.length);
+        const matchedType = sortedAdminTypes.find((t) => {
+          const lowerT = t.toLowerCase();
+          return (
+            category.includes(lowerT) ||
+            tags.includes(lowerT) ||
+            name.includes(lowerT)
+          );
+        });
+        type = matchedType || "Other";
       } else {
-        type = p.category || "Other";
+        type = classifyTypeFallback(name, category);
       }
+
       return { ...p, classifiedType: type };
     });
-  }, [allProducts]);
+  }, [allProducts, adminFilterTypes]);
 
   // 3. Extract unique types and colors dynamically
   const availableTypes = useMemo(() => {
+    if (adminFilterTypes && adminFilterTypes.length > 0) {
+      const hasOther = productsWithTypes.some((p) => p.classifiedType === "Other");
+      return hasOther ? [...adminFilterTypes, "Other"] : adminFilterTypes;
+    }
     const typesSet = new Set<string>();
     productsWithTypes.forEach((p) => {
       if (p.classifiedType) typesSet.add(p.classifiedType);
     });
     return Array.from(typesSet).sort();
-  }, [productsWithTypes]);
+  }, [productsWithTypes, adminFilterTypes]);
 
   const availableColors = useMemo(() => {
     const colorsSet = new Set<string>();

@@ -28,6 +28,7 @@ type NavItem = {
   imageUrl?: string;
   order: number;
   isActive: boolean;
+  filterTypes?: string;
 };
 
 export default function AdminNavigation() {
@@ -40,7 +41,7 @@ export default function AdminNavigation() {
 
   // Form State
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ label: "", href: "", imageUrl: "", order: 0, isActive: true });
+  const [formData, setFormData] = useState({ label: "", href: "", imageUrl: "", order: 0, isActive: true, filterTypes: "" });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -71,16 +72,23 @@ export default function AdminNavigation() {
 
   const handleEdit = (item: NavItem) => {
     setEditingId(item.id);
-    setFormData({ label: item.label, href: item.href, imageUrl: item.imageUrl || "", order: item.order, isActive: item.isActive });
+    setFormData({ 
+      label: item.label, 
+      href: item.href, 
+      imageUrl: item.imageUrl || "", 
+      order: item.order, 
+      isActive: item.isActive,
+      filterTypes: item.filterTypes || ""
+    });
   };
 
   const handleCancel = () => {
     setEditingId(null);
-    setFormData({ label: "", href: "", imageUrl: "", order: 0, isActive: true });
+    setFormData({ label: "", href: "", imageUrl: "", order: 0, isActive: true, filterTypes: "" });
   };
 
   const handleAddNew = () => {
-    setFormData({ label: "", href: "", imageUrl: "", order: items.length, isActive: true });
+    setFormData({ label: "", href: "", imageUrl: "", order: items.length, isActive: true, filterTypes: "" });
     setEditingId(0);
   };
 
@@ -249,6 +257,21 @@ export default function AdminNavigation() {
                   <div className={`w-2 h-2 rounded-full ${formData.isActive ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                   <span>{formData.isActive ? "Active" : "Inactive"}</span>
                 </button>
+              </div>
+
+              {/* Type Filter Options */}
+              <div className="md:col-span-2">
+                <label className="block text-[10px] font-bold text-brand/40 uppercase tracking-widest mb-2 ml-1">Type Filter Options</label>
+                <input 
+                  type="text" 
+                  value={formData.filterTypes}
+                  onChange={(e) => setFormData({ ...formData, filterTypes: e.target.value })}
+                  placeholder="e.g. T-Shirt, Shirt, Workwear, Ethnic Wear, Pants & Joggers"
+                  className="w-full bg-brand/5 border border-brand/10 rounded-xl py-3 px-4 text-sm font-bold text-brand focus:outline-none focus:border-[#C5A059]/30 focus:ring-4 focus:ring-[#C5A059]/10 transition-all"
+                />
+                <p className="mt-1.5 text-[10px] text-brand/50 font-medium leading-relaxed">
+                  Enter comma-separated product types to display in the sidebar filter for this category. Leave blank to automatically classify products dynamically based on default keywords.
+                </p>
               </div>
             </div>
             <div className="mt-8 flex justify-end space-x-4">

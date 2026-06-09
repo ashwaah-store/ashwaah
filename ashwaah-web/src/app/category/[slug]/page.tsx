@@ -95,6 +95,8 @@ export default async function CategoryPage({ params }: PageProps) {
       );
   }
 
+  const filterTypes = menuResult.length > 0 ? menuResult[0].filterTypes : null;
+
   return (
     <div className="w-full bg-brand-light min-h-[calc(100vh-64px)] flex flex-col">
       {/* Rendering sections and fallback products via interactive CategoryFilterSection component */}
@@ -103,6 +105,7 @@ export default async function CategoryPage({ params }: PageProps) {
         initialDisplayProducts={displayProducts}
         categoryName={categoryName}
         slug={slug}
+        filterTypes={filterTypes}
       />
     </div>
   );

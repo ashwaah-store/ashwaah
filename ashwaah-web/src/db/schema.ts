@@ -77,6 +77,7 @@ export const navigationMenu = sqliteTable("navigation_menu", {
   imageUrl: text("image_url"),
   order: integer("order").notNull().default(0),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  filterTypes: text("filter_types"),
 });
 
 export const pageSections = sqliteTable("page_sections", {
