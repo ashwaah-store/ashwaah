@@ -6,7 +6,7 @@ import { Mail, Phone, Camera, Share2, Send, MessageCircle, Sparkles } from "luci
 
 export default function MyStory() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#FCFBF8] via-[#FDFBF7] to-[#F7F3EB] text-[#1B3022]">
+    <main className="min-h-screen bg-gradient-to-br from-[#FCFBF8] via-[#FDFBF7] to-[#F7F3EB] text-brand">
 
 
 
@@ -29,13 +29,13 @@ export default function MyStory() {
           <div className="space-y-6">
             <div>
               <span className="text-[#C5A059] font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Our Philosophy</span>
-              <h2 className="text-4xl md:text-5xl font-playfair font-bold text-[#1B3022] leading-tight mb-4">
+              <h2 className="text-4xl md:text-5xl font-playfair font-bold text-brand leading-tight mb-4">
                 The Vision Behind <span className="text-[#C5A059]">Ashwaah</span>
               </h2>
               <div className="w-20 h-1 bg-[#C5A059] rounded-full"></div>
             </div>
 
-            <div className="space-y-4 text-lg text-[#1B3022]/70 font-medium leading-relaxed">
+            <div className="space-y-4 text-lg text-brand/70 font-medium leading-relaxed">
               <p>
                 I am Ashwini Gowda, a woman whose journey began in the serene village of Siddhapura, Karnataka, a place known for the breathtaking Jog Falls. From these humble roots, my passion for fashion grew into a mission—to redefine style by blending fashion with comfort and making it accessible, sustainable, and empowering.
 
@@ -55,7 +55,7 @@ export default function MyStory() {
       </section>
 
       {/* Connect Section */}
-      <section className="bg-[#1B3022] py-24 text-white overflow-hidden relative">
+      <section className="bg-brand py-24 text-white overflow-hidden relative">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#C5A059]/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
 
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center relative z-10">
@@ -99,15 +99,28 @@ export default function MyStory() {
           <div className="bg-white/5 p-12 rounded-[3rem] border border-white/10 backdrop-blur-md">
             <h4 className="text-xl font-playfair font-bold mb-8">Follow Our Journey</h4>
             <div className="grid grid-cols-2 gap-4">
-              <a href="#" className="flex items-center justify-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-[#C5A059] transition-all group">
+              <a 
+                href="https://www.instagram.com/ashwaah1988?igsh=MWpucWdvdWFmbzJnZA%3D%3D&utm_source=qr" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center justify-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-[#C5A059] transition-all group"
+              >
                 <Camera size={20} />
                 <span className="text-xs font-bold uppercase tracking-widest">Instagram</span>
               </a>
-              <a href="#" className="flex items-center justify-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-brand-dark transition-all group">
+              <a 
+                href="https://www.facebook.com/share/1Ddd2P38UR/?mibextid=wwXIfr" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center justify-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-brand-dark transition-all group"
+              >
                 <Share2 size={20} />
                 <span className="text-xs font-bold uppercase tracking-widest">Facebook</span>
               </a>
-              <a href="#" className="flex items-center justify-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-blue-400 transition-all group">
+              <a 
+                href="#" 
+                className="flex items-center justify-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-blue-400 transition-all group"
+              >
                 <Send size={20} />
                 <span className="text-xs font-bold uppercase tracking-widest">Twitter</span>
               </a>
