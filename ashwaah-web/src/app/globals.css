@@ -8,6 +8,7 @@
   --color-brand-accent: #C5A059; /* Gold/Accent color */
   --font-inter: var(--font-inter);
   --font-playfair: var(--font-playfair);
+  --font-cinzel: var(--font-cinzel);
 }
 
 body {

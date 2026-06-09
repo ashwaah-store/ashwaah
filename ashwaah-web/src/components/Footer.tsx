@@ -65,7 +65,7 @@ export default function Footer() {
               alt="Ashwaah Logo" 
               className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
             />
-            <span className="font-playfair text-xl font-bold tracking-tighter text-white group-hover:text-[#C5A059] transition-colors">
+            <span className="font-cinzel text-xl font-bold tracking-wide text-white group-hover:text-[#C5A059] transition-colors">
               Ashwaah
             </span>
           </Link>
