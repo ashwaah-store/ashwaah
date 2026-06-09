@@ -407,7 +407,7 @@ export default function CategorySettingsPage() {
                   >
                     {/* Visual Card Display */}
                     <div className="flex gap-4">
-                      <div className="w-24 aspect-[3/4] bg-white rounded-2xl overflow-hidden shadow-sm border border-brand/5 relative flex-shrink-0">
+                      <div className="w-24 aspect-[4/5] bg-white rounded-2xl overflow-hidden shadow-sm border border-brand/5 relative flex-shrink-0">
                         <img 
                           src={item.imageUrl} 
                           alt={item.name} 
