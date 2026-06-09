@@ -121,7 +121,7 @@ export default function Home() {
     <div className="min-h-screen bg-brand-light text-brand font-sans selection:bg-brand-accent/30">
       {/* Dynamic Offer Announcement Bar (Carousel, 1cm - 2cm Height) */}
       {offers.length > 0 && (
-        <div className="w-full bg-[#FFFDF6] text-[#5C1D16] h-12 flex items-center justify-center overflow-hidden border-b border-[#5C1D16]/10 relative z-30 shadow-sm">
+        <div className="w-full bg-[#FFFDF6] text-[#5C1D16] h-14 flex items-center justify-center overflow-hidden border-b border-[#5C1D16]/10 relative z-30 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 w-full text-center flex items-center justify-center h-full relative">
             <AnimatePresence mode="wait">
               {offers.map((offer, idx) => (
@@ -136,11 +136,11 @@ export default function Home() {
                   >
                     {offer.link ? (
                       <Link href={offer.link} className="hover:text-brand-accent transition-colors duration-300 flex items-center gap-2">
-                        <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em]">📢 {offer.text}</span>
-                        <span className="text-[8px] md:text-[9px] font-black bg-[#C5A059] text-white px-2.5 py-0.5 rounded-full uppercase tracking-widest shadow-sm">Shop Now →</span>
+                        <span className="text-[12px] md:text-[13px] font-black uppercase tracking-[0.25em]">📢 {offer.text}</span>
+                        <span className="text-[9px] md:text-[10px] font-black bg-[#C5A059] text-white px-2.5 py-0.5 rounded-full uppercase tracking-widest shadow-sm">Shop Now →</span>
                       </Link>
                     ) : (
-                      <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em]">📢 {offer.text}</span>
+                      <span className="text-[12px] md:text-[13px] font-black uppercase tracking-[0.25em]">📢 {offer.text}</span>
                     )}
                   </motion.div>
                 )

@@ -361,15 +361,15 @@ export default function SettingsPage() {
             </div>
 
             {/* 2. Offer Carousel Banner Mockup (1cm to 2cm) */}
-            <div className="h-12 bg-[#FFFDF6] text-[#5C1D16] flex items-center justify-center px-4 relative z-10 shadow-sm border-b border-[#5C1D16]/10">
+            <div className="h-14 bg-[#FFFDF6] text-[#5C1D16] flex items-center justify-center px-4 relative z-10 shadow-sm border-b border-[#5C1D16]/10">
               {offers.length > 0 ? (
                 <div className="text-center w-full animate-pulse">
-                  <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#5C1D16]">
+                  <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-[#5C1D16]">
                     📢 {offers[0].text}
                   </p>
                 </div>
               ) : (
-                <p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/40">
+                <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-white/40">
                   Carousel Slide Offers Area (1 - 2 CM Height)
                 </p>
               )}
