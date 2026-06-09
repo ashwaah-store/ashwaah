@@ -133,7 +133,7 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center space-x-2 bg-brand/5 border border-brand/10 text-brand text-xs font-bold px-4 py-1.5 rounded-full mb-8 shadow-sm tracking-widest uppercase"
+            className="inline-flex items-center space-x-2 bg-brand/5 border border-brand/10 text-brand text-xs font-bold px-4 py-1.5 rounded-full mb-6 shadow-sm tracking-widest uppercase"
           >
             <Sparkles size={14} className="text-brand-accent" />
             <span>Curated for All. Customized for You</span>
@@ -142,7 +142,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-6xl md:text-8xl font-playfair font-bold tracking-tight mb-8 text-brand leading-[1.1]"
+            className="text-4xl md:text-6xl font-playfair font-bold tracking-tight mb-6 text-brand leading-[1.15]"
           >
             Standard Sizes. <br /> <span className="text-brand-accent italic">Perfected Fits.</span>
           </motion.h1>
@@ -150,7 +150,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
-            className="text-brand/70 text-xl max-w-2xl mx-auto mb-4 font-inter leading-relaxed"
+            className="text-brand/70 text-base md:text-lg max-w-2xl mx-auto mb-4 font-inter leading-relaxed"
           >
             At Ashwaah, Our crafted designs meet your individuality — pre‑made or personalised, always perfect for you
           </motion.p>
