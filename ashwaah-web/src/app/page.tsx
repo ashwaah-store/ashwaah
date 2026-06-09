@@ -176,7 +176,7 @@ export default function Home() {
       {/* Featured Collections Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         {/* Dynamic Category Row */}
-        <section className="w-full mx-auto mt-12 mb-16 relative group">
+        <section className="w-full mx-auto mt-12 mb-4 relative group">
           {/* Navigation Arrows */}
           <button 
             onClick={() => scroll('left')}
