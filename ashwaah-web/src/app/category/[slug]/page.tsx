@@ -20,10 +20,12 @@ export default async function CategoryPage({ params }: PageProps) {
 
   let categoryName = "";
   let isFromNav = false;
+  let filterTypes: string | null = null;
 
   if (menuResult.length > 0) {
     categoryName = menuResult[0].label;
     isFromNav = true;
+    filterTypes = menuResult[0].filterTypes;
   } else {
     // Check homepage category grid cards
     const homeCatResult = await db.select()
@@ -37,6 +39,7 @@ export default async function CategoryPage({ params }: PageProps) {
 
     if (matchingHomeCat) {
       categoryName = matchingHomeCat.name;
+      filterTypes = matchingHomeCat.filterTypes;
     }
   }
 
@@ -94,8 +97,6 @@ export default async function CategoryPage({ params }: PageProps) {
         )
       );
   }
-
-  const filterTypes = menuResult.length > 0 ? menuResult[0].filterTypes : null;
 
   return (
     <div className="w-full bg-brand-light min-h-[calc(100vh-64px)] flex flex-col">

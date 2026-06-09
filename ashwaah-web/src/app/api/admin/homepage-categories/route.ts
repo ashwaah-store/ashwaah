@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { name, imageUrl, promoText, actionText, link, order } = body;
+    const { name, imageUrl, promoText, actionText, link, order, filterTypes } = body;
 
     if (!name || !imageUrl || !promoText) {
       return NextResponse.json(
@@ -53,6 +53,7 @@ export async function POST(request: Request) {
         actionText: actionText || "Shop Now",
         link: link || null,
         order: order || 0,
+        filterTypes: filterTypes || null,
       })
       .returning();
 
@@ -85,7 +86,7 @@ export async function PUT(request: Request) {
       }
       return NextResponse.json({ success: true });
     } else {
-      const { id, name, imageUrl, promoText, actionText, link, order } = body;
+      const { id, name, imageUrl, promoText, actionText, link, order, filterTypes } = body;
 
       if (!id) {
         return NextResponse.json(
@@ -101,6 +102,7 @@ export async function PUT(request: Request) {
       if (actionText !== undefined) updates.actionText = actionText;
       if (link !== undefined) updates.link = link || null;
       if (order !== undefined) updates.order = order;
+      if (filterTypes !== undefined) updates.filterTypes = filterTypes || null;
 
       const result = await db
         .update(homepageCategories)

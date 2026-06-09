@@ -25,6 +25,7 @@ interface HomepageCategory {
   actionText: string;
   link: string | null;
   order: number;
+  filterTypes?: string | null;
 }
 
 export default function CategorySettingsPage() {
@@ -45,6 +46,7 @@ export default function CategorySettingsPage() {
   const [actionText, setActionText] = useState("Shop Now");
   const [link, setLink] = useState("");
   const [order, setOrder] = useState(0);
+  const [filterTypes, setFilterTypes] = useState("");
 
   const fetchData = async () => {
     try {
@@ -78,6 +80,7 @@ export default function CategorySettingsPage() {
     setActionText("Shop Now");
     setLink("");
     setOrder(categories.length);
+    setFilterTypes("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,6 +99,7 @@ export default function CategorySettingsPage() {
       actionText: actionText.trim() || "Shop Now",
       link: link.trim() || null,
       order: Number(order) || 0,
+      filterTypes: filterTypes.trim() || null,
     };
 
     try {
@@ -132,6 +136,7 @@ export default function CategorySettingsPage() {
     setActionText(item.actionText);
     setLink(item.link || "");
     setOrder(item.order);
+    setFilterTypes(item.filterTypes || "");
   };
 
   const handleDelete = async (id: number) => {
@@ -318,6 +323,22 @@ export default function CategorySettingsPage() {
                 placeholder="e.g. /category/ethnic-wear"
                 className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
               />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-2 ml-1">
+                Type Filter Options
+              </label>
+              <input
+                type="text"
+                value={filterTypes}
+                onChange={(e) => setFilterTypes(e.target.value)}
+                placeholder="e.g. T-Shirt, Shirt, Pants"
+                className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
+              />
+              <p className="mt-1.5 text-[9px] text-brand/40 font-medium leading-relaxed">
+                Enter comma-separated product types to show in the category page sidebar filter. Leave blank to automatically classify products dynamically based on default keywords.
+              </p>
             </div>
 
             {/* Live Mockup Preview inside Form */}

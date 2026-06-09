@@ -133,6 +133,7 @@ export const homepageCategories = sqliteTable("homepage_categories", {
   actionText: text("action_text").default("Shop Now"),
   link: text("link"),
   order: integer("order").notNull().default(0),
+  filterTypes: text("filter_types"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
