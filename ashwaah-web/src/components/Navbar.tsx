@@ -137,7 +137,7 @@ export default function Navbar() {
                   alt="Ashwaah Logo" 
                   className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
                 />
-                <span className="font-cinzel text-xl md:text-2xl font-bold text-white tracking-wide hover:text-[#C5A059] transition-colors">
+                <span className="font-cormorant text-2xl md:text-3xl font-bold text-white tracking-wide hover:text-[#C5A059] transition-colors">
                   Ashwaah
                 </span>
               </Link>
