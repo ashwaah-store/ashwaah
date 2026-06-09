@@ -151,7 +151,7 @@ export default function Home() {
       )}
 
       {/* Hero Section */}
-      <header className="relative w-full min-h-[70vh] flex flex-col items-center justify-center overflow-hidden border-b border-brand/10 bg-brand-light pt-16">
+      <header className="relative w-full min-h-[45vh] flex flex-col items-center justify-center overflow-hidden border-b border-brand/10 bg-brand-light pt-10 pb-12">
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
