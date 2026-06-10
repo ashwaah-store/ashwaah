@@ -391,14 +391,14 @@ export default function SettingsPage() {
           <div className="rounded-2xl border border-brand/10 overflow-hidden relative flex flex-col p-0 bg-brand/5">
 
             {/* 2. Offer Carousel Banner Mockup */}
-            <div className="h-28 bg-[#F5EBE0] text-[#3E5622] flex items-center justify-center px-4 relative z-10 shadow-sm border-b border-[#3E5622]/10">
+            <div className="h-24 bg-[#F5EBE0] text-[#3E5622] flex items-center justify-center px-4 relative z-10 shadow-sm border-b border-[#3E5622]/10">
               {offers.length > 0 ? (
                 (() => {
                   const { title, subtitle } = parseOfferText(offers[0].text);
                   return (
-                    <div className={`relative flex items-center h-20 bg-[#3E5622] text-white px-10 md:px-12 rounded-l-2xl rounded-r-md shadow-md overflow-hidden font-inter ${!subtitle ? "justify-center" : ""}`}>
+                    <div className={`relative flex items-center h-16 bg-[#3E5622] text-white px-10 rounded-l-2xl rounded-r-md shadow-md overflow-hidden font-inter ${!subtitle ? "justify-center" : ""}`}>
                       {/* Left Title */}
-                      <span className={`font-extrabold text-xl md:text-2xl uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${subtitle ? "pr-5" : ""}`}>
+                      <span className={`font-extrabold text-lg md:text-xl uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${subtitle ? "pr-4" : ""}`}>
                         {title}
                       </span>
                       
@@ -406,22 +406,22 @@ export default function SettingsPage() {
                         <>
                           {/* Dashed Divider with top/bottom circular cutouts */}
                           <div className="relative h-full flex items-center px-1">
-                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#F5EBE0] rounded-full"></div>
+                            <div className="absolute -top-[10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-[#F5EBE0] rounded-full"></div>
                             <div className="h-3/5 border-l border-dashed border-white/50"></div>
-                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#F5EBE0] rounded-full"></div>
+                            <div className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-[#F5EBE0] rounded-full"></div>
                           </div>
                           
                           {/* Right Subtitle */}
-                          <span className="text-sm md:text-base font-black uppercase tracking-widest pl-5 pr-3 opacity-95 whitespace-nowrap">
+                          <span className="text-sm md:text-base font-black uppercase tracking-widest pl-4 pr-2 opacity-95 whitespace-nowrap">
                             {subtitle}
                           </span>
                         </>
                       )}
 
                       {/* Jagged right edge (torn coupon effect) */}
-                      <div className="absolute right-0 top-0 bottom-0 w-1.5 flex flex-col justify-between py-1.5">
-                        {Array.from({ length: 10 }).map((_, i) => (
-                          <div key={i} className="w-1.5 h-2 bg-[#F5EBE0] rounded-l-full"></div>
+                      <div className="absolute right-0 top-0 bottom-0 w-1 flex flex-col justify-between py-1">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="w-1 h-1.5 bg-[#F5EBE0] rounded-l-full"></div>
                         ))}
                       </div>
                     </div>
