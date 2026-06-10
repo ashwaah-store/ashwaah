@@ -32,6 +32,30 @@ interface Product {
   variations: Variation[];
 }
 
+const COLOR_MAP: Record<string, string> = {
+  white: "#FFFFFF",
+  black: "#171717",
+  red: "#EF4444",
+  blue: "#3B82F6",
+  "sky blue": "#0EA5E9",
+  navy: "#1E3A8A",
+  grey: "#737373",
+  gray: "#737373",
+  brown: "#78350F",
+  maroon: "#5C1D16",
+  pink: "#EC4899",
+  beige: "#EADED2",
+  gold: "#C5A059",
+  "forest green": "#1B3022",
+  green: "#22C55E",
+  yellow: "#EAB308",
+};
+
+const getColorHex = (colorName: string) => {
+  const lower = colorName.toLowerCase();
+  return COLOR_MAP[lower] || (colorName.startsWith("#") ? colorName : "#CCCCCC");
+};
+
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [product, setProduct] = useState<Product | null>(null);
@@ -294,7 +318,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   >
                     <div
                       className="w-full h-full rounded-full border border-black/5"
-                      style={{ backgroundColor: color.toLowerCase() }}
+                      style={{ backgroundColor: getColorHex(color) }}
                     >
                       {selectedColor === color && (
                         <div className="absolute inset-0 flex items-center justify-center text-white">

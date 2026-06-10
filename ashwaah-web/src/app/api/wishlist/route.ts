@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { wishlists, products, users } from "@/db/schema";
+import { wishlists, products, users, productVariations } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 
@@ -38,7 +38,17 @@ export async function GET() {
     .innerJoin(products, eq(wishlists.productId, products.id))
     .where(eq(wishlists.userId, user.id));
 
-    return NextResponse.json({ success: true, items: dbWishlist });
+    // Calculate total stock for each wishlisted product
+    const itemsWithStock = await Promise.all(dbWishlist.map(async (item) => {
+      const vars = await db.select().from(productVariations).where(eq(productVariations.productId, item.productId));
+      const totalStock = vars.reduce((sum, v) => sum + v.stock, 0);
+      return {
+        ...item,
+        totalStock
+      };
+    }));
+
+    return NextResponse.json({ success: true, items: itemsWithStock });
   } catch (error: any) {
     console.error("Wishlist Fetch Error:", error);
     return NextResponse.json({ success: false, error: "Failed to fetch wishlist" }, { status: 500 });

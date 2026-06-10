@@ -8,6 +8,7 @@ export interface WishlistItem {
   imageUrl: string;
   category: string;
   description: string;
+  totalStock?: number;
 }
 
 interface WishlistStore {
@@ -64,6 +65,7 @@ export const useWishlistStore = create<WishlistStore>((set, get) => ({
               imageUrl: firstImage,
               category: item.product.category || "",
               description: item.product.description || "",
+              totalStock: item.totalStock ?? 0,
             };
           });
           set({ items: mapped, isLoaded: true, isAuthenticated: true });

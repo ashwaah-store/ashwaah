@@ -28,6 +28,30 @@ interface ProductDetails {
   variations: Variation[];
 }
 
+const COLOR_MAP: Record<string, string> = {
+  white: "#FFFFFF",
+  black: "#171717",
+  red: "#EF4444",
+  blue: "#3B82F6",
+  "sky blue": "#0EA5E9",
+  navy: "#1E3A8A",
+  grey: "#737373",
+  gray: "#737373",
+  brown: "#78350F",
+  maroon: "#5C1D16",
+  pink: "#EC4899",
+  beige: "#EADED2",
+  gold: "#C5A059",
+  "forest green": "#1B3022",
+  green: "#22C55E",
+  yellow: "#EAB308",
+};
+
+const getColorHex = (colorName: string) => {
+  const lower = colorName.toLowerCase();
+  return COLOR_MAP[lower] || (colorName.startsWith("#") ? colorName : "#CCCCCC");
+};
+
 export default function WishlistPage() {
   const router = useRouter();
   
@@ -248,8 +272,17 @@ export default function WishlistPage() {
                     <img
                       src={item.imageUrl || "/images/placeholder.png"}
                       alt={item.name}
-                      className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+                      className={`absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ${
+                        item.totalStock === 0 ? "opacity-60 grayscale" : ""
+                      }`}
                     />
+                    {item.totalStock === 0 && (
+                      <div className="absolute inset-x-0 bottom-0 bg-white py-2.5 text-center border-t border-brand/5 shadow-sm">
+                        <span className="text-xs font-black tracking-[0.2em] text-[#EF4444] uppercase">
+                          OUT OF STOCK
+                        </span>
+                      </div>
+                    )}
                   </Link>
 
                   {/* Card Info */}
@@ -266,11 +299,16 @@ export default function WishlistPage() {
 
                     {/* Move to Bag Button */}
                     <button
+                      disabled={item.totalStock === 0}
                       onClick={() => handleOpenMoveModal(item)}
-                      className="w-full mt-auto flex items-center justify-center space-x-2 font-bold py-3.5 rounded-2xl bg-[#3E5622] text-white hover:bg-[#32451B] transition-all text-xs tracking-wider uppercase shadow-md cursor-pointer border border-transparent hover:border-brand-accent/20"
+                      className={`w-full mt-auto flex items-center justify-center space-x-2 font-bold py-3.5 rounded-2xl transition-all text-xs tracking-wider uppercase shadow-md ${
+                        item.totalStock === 0
+                          ? "bg-[#1B3022]/10 text-[#1B3022]/30 cursor-not-allowed shadow-none border border-[#1B3022]/5"
+                          : "bg-[#3E5622] text-white hover:bg-[#32451B] cursor-pointer border border-transparent hover:border-brand-accent/20"
+                      }`}
                     >
                       <ShoppingBag size={14} />
-                      <span>Move to Bag</span>
+                      <span>{item.totalStock === 0 ? "Out of Stock" : "Move to Bag"}</span>
                     </button>
                   </div>
                 </div>
@@ -385,7 +423,7 @@ export default function WishlistPage() {
                               >
                                 <div
                                   className="w-full h-full rounded-full border border-black/5"
-                                  style={{ backgroundColor: color.toLowerCase() }}
+                                  style={{ backgroundColor: getColorHex(color) }}
                                 />
                                 {selectedColor === color && (
                                   <div className="absolute inset-0 flex items-center justify-center text-white">
