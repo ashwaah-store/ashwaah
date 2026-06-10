@@ -292,7 +292,7 @@ export default function Home() {
                       <span className="text-[9px] md:text-[10px] tracking-wider uppercase font-medium text-center w-full block break-words">
                         {item.name}
                       </span>
-                      <span className="text-xs md:text-sm font-bold font-playfair tracking-tight leading-tight my-0.5 uppercase text-center w-full block break-words">
+                      <span className="text-sm md:text-base font-bold tracking-tight leading-tight my-0.5 uppercase text-center w-full block break-words">
                         {item.promoText}
                       </span>
                       <span className="text-[8px] font-bold tracking-widest uppercase border-t border-white/20 pt-1 mt-1 w-full block transition-colors group-hover:text-white">

@@ -369,7 +369,7 @@ export default function CategorySettingsPage() {
                   <span className="text-[9px] tracking-wide uppercase font-medium text-center w-full block break-words">
                     {name || "Category Name"}
                   </span>
-                  <span className="text-xs font-bold font-playfair tracking-tight leading-tight my-0.5 uppercase text-center w-full block break-words">
+                  <span className="text-sm font-bold tracking-tight leading-tight my-0.5 uppercase text-center w-full block break-words">
                     {promoText || "Promo Text"}
                   </span>
                   <span className="text-[8px] font-bold tracking-widest uppercase opacity-90 border-t border-white/20 pt-1 mt-1 w-full block">
