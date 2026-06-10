@@ -11,6 +11,30 @@ interface Offer {
   order: number;
 }
 
+function parseOfferText(text: string) {
+  if (text.includes("|")) {
+    const parts = text.split("|");
+    return { title: parts[0].trim(), subtitle: parts[1].trim() };
+  }
+  if (text.includes("!")) {
+    const parts = text.split("!");
+    return { title: parts[0].trim(), subtitle: parts[1].trim() || "Shop Now" };
+  }
+  if (text.length > 25) {
+    const mid = Math.floor(text.length / 2);
+    const before = text.lastIndexOf(" ", mid);
+    const after = text.indexOf(" ", mid + 1);
+    const splitIdx = (mid - before < after - mid) ? before : after;
+    if (splitIdx > 0) {
+      return { 
+        title: text.substring(0, splitIdx).trim(), 
+        subtitle: text.substring(splitIdx).trim() 
+      };
+    }
+  }
+  return { title: text, subtitle: "Shop Now" };
+}
+
 export default function SettingsPage() {
   const router = useRouter();
   const [bannerUrl, setBannerUrl] = useState("");
@@ -363,11 +387,36 @@ export default function SettingsPage() {
             {/* 2. Offer Carousel Banner Mockup (1cm to 2cm) */}
             <div className="h-14 bg-[#FFFDF6] text-[#3E5622] flex items-center justify-center px-4 relative z-10 shadow-sm border-b border-[#3E5622]/10">
               {offers.length > 0 ? (
-                <div className="text-center w-full animate-pulse">
-                  <p className="text-[11px] md:text-[12px] font-black uppercase tracking-[0.25em] text-[#3E5622]">
-                    📢 {offers[0].text}
-                  </p>
-                </div>
+                (() => {
+                  const { title, subtitle } = parseOfferText(offers[0].text);
+                  return (
+                    <div className="relative flex items-center h-10 bg-gradient-to-r from-[#D82A0F] via-[#F35520] to-[#E22E14] text-white px-5 rounded-l-xl rounded-r-md shadow-md overflow-hidden font-inter">
+                      {/* Left Title */}
+                      <span className="font-extrabold text-xs md:text-sm uppercase tracking-wider pr-4 flex items-center gap-1.5 whitespace-nowrap">
+                        {title}
+                      </span>
+                      
+                      {/* Dashed Divider with top/bottom circular cutouts */}
+                      <div className="relative h-full flex items-center px-1">
+                        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFFDF6] rounded-full"></div>
+                        <div className="h-3/5 border-l border-dashed border-white/50"></div>
+                        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFFDF6] rounded-full"></div>
+                      </div>
+                      
+                      {/* Right Subtitle */}
+                      <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest pl-3 pr-2 opacity-95 whitespace-nowrap">
+                        {subtitle}
+                      </span>
+
+                      {/* Jagged right edge (torn coupon effect) */}
+                      <div className="absolute right-0 top-0 bottom-0 w-1 flex flex-col justify-between py-1">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="w-1 h-1.5 bg-[#FFFDF6] rounded-l-full"></div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()
               ) : (
                 <p className="text-[11px] md:text-[12px] font-black uppercase tracking-[0.25em] text-white/40">
                   Carousel Slide Offers Area (1 - 2 CM Height)

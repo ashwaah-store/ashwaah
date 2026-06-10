@@ -16,6 +16,30 @@ type NavItem = {
 
 import { motion, AnimatePresence } from "framer-motion";
 
+function parseOfferText(text: string) {
+  if (text.includes("|")) {
+    const parts = text.split("|");
+    return { title: parts[0].trim(), subtitle: parts[1].trim() };
+  }
+  if (text.includes("!")) {
+    const parts = text.split("!");
+    return { title: parts[0].trim(), subtitle: parts[1].trim() || "Shop Now" };
+  }
+  if (text.length > 25) {
+    const mid = Math.floor(text.length / 2);
+    const before = text.lastIndexOf(" ", mid);
+    const after = text.indexOf(" ", mid + 1);
+    const splitIdx = (mid - before < after - mid) ? before : after;
+    if (splitIdx > 0) {
+      return { 
+        title: text.substring(0, splitIdx).trim(), 
+        subtitle: text.substring(splitIdx).trim() 
+      };
+    }
+  }
+  return { title: text, subtitle: "Shop Now" };
+}
+
 export default function Home() {
   const [navItems, setNavItems] = useState<NavItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -124,8 +148,37 @@ export default function Home() {
         <div className="w-full bg-[#FFFDF6] text-[#3E5622] h-14 flex items-center justify-center overflow-hidden border-b border-[#3E5622]/10 relative z-30 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 w-full text-center flex items-center justify-center h-full relative">
             <AnimatePresence mode="wait">
-              {offers.map((offer, idx) => (
-                idx === currentOfferIndex && (
+              {offers.map((offer, idx) => {
+                const { title, subtitle } = parseOfferText(offer.text);
+                const TicketContent = (
+                  <div className="relative flex items-center h-10 bg-gradient-to-r from-[#D82A0F] via-[#F35520] to-[#E22E14] text-white px-5 rounded-l-xl rounded-r-md shadow-md overflow-hidden font-inter">
+                    {/* Left Title */}
+                    <span className="font-extrabold text-xs md:text-sm uppercase tracking-wider pr-4 flex items-center gap-1.5 whitespace-nowrap">
+                      {title}
+                    </span>
+                    
+                    {/* Dashed Divider with top/bottom circular cutouts */}
+                    <div className="relative h-full flex items-center px-1">
+                      <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFFDF6] rounded-full"></div>
+                      <div className="h-3/5 border-l border-dashed border-white/50"></div>
+                      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFFDF6] rounded-full"></div>
+                    </div>
+                    
+                    {/* Right Subtitle */}
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest pl-3 pr-2 opacity-95 whitespace-nowrap">
+                      {subtitle}
+                    </span>
+
+                    {/* Jagged right edge (torn coupon effect) */}
+                    <div className="absolute right-0 top-0 bottom-0 w-1 flex flex-col justify-between py-1">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="w-1 h-1.5 bg-[#FFFDF6] rounded-l-full"></div>
+                      ))}
+                    </div>
+                  </div>
+                );
+
+                return idx === currentOfferIndex && (
                   <motion.div
                     key={offer.id}
                     initial={{ opacity: 0, x: "-100%" }}
@@ -135,16 +188,17 @@ export default function Home() {
                     className="absolute inset-0 flex items-center justify-center px-4"
                   >
                     {offer.link ? (
-                      <Link href={offer.link} className="hover:text-brand-accent transition-colors duration-300 flex items-center gap-2">
-                        <span className="text-[14px] md:text-[15px] font-black uppercase tracking-[0.25em]">📢 {offer.text}</span>
-                        <span className="text-[10px] md:text-[11px] font-black bg-[#C5A059] text-white px-2.5 py-0.5 rounded-full uppercase tracking-widest shadow-sm">Shop Now →</span>
+                      <Link href={offer.link} className="hover:scale-[1.02] transition-transform duration-300 shadow-sm hover:shadow-md block">
+                        {TicketContent}
                       </Link>
                     ) : (
-                      <span className="text-[14px] md:text-[15px] font-black uppercase tracking-[0.25em]">📢 {offer.text}</span>
+                      <div className="shadow-sm">
+                        {TicketContent}
+                      </div>
                     )}
                   </motion.div>
-                )
-              ))}
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>
