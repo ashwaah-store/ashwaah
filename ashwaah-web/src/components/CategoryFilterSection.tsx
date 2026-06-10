@@ -530,7 +530,7 @@ export default function CategoryFilterSection({
       </aside>
 
       {/* Right Column: Products Content Area */}
-      <div className="flex-grow w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-10 max-w-7xl mx-auto">
+      <div className="flex-grow min-w-0 px-4 sm:px-6 lg:px-8 py-8 lg:py-10 max-w-7xl mx-auto">
         {/* Header Title & Description */}
         <div className="mb-10 text-center lg:text-left">
           <h1 className="text-4xl md:text-5xl font-playfair font-bold text-brand mb-3 tracking-tight">{categoryName}</h1>
