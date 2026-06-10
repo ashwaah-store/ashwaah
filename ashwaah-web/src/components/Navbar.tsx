@@ -187,7 +187,7 @@ export default function Navbar() {
                 aria-label="Wishlist"
                 className="hover:text-[#C5A059] transition-colors relative p-2 cursor-pointer"
               >
-                <Heart className="h-5 w-5 text-white" />
+                <Heart className="h-5 w-5" />
                 {user && wishlistItems.length > 0 && (
                   <span className="absolute top-0 right-0 bg-[#FFFDF6] text-[#064e3b] text-[8px] font-black h-3.5 w-3.5 rounded-full flex items-center justify-center border-2 border-[#064e3b]">
                     {wishlistItems.length}
@@ -229,9 +229,9 @@ export default function Navbar() {
               <Link
                 href={user ? "/wishlist" : `/login?redirect=${encodeURIComponent(pathname)}`}
                 aria-label="Wishlist"
-                className="text-white relative p-2 cursor-pointer"
+                className="text-white hover:text-[#C5A059] transition-colors relative p-2 cursor-pointer"
               >
-                <Heart className="h-5 w-5 text-white" />
+                <Heart className="h-5 w-5" />
                 {user && wishlistItems.length > 0 && (
                   <span className="absolute top-0 right-0 bg-[#FFFDF6] text-[#064e3b] text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-[#064e3b]">
                     {wishlistItems.length}
@@ -239,7 +239,7 @@ export default function Navbar() {
                 )}
               </Link>
 
-              <Link href={user ? "/cart" : "/login"} aria-label="Cart" className="text-white relative p-2">
+              <Link href={user ? "/cart" : "/login"} aria-label="Cart" className="text-white hover:text-[#C5A059] transition-colors relative p-2">
                 <ShoppingCart className="h-5 w-5" />
                 <span className="absolute top-0 right-0 bg-[#FFFDF6] text-[#064e3b] text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-[#064e3b]">
                   {cartCount}
