@@ -37,6 +37,7 @@ export default function SettingsPage() {
 
   // New offer form state
   const [newOfferText, setNewOfferText] = useState("");
+  const [newOfferSubtext, setNewOfferSubtext] = useState("");
   const [newOfferLink, setNewOfferLink] = useState("");
 
   const fetchData = async () => {
@@ -136,12 +137,16 @@ export default function SettingsPage() {
     setError("");
     setSuccess("");
 
+    const combinedText = newOfferSubtext.trim()
+      ? `${newOfferText.trim()} | ${newOfferSubtext.trim()}`
+      : newOfferText.trim();
+
     try {
       const res = await fetch("/api/admin/offers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: newOfferText,
+          text: combinedText,
           link: newOfferLink || null,
           order: offers.length,
         }),
@@ -150,6 +155,7 @@ export default function SettingsPage() {
       if (data.success) {
         setSuccess("Offer banner added successfully!");
         setNewOfferText("");
+        setNewOfferSubtext("");
         setNewOfferLink("");
         fetchData();
         router.refresh();
@@ -290,9 +296,20 @@ export default function SettingsPage() {
                   type="text"
                   value={newOfferText}
                   onChange={(e) => setNewOfferText(e.target.value)}
-                  placeholder="e.g. Free shipping on orders above ₹4,999!"
+                  placeholder="e.g. FLAT ₹500 OFF"
                   className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-xs font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
                   required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-2 ml-1">Add Offer Banner Subtext (Optional)</label>
+                <input
+                  type="text"
+                  value={newOfferSubtext}
+                  onChange={(e) => setNewOfferSubtext(e.target.value)}
+                  placeholder="e.g. On First Purchase"
+                  className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-xs font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
                 />
               </div>
 
@@ -323,7 +340,7 @@ export default function SettingsPage() {
 
             {/* List of current offers */}
             <div>
-              <p className="text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-4 border-b border-brand/5 pb-2">Active Slides ({offers.length})</p>
+              <p className="text-[10px] font-black text-brand/40 uppercase tracking-[0.25em] mb-4 border-b border-brand/5 pb-2">Active Slides ({offers.length})</p>
               
               {offers.length === 0 ? (
                 <div className="text-center py-6 border border-dashed border-brand/10 rounded-2xl text-brand/30">
@@ -335,7 +352,19 @@ export default function SettingsPage() {
                   {offers.map((offer) => (
                     <div key={offer.id} className="flex items-center justify-between p-4 bg-brand/5 border border-brand/5 rounded-2xl group transition-all hover:bg-brand/10">
                       <div className="flex-1 min-w-0 pr-4">
-                        <p className="text-xs font-bold text-brand truncate">{offer.text}</p>
+                        {(() => {
+                          const { title, subtitle } = parseOfferText(offer.text);
+                          return (
+                            <p className="text-xs font-bold text-brand truncate">
+                              {title}
+                              {subtitle && (
+                                <span className="text-brand/40 font-medium ml-2">
+                                  ({subtitle})
+                                </span>
+                              )}
+                            </p>
+                          );
+                        })()}
                         {offer.link && (
                           <p className="text-[9px] font-black text-[#C5A059] uppercase tracking-wider mt-1 truncate">Link: {offer.link}</p>
                         )}
