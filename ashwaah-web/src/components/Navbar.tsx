@@ -148,24 +148,19 @@ export default function Navbar() {
             </nav>
 
             <div className="hidden md:flex items-center space-x-4 ml-auto text-white">
-              {/* Amazon Style Search Bar */}
+              {/* Unified Minimalist Search Bar */}
               <div className="max-w-[280px] md:w-[280px]">
-                <form onSubmit={handleSearchSubmit} className="w-full flex">
-                  <div className="relative flex-1">
-                    <input 
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search Ashwaah..."
-                      className="w-full bg-white text-brand-dark px-3 py-2 rounded-l-md text-xs focus:outline-none placeholder:text-brand-dark/40"
-                    />
+                <form onSubmit={handleSearchSubmit} className="w-full relative flex items-center">
+                  <div className="absolute left-3 flex items-center pointer-events-none text-brand-dark/40">
+                    <Search size={16} strokeWidth={2.2} />
                   </div>
-                  <button 
-                    type="submit"
-                    className="bg-[#C5A059] hover:bg-[#B38E46] text-white px-3 rounded-r-md transition-colors flex items-center justify-center"
-                  >
-                    <Search size={16} strokeWidth={2.5} />
-                  </button>
+                  <input 
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search for products, brands and more"
+                    className="w-full bg-[#F4F4F5] text-brand-dark pl-9 pr-4 py-2 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C5A059] placeholder:text-brand-dark/45 transition-all shadow-sm"
+                  />
                 </form>
               </div>
 
