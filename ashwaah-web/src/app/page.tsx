@@ -23,21 +23,11 @@ function parseOfferText(text: string) {
   }
   if (text.includes("!")) {
     const parts = text.split("!");
-    return { title: parts[0].trim(), subtitle: parts[1].trim() || "Shop Now" };
+    const title = parts[0].trim();
+    const subtitle = parts.slice(1).join("!").trim();
+    return { title, subtitle: subtitle || null };
   }
-  if (text.length > 25) {
-    const mid = Math.floor(text.length / 2);
-    const before = text.lastIndexOf(" ", mid);
-    const after = text.indexOf(" ", mid + 1);
-    const splitIdx = (mid - before < after - mid) ? before : after;
-    if (splitIdx > 0) {
-      return { 
-        title: text.substring(0, splitIdx).trim(), 
-        subtitle: text.substring(splitIdx).trim() 
-      };
-    }
-  }
-  return { title: text, subtitle: "Shop Now" };
+  return { title: text.trim(), subtitle: null };
 }
 
 export default function Home() {
@@ -150,24 +140,28 @@ export default function Home() {
             <AnimatePresence mode="wait">
               {offers.map((offer, idx) => {
                 const { title, subtitle } = parseOfferText(offer.text);
-                const TicketContent = (
-                  <div className="relative flex items-center h-10 bg-gradient-to-r from-[#D82A0F] via-[#F35520] to-[#E22E14] text-white px-5 rounded-l-xl rounded-r-md shadow-md overflow-hidden font-inter">
+                 const TicketContent = (
+                  <div className={`relative flex items-center h-10 bg-[#3E5622] text-white px-5 rounded-l-xl rounded-r-md shadow-md overflow-hidden font-inter ${!subtitle ? "justify-center" : ""}`}>
                     {/* Left Title */}
-                    <span className="font-extrabold text-xs md:text-sm uppercase tracking-wider pr-4 flex items-center gap-1.5 whitespace-nowrap">
+                    <span className={`font-extrabold text-xs md:text-sm uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${subtitle ? "pr-4" : ""}`}>
                       {title}
                     </span>
                     
-                    {/* Dashed Divider with top/bottom circular cutouts */}
-                    <div className="relative h-full flex items-center px-1">
-                      <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFFDF6] rounded-full"></div>
-                      <div className="h-3/5 border-l border-dashed border-white/50"></div>
-                      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFFDF6] rounded-full"></div>
-                    </div>
-                    
-                    {/* Right Subtitle */}
-                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest pl-3 pr-2 opacity-95 whitespace-nowrap">
-                      {subtitle}
-                    </span>
+                    {subtitle && (
+                      <>
+                        {/* Dashed Divider with top/bottom circular cutouts */}
+                        <div className="relative h-full flex items-center px-1">
+                          <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFFDF6] rounded-full"></div>
+                          <div className="h-3/5 border-l border-dashed border-white/50"></div>
+                          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFFDF6] rounded-full"></div>
+                        </div>
+                        
+                        {/* Right Subtitle */}
+                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest pl-3 pr-2 opacity-95 whitespace-nowrap">
+                          {subtitle}
+                        </span>
+                      </>
+                    )}
 
                     {/* Jagged right edge (torn coupon effect) */}
                     <div className="absolute right-0 top-0 bottom-0 w-1 flex flex-col justify-between py-1">
