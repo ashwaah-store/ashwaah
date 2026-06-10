@@ -278,15 +278,17 @@ export default function WishlistPage() {
                         item.totalStock === 0 ? "opacity-60 grayscale" : ""
                       }`}
                     />
+                    {item.totalStock === 0 && (
+                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-white px-6 py-2.5 z-20 border-t border-x border-brand/5 shadow-sm">
+                        <span className="text-[10px] md:text-xs font-black tracking-[0.15em] text-[#FF4E20] uppercase whitespace-nowrap">
+                          OUT OF STOCK
+                        </span>
+                      </div>
+                    )}
                   </Link>
 
                   {/* Card Info */}
                   <div className="pt-3 pb-3 px-3 flex flex-col flex-1">
-                    {item.totalStock === 0 && (
-                      <span className="text-[9px] font-black text-red-600 uppercase tracking-widest mb-1.5 block">
-                        OUT OF STOCK
-                      </span>
-                    )}
                     <h3 className="text-xs md:text-sm font-black tracking-widest text-[#1B3022] uppercase line-clamp-1 mb-0.5">
                       {item.name}
                     </h3>
