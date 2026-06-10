@@ -409,7 +409,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <button
                 disabled={!!(selectedColor && selectedSize && currentStock === 0)}
                 onClick={handleAddToCart}
-                className={`flex-grow flex items-center justify-center space-x-3 font-bold py-4 rounded-2xl transition-all text-base shadow-xl ${selectedColor && selectedSize && currentStock === 0
+                className={`flex-1 flex items-center justify-center space-x-3 font-bold py-4 rounded-2xl transition-all text-base shadow-xl ${selectedColor && selectedSize && currentStock === 0
                     ? "bg-brand/10 text-brand/30 cursor-not-allowed"
                     : "bg-brand text-white hover:bg-brand-hover active:scale-[0.98] border border-transparent hover:border-brand-accent"
                   }`}
@@ -427,14 +427,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <button
                 type="button"
                 onClick={handleWishlistClick}
-                className={`flex-shrink-0 w-14 h-14 rounded-2xl border-2 flex items-center justify-center shadow-lg transition-all cursor-pointer ${
+                className={`flex-1 flex items-center justify-center space-x-3 font-bold py-4 rounded-2xl border-2 shadow-xl transition-all cursor-pointer ${
                   isWishlisted 
                     ? "border-red-500 bg-red-50 text-red-500 hover:bg-red-100" 
                     : "border-brand/10 bg-white text-brand hover:border-brand-accent/50 hover:bg-brand/5"
                 }`}
                 title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
               >
-                <Heart className={`w-6 h-6 ${isWishlisted ? "fill-red-500 text-red-500" : "text-brand"}`} />
+                <Heart className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : "text-brand"}`} />
+                <span>{isWishlisted ? "Wishlisted" : "Add to Wishlist"}</span>
               </button>
             </div>
           </div>
