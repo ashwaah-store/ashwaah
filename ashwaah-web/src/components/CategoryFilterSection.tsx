@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { SlidersHorizontal, ChevronDown, Check, X, LayoutGrid } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCarousel from "@/components/ProductCarousel";
@@ -233,14 +233,41 @@ export default function CategoryFilterSection({
     return Array.from(colorsSet).sort();
   }, [productsWithTypes]);
 
+  // 3.5 Dynamic Price Limits Computation
+  const [minLimit, maxLimit] = useMemo(() => {
+    if (productsWithTypes.length === 0) return [0, 10000];
+    let min = Infinity;
+    let max = -Infinity;
+    productsWithTypes.forEach((p) => {
+      const price = p.salePrice || p.basePrice || 0;
+      if (price < min) min = price;
+      if (price > max) max = price;
+    });
+    if (min === Infinity || max === -Infinity) return [0, 10000];
+    if (min === max) return [Math.max(0, min - 100), min + 100];
+    return [Math.floor(min), Math.ceil(max)];
+  }, [productsWithTypes]);
+
   // 4. State Management (Multi-select arrays)
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"default" | "price-asc" | "price-desc">("default");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [activeThumb, setActiveThumb] = useState<"min" | "max">("min");
 
-  const isFilterOrSortActive = selectedTypes.length > 0 || selectedColors.length > 0 || selectedSizes.length > 0 || sortBy !== "default";
+  useEffect(() => {
+    setPriceRange([minLimit, maxLimit]);
+  }, [minLimit, maxLimit]);
+
+  const isPriceFilterActive = priceRange[0] !== minLimit || priceRange[1] !== maxLimit;
+  const isFilterOrSortActive =
+    selectedTypes.length > 0 ||
+    selectedColors.length > 0 ||
+    selectedSizes.length > 0 ||
+    sortBy !== "default" ||
+    isPriceFilterActive;
 
   // Determine if this is a shoes/footwear category
   const isShoesCategory = useMemo(() => {
@@ -334,6 +361,12 @@ export default function CategoryFilterSection({
       });
     }
 
+    // Filter by price range
+    list = list.filter((p) => {
+      const price = p.salePrice || p.basePrice || 0;
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+
     // Sort by Price (salePrice if available, otherwise basePrice)
     if (sortBy === "price-asc") {
       list.sort((a, b) => {
@@ -350,7 +383,7 @@ export default function CategoryFilterSection({
     }
 
     return list;
-  }, [productsWithTypes, selectedTypes, selectedColors, selectedSizes, sortBy]);
+  }, [productsWithTypes, selectedTypes, selectedColors, selectedSizes, sortBy, priceRange]);
 
   const handleTypeToggle = (type: string) => {
     setSelectedTypes((prev) =>
@@ -375,6 +408,7 @@ export default function CategoryFilterSection({
     setSelectedColors([]);
     setSelectedSizes([]);
     setSortBy("default");
+    setPriceRange([minLimit, maxLimit]);
   };
 
   return (
@@ -391,7 +425,7 @@ export default function CategoryFilterSection({
             {isMobileFiltersOpen ? "Hide Filters" : "Show Filters"}
           </span>
           <span className="text-[#C5A059] font-black">
-            {isFilterOrSortActive ? `(${selectedTypes.length + selectedColors.length + selectedSizes.length} Active)` : ""}
+            {isFilterOrSortActive ? `(${selectedTypes.length + selectedColors.length + selectedSizes.length + (isPriceFilterActive ? 1 : 0)} Active)` : ""}
           </span>
         </button>
       </div>
@@ -413,6 +447,57 @@ export default function CategoryFilterSection({
               Clear All
             </button>
           )}
+        </div>
+
+        {/* Price Range Slider */}
+        <div className="mb-6 pb-6 border-b border-brand/5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-brand/40 ml-1">Price Range</h3>
+            <span className="text-xs font-bold text-brand/80">
+              ₹{priceRange[0].toLocaleString("en-IN")} - ₹{priceRange[1].toLocaleString("en-IN")}{priceRange[1] >= maxLimit ? "+" : ""}
+            </span>
+          </div>
+          
+          <div className="range-slider-container relative w-full h-5 flex items-center px-1">
+            {/* Track background */}
+            <div className="absolute left-1 right-1 h-1 bg-brand/10 rounded-full pointer-events-none" />
+            {/* Highlight track */}
+            <div
+              className="absolute h-1 bg-[#FF4E20] rounded-full pointer-events-none"
+              style={{
+                left: `${((priceRange[0] - minLimit) / (maxLimit - minLimit || 1)) * 100}%`,
+                right: `${100 - ((priceRange[1] - minLimit) / (maxLimit - minLimit || 1)) * 100}%`
+              }}
+            />
+            <input
+              type="range"
+              min={minLimit}
+              max={maxLimit}
+              value={priceRange[0]}
+              onMouseDown={() => setActiveThumb("min")}
+              onTouchStart={() => setActiveThumb("min")}
+              onChange={(e) => {
+                const val = Math.min(Number(e.target.value), priceRange[1]);
+                setPriceRange([val, priceRange[1]]);
+              }}
+              style={{ zIndex: activeThumb === "min" ? 25 : 20 }}
+              className="absolute left-0 w-full top-0 h-5 appearance-none bg-transparent cursor-pointer pointer-events-none"
+            />
+            <input
+              type="range"
+              min={minLimit}
+              max={maxLimit}
+              value={priceRange[1]}
+              onMouseDown={() => setActiveThumb("max")}
+              onTouchStart={() => setActiveThumb("max")}
+              onChange={(e) => {
+                const val = Math.max(Number(e.target.value), priceRange[0]);
+                setPriceRange([priceRange[0], val]);
+              }}
+              style={{ zIndex: activeThumb === "max" ? 25 : 20 }}
+              className="absolute left-0 w-full top-0 h-5 appearance-none bg-transparent cursor-pointer pointer-events-none"
+            />
+          </div>
         </div>
 
         {/* Section 1: Categories / Types */}

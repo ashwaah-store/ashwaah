@@ -47,12 +47,33 @@ function SearchResults() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Dynamic Price Limits Computation
+  const [minLimit, maxLimit] = useMemo(() => {
+    if (products.length === 0) return [0, 10000];
+    let min = Infinity;
+    let max = -Infinity;
+    products.forEach((p) => {
+      const price = p.salePrice || p.basePrice || 0;
+      if (price < min) min = price;
+      if (price > max) max = price;
+    });
+    if (min === Infinity || max === -Infinity) return [0, 10000];
+    if (min === max) return [Math.max(0, min - 100), min + 100];
+    return [Math.floor(min), Math.ceil(max)];
+  }, [products]);
+
   // Filter and Sorting states
   const [selectedGender, setSelectedGender] = useState<"men" | "women" | null>(null);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"default" | "price-asc" | "price-desc">("default");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [activeThumb, setActiveThumb] = useState<"min" | "max">("min");
+
+  useEffect(() => {
+    setPriceRange([minLimit, maxLimit]);
+  }, [minLimit, maxLimit]);
 
   useEffect(() => {
     async function performSearch() {
@@ -205,6 +226,12 @@ function SearchResults() {
       });
     }
 
+    // 3.5 Price Range filter
+    list = list.filter((p) => {
+      const price = p.salePrice || p.basePrice || 0;
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+
     // 4. Sort by price
     if (sortBy === "price-asc") {
       list.sort((a, b) => {
@@ -221,7 +248,7 @@ function SearchResults() {
     }
 
     return list;
-  }, [products, selectedGender, selectedColors, selectedSizes, sortBy]);
+  }, [products, selectedGender, selectedColors, selectedSizes, sortBy, priceRange]);
 
   const handleGenderToggle = (gender: "men" | "women") => {
     setSelectedGender((prev) => (prev === gender ? null : gender));
@@ -244,13 +271,17 @@ function SearchResults() {
     setSelectedColors([]);
     setSelectedSizes([]);
     setSortBy("default");
+    setPriceRange([minLimit, maxLimit]);
   };
+
+  const isPriceFilterActive = priceRange[0] !== minLimit || priceRange[1] !== maxLimit;
 
   const isFilterOrSortActive =
     selectedGender !== null ||
     selectedColors.length > 0 ||
     selectedSizes.length > 0 ||
-    sortBy !== "default";
+    sortBy !== "default" ||
+    isPriceFilterActive;
 
   if (loading) {
     return (
@@ -297,7 +328,7 @@ function SearchResults() {
             {isMobileFiltersOpen ? "Hide Filters" : "Show Filters"}
           </span>
           <span className="text-[#C5A059] font-black">
-            {isFilterOrSortActive ? `(${ (selectedGender ? 1 : 0) + selectedColors.length + selectedSizes.length} Active)` : ""}
+            {isFilterOrSortActive ? `(${ (selectedGender ? 1 : 0) + selectedColors.length + selectedSizes.length + (isPriceFilterActive ? 1 : 0)} Active)` : ""}
           </span>
         </button>
       </div>
@@ -319,6 +350,57 @@ function SearchResults() {
               Clear All
             </button>
           )}
+        </div>
+
+        {/* Price Range Slider */}
+        <div className="mb-6 pb-6 border-b border-[#064e3b]/5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#064e3b]/40 ml-1">Price Range</h3>
+            <span className="text-xs font-bold text-[#064e3b]/80">
+              ₹{priceRange[0].toLocaleString("en-IN")} - ₹{priceRange[1].toLocaleString("en-IN")}{priceRange[1] >= maxLimit ? "+" : ""}
+            </span>
+          </div>
+          
+          <div className="range-slider-container relative w-full h-5 flex items-center px-1">
+            {/* Track background */}
+            <div className="absolute left-1 right-1 h-1 bg-[#064e3b]/10 rounded-full pointer-events-none" />
+            {/* Highlight track */}
+            <div
+              className="absolute h-1 bg-[#FF4E20] rounded-full pointer-events-none"
+              style={{
+                left: `${((priceRange[0] - minLimit) / (maxLimit - minLimit || 1)) * 100}%`,
+                right: `${100 - ((priceRange[1] - minLimit) / (maxLimit - minLimit || 1)) * 100}%`
+              }}
+            />
+            <input
+              type="range"
+              min={minLimit}
+              max={maxLimit}
+              value={priceRange[0]}
+              onMouseDown={() => setActiveThumb("min")}
+              onTouchStart={() => setActiveThumb("min")}
+              onChange={(e) => {
+                const val = Math.min(Number(e.target.value), priceRange[1]);
+                setPriceRange([val, priceRange[1]]);
+              }}
+              style={{ zIndex: activeThumb === "min" ? 25 : 20 }}
+              className="absolute left-0 w-full top-0 h-5 appearance-none bg-transparent cursor-pointer pointer-events-none"
+            />
+            <input
+              type="range"
+              min={minLimit}
+              max={maxLimit}
+              value={priceRange[1]}
+              onMouseDown={() => setActiveThumb("max")}
+              onTouchStart={() => setActiveThumb("max")}
+              onChange={(e) => {
+                const val = Math.max(Number(e.target.value), priceRange[0]);
+                setPriceRange([priceRange[0], val]);
+              }}
+              style={{ zIndex: activeThumb === "max" ? 25 : 20 }}
+              className="absolute left-0 w-full top-0 h-5 appearance-none bg-transparent cursor-pointer pointer-events-none"
+            />
+          </div>
         </div>
 
         {/* Section 1: Suitable For / Gender (Single-select, hidden if all results are home decor) */}
