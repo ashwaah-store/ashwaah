@@ -139,6 +139,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     fetchProduct();
   }, [id]);
 
+  const colorImages = useMemo(() => {
+    if (!product) return [];
+    return getProductImageUrls(product.images, product.colors, selectedColor);
+  }, [product, selectedColor]);
+
+  // Sync main image when color images update
+  useEffect(() => {
+    if (colorImages.length > 0) {
+      setMainImage(colorImages[0]);
+    }
+  }, [colorImages]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-brand-light">
@@ -157,18 +169,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       </div>
     );
   }
-
-  const colorImages = useMemo(() => {
-    if (!product) return [];
-    return getProductImageUrls(product.images, product.colors, selectedColor);
-  }, [product, selectedColor]);
-
-  // Sync main image when color images update
-  useEffect(() => {
-    if (colorImages.length > 0) {
-      setMainImage(colorImages[0]);
-    }
-  }, [colorImages]);
 
   const variations = product.variations || [];
 
