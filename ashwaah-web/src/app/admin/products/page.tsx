@@ -93,9 +93,28 @@ export default function ProductManagement() {
   const [newMeasurementInput, setNewMeasurementInput] = useState("");
   const [pendingColor, setPendingColor] = useState("#C5A059");
 
-  // Images
-  const [imageInput, setImageInput] = useState("");
-  const [images, setImages] = useState<string[]>([]);
+  // Images per color
+  const [colorImageInputs, setColorImageInputs] = useState<Record<string, string>>({});
+  const [colorImages, setColorImages] = useState<Record<string, string[]>>({});
+
+  const getFirstImage = (imagesStr: string | null | undefined) => {
+    try {
+      if (!imagesStr) return "/images/placeholder.png";
+      const parsed = JSON.parse(imagesStr);
+      if (Array.isArray(parsed)) {
+        return parsed[0] || "/images/placeholder.png";
+      }
+      const keys = Object.keys(parsed);
+      for (const key of keys) {
+        if (parsed[key] && parsed[key].length > 0) {
+          return parsed[key][0];
+        }
+      }
+      return "/images/placeholder.png";
+    } catch {
+      return "/images/placeholder.png";
+    }
+  };
 
   // Sizes & Colors → Variations
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
@@ -181,15 +200,34 @@ export default function ProductManagement() {
   const updateVariation = (size: string, color: string, field: keyof Variation, value: string | number) =>
     setVariations(prev => prev.map(v => v.size === size && v.color === color ? { ...v, [field]: value } : v));
 
-  const addImage = () => {
-    if (imageInput.trim()) { setImages(p => [...p, imageInput.trim()]); setImageInput(""); }
+  const addColorImage = (color: string) => {
+    const inputVal = colorImageInputs[color]?.trim();
+    if (inputVal) {
+      setColorImages(prev => ({
+        ...prev,
+        [color]: [...(prev[color] || []), inputVal]
+      }));
+      setColorImageInputs(prev => ({
+        ...prev,
+        [color]: ""
+      }));
+    }
+  };
+
+  const removeColorImage = (color: string, indexToRemove: number) => {
+    setColorImages(prev => ({
+      ...prev,
+      [color]: (prev[color] || []).filter((_, idx) => idx !== indexToRemove)
+    }));
   };
 
   const resetForm = () => {
     setEditingId(null);
     setName(""); setDescription(""); setGender("unisex"); setCategory("");
     setAvgRating("4.3"); setNumReviews("1");
-    setIsFeatured(false); setIsCustomizable(false); setTags(""); setImages([]);
+    setIsFeatured(false); setIsCustomizable(false); setTags("");
+    setColorImages({});
+    setColorImageInputs({});
     setSelectedSizes([]); setSelectedColors([]); setVariations([]);
     setSizeSystem("apparel");
     setEnabledMeasurements([]);
@@ -215,7 +253,27 @@ export default function ProductManagement() {
         setIsFeatured(!!p.isFeatured);
         setIsCustomizable(!!p.isCustomizable);
         setTags(p.tags || "");
-        setImages(JSON.parse(p.images || "[]"));
+        
+        let parsedImages: Record<string, string[]> = {};
+        try {
+          const raw = JSON.parse(p.images || "[]");
+          if (Array.isArray(raw)) {
+            const itemColors = p.variations
+              ? Array.from(new Set(p.variations.map((v: any) => v.color))).filter(c => c && c !== "Default") as string[]
+              : [];
+            if (itemColors.length > 0) {
+              parsedImages[itemColors[0]] = raw;
+            } else {
+              parsedImages["Default"] = raw;
+            }
+          } else {
+            parsedImages = raw;
+          }
+        } catch {
+          parsedImages = {};
+        }
+        setColorImages(parsedImages);
+        setColorImageInputs({});
         
         // Handle variations
         if (p.variations) {
@@ -259,7 +317,23 @@ export default function ProductManagement() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return showToast("Product name is required.");
-    if (images.length < 1) return showToast("Add at least 1 image URL.");
+    
+    // Check images count across active colors
+    const activeColors = selectedColors.length > 0 ? selectedColors : ["Default"];
+    const totalImagesCount = activeColors.reduce((sum, color) => sum + (colorImages[color]?.length || 0), 0);
+    if (totalImagesCount < 1) return showToast("Add at least 1 image URL.");
+    
+    if (selectedColors.length > 0) {
+      const missingImagesColor = selectedColors.find(color => !colorImages[color] || colorImages[color].length === 0);
+      if (missingImagesColor) {
+        return showToast(`Please add at least 1 image for color: ${missingImagesColor}`);
+      }
+    } else {
+      if (!colorImages["Default"] || colorImages["Default"].length === 0) {
+        return showToast("Please add at least 1 image.");
+      }
+    }
+
     if (variations.length === 0) return showToast("Please add at least one size/color variation.");
     const emptyVariation = variations.find(v => !v.basePrice || !v.salePrice);
     if (emptyVariation) return showToast(`Please provide prices for: ${emptyVariation.size} / ${emptyVariation.color}`);
@@ -267,11 +341,21 @@ export default function ProductManagement() {
     const overpricedVariation = variations.find(v => Number(v.salePrice) >= Number(v.basePrice));
     if (overpricedVariation) return showToast(`Sale Price must be LOWER than Base Price for: ${overpricedVariation.size} / ${overpricedVariation.color}`);
 
+    // Construct clean images object matching active colors
+    const imagesToSave: Record<string, string[]> = {};
+    if (selectedColors.length > 0) {
+      selectedColors.forEach(color => {
+        imagesToSave[color] = colorImages[color] || [];
+      });
+    } else {
+      imagesToSave["Default"] = colorImages["Default"] || [];
+    }
+
     setIsSubmitting(true);
     try {
       const method = editingId ? "PATCH" : "POST";
       const payload = { 
-        id: editingId, name, description, images, variations, 
+        id: editingId, name, description, images: imagesToSave, variations, 
         avgRating, numReviews, category, gender, colors: selectedColors, tags, isFeatured,
         isCustomizable,
         enabledMeasurements: JSON.stringify(enabledMeasurements)
@@ -371,7 +455,7 @@ export default function ProductManagement() {
             <div className="p-8 border-b border-brand/5 flex items-center justify-between bg-brand/5">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 rounded-2xl overflow-hidden border border-brand/10">
-                  <img src={JSON.parse(stockEditingProduct.images || "[]")[0]} alt="" className="w-full h-full object-cover" />
+                  <img src={getFirstImage(stockEditingProduct.images)} alt="" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h2 className="text-xl font-playfair font-bold text-brand">Quick Stock Update</h2>
@@ -647,44 +731,19 @@ export default function ProductManagement() {
               </div>
             </div>
 
-            {/* ── Section 3: Images ── */}
+            {/* ── Section 3: Inventory Overview ── */}
             <div>
-              <h3 className="text-xs font-black text-brand/30 uppercase tracking-[0.3em] mb-6 flex items-center gap-2"><span className="w-5 h-5 rounded-full bg-brand text-white text-[8px] flex items-center justify-center font-black">3</span> Product Images ({images.length})</h3>
-              <div className="flex gap-3 mb-5">
-                <input value={imageInput} onChange={e => setImageInput(e.target.value)} onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addImage())} placeholder="Paste image URL and press Enter or click Add →" className={`${INPUT} flex-1`} />
-                <button type="button" onClick={addImage} className="bg-[#1B3022] text-[#C5A059] px-5 py-2 rounded-2xl font-bold text-xs hover:bg-[#2c4d37] transition-all whitespace-nowrap">Add URL</button>
-              </div>
-              {images.length > 0 && (
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
-                  {images.map((img, i) => (
-                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-brand/10 group">
-                      <img src={img} alt={`img-${i}`} className="w-full h-full object-cover" onError={e => (e.currentTarget.src = "/images/placeholder.png")} />
-                      <button type="button" onClick={() => setImages(images.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-500/80 text-white items-center justify-center hidden group-hover:flex"><X size={18} /></button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {images.length === 0 && (
-                <div className="border-2 border-dashed border-brand/10 rounded-2xl py-12 text-center text-brand/30">
-                  <Package size={32} className="mx-auto mb-3" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">No images added yet</p>
-                </div>
-              )}
-            </div>
-
-            {/* ── Section 4: Stock ── */}
-            <div>
-              <h3 className="text-xs font-black text-brand/30 uppercase tracking-[0.3em] mb-6 flex items-center gap-2"><span className="w-5 h-5 rounded-full bg-brand text-white text-[8px] flex items-center justify-center font-black">4</span> Inventory Overview</h3>
+              <h3 className="text-xs font-black text-brand/30 uppercase tracking-[0.3em] mb-6 flex items-center gap-2"><span className="w-5 h-5 rounded-full bg-brand text-white text-[8px] flex items-center justify-center font-black">3</span> Inventory Overview</h3>
               <div className="p-5 bg-brand/5 rounded-2xl flex items-center justify-between">
                 <span className="text-[10px] font-black text-brand/40 uppercase tracking-widest">Total Combined Stock (All variations)</span>
                 <span className="text-2xl font-black text-brand">{totalStock}</span>
               </div>
             </div>
 
-            {/* ── Section 5: Sizes ── */}
+            {/* ── Section 4: Available Sizes ── */}
             <div className="space-y-4">
               <h3 className="text-xs font-black text-brand/30 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-brand text-white text-[8px] flex items-center justify-center font-black">5</span> 
+                <span className="w-5 h-5 rounded-full bg-brand text-white text-[8px] flex items-center justify-center font-black">4</span> 
                 Available Sizes
               </h3>
               
@@ -742,10 +801,10 @@ export default function ProductManagement() {
               )}
             </div>
 
-            {/* ── Section 6: Available Colors ── */}
+            {/* ── Section 5: Available Colors ── */}
             <div>
               <h3 className="text-xs font-black text-brand/30 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-brand text-white text-[8px] flex items-center justify-center font-black">6</span> 
+                <span className="w-5 h-5 rounded-full bg-brand text-white text-[8px] flex items-center justify-center font-black">5</span> 
                 Available Colors
               </h3>
               <div className="space-y-6">
@@ -826,6 +885,81 @@ export default function ProductManagement() {
                     </p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* ── Section 6: Color-Specific Images ── */}
+            <div>
+              <h3 className="text-xs font-black text-brand/30 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-brand text-white text-[8px] flex items-center justify-center font-black">6</span> 
+                Color-Specific Images
+              </h3>
+              
+              <div className="space-y-6">
+                {(selectedColors.length > 0 ? selectedColors : ["Default"]).map((color) => {
+                  const currentImages = colorImages[color] || [];
+                  const currentInput = colorImageInputs[color] || "";
+                  const colorPreset = PRESET_COLORS.find(c => c.name === color);
+                  
+                  return (
+                    <div key={color} className="p-6 bg-brand/5 rounded-[2.5rem] border border-brand/10 space-y-4">
+                      <div className="flex items-center space-x-3 pb-2 border-b border-brand/5">
+                        {color !== "Default" && (
+                          <div 
+                            className="w-4 h-4 rounded-full border border-black/10"
+                            style={{ backgroundColor: color.startsWith("#") ? color : colorPreset?.hex }}
+                          />
+                        )}
+                        <span className="text-xs font-black text-brand uppercase tracking-wider">
+                          {color === "Default" ? "Default Images" : `${color} Images`} ({currentImages.length})
+                        </span>
+                      </div>
+                      
+                      <div className="flex gap-3">
+                        <input 
+                          value={currentInput} 
+                          onChange={e => setColorImageInputs(prev => ({ ...prev, [color]: e.target.value }))} 
+                          onKeyDown={e => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addColorImage(color);
+                            }
+                          }} 
+                          placeholder="Paste image URL and press Enter or click Add →" 
+                          className={`${INPUT} flex-1`} 
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => addColorImage(color)} 
+                          className="bg-[#1B3022] text-[#C5A059] px-5 py-2 rounded-2xl font-bold text-xs hover:bg-[#2c4d37] transition-all whitespace-nowrap"
+                        >
+                          Add URL
+                        </button>
+                      </div>
+                      
+                      {currentImages.length > 0 ? (
+                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+                          {currentImages.map((img, i) => (
+                            <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-brand/10 group">
+                              <img src={img} alt={`${color}-img-${i}`} className="w-full h-full object-cover" onError={e => (e.currentTarget.src = "/images/placeholder.png")} />
+                              <button 
+                                type="button" 
+                                onClick={() => removeColorImage(color, i)} 
+                                className="absolute inset-0 bg-red-500/80 text-white items-center justify-center hidden group-hover:flex"
+                              >
+                                <X size={18} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="border border-dashed border-brand/10 bg-white/50 rounded-2xl py-6 text-center text-brand/30">
+                          <p className="text-[10px] font-black uppercase tracking-widest">No images added for this color</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -961,7 +1095,7 @@ export default function ProductManagement() {
                   <p className="text-[10px] text-brand/20 mt-2">Try a different search term</p>
                 </div>
               ) : filteredProducts.map(product => {
-                const imgs = JSON.parse(product.images || "[]");
+                const firstImg = getFirstImage(product.images);
                 const off = product.basePrice && product.salePrice ? Math.round((1 - product.salePrice / product.basePrice) * 100) : 0;
                 const isCurrentlyEditing = editingId === product.id;
                 
@@ -969,7 +1103,7 @@ export default function ProductManagement() {
                   <div key={product.id} className={`bg-white rounded-2xl p-3 border transition-all duration-300 group ${isCurrentlyEditing ? "border-brand-accent shadow-lg" : "border-brand/5 hover:border-brand-accent/30 shadow-sm"}`}>
                     <div className="flex items-center space-x-3">
                       <div className="w-14 h-14 rounded-xl overflow-hidden bg-brand/5 border border-brand/5 flex-shrink-0 relative">
-                        <img src={imgs[0] || "/images/placeholder.png"} alt={product.name} className="w-full h-full object-cover" onError={e => (e.currentTarget.src = "/images/placeholder.png")} />
+                        <img src={firstImg} alt={product.name} className="w-full h-full object-cover" onError={e => (e.currentTarget.src = "/images/placeholder.png")} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2">

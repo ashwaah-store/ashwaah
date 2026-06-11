@@ -30,6 +30,7 @@ export async function GET() {
         basePrice: products.basePrice,
         salePrice: products.salePrice,
         images: products.images,
+        colors: products.colors,
         category: products.category,
         isCustomizable: products.isCustomizable,
       }

@@ -5,6 +5,8 @@ import { SlidersHorizontal, ChevronDown, Check, X, LayoutGrid } from "lucide-rea
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCarousel from "@/components/ProductCarousel";
 import ProductCard from "@/components/ProductCard";
+import { getFirstProductImageUrl, getProductImageUrls } from "@/utils/product";
+
 
 interface Product {
   id: any;
@@ -666,21 +668,8 @@ export default function CategoryFilterSection({
               )}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 animate-in fade-in duration-300">
                 {filteredAndSortedProducts.map((p) => {
-                  let firstImage = "/images/placeholder.png";
-                  let parsedImagesList: string[] = [];
-                  try {
-                    const parsedImages = JSON.parse(p.images || "[]");
-                    if (Array.isArray(parsedImages)) {
-                      parsedImagesList = parsedImages;
-                      if (parsedImages.length > 0) {
-                        firstImage = parsedImages[0];
-                      }
-                    } else if (p.imageUrl) {
-                      firstImage = p.imageUrl;
-                    }
-                  } catch (e) {
-                    if (p.imageUrl) firstImage = p.imageUrl;
-                  }
+                  const parsedImagesList = getProductImageUrls(p.images, p.colors);
+                  const firstImage = getFirstProductImageUrl(p.images, p.colors);
 
                   const productProps = {
                     id: String(p.id),

@@ -48,6 +48,24 @@ export async function GET(request: Request) {
       const totalStock = productVariationsList?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0;
       const remaining = totalStock - sold - toDeliver;
 
+      let firstImg = null;
+      if (product.images) {
+        try {
+          const parsed = JSON.parse(product.images);
+          if (Array.isArray(parsed)) {
+            firstImg = parsed[0];
+          } else {
+            const keys = Object.keys(parsed);
+            for (const key of keys) {
+              if (parsed[key] && parsed[key].length > 0) {
+                firstImg = parsed[key][0];
+                break;
+              }
+            }
+          }
+        } catch {}
+      }
+
       return {
         id: product.id,
         name: product.name,
@@ -56,7 +74,7 @@ export async function GET(request: Request) {
         sold,
         remaining: Math.max(0, remaining),
         toBeDelivered: toDeliver,
-        image: product.images ? JSON.parse(product.images)[0] : null,
+        image: firstImg,
       };
     });
 

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useMemo } from "react";
 import { Sparkles, ArrowLeft, ShoppingBag, Check, X, Heart } from "lucide-react";
 import Link from "next/link";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { usePathname } from "next/navigation";
 import RefineDrawer from "@/components/RefineDrawer";
+import { getProductImageUrls } from "@/utils/product";
+
 
 interface Variation {
   id: number;
@@ -99,7 +101,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           setProduct(data);
 
           // Set initial color and size if available
-          const uniqueColors = Array.from(new Set(data.variations.map((v: Variation) => v.color)));
+          const uniqueColors = Array.from(new Set(data.variations.map((v: Variation) => v.color))) as string[];
           if (uniqueColors.length > 0) {
             const firstColor = uniqueColors[0] as string;
             setSelectedColor(firstColor);
@@ -110,10 +112,23 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           }
 
           // Set initial main image
-          const images = JSON.parse(data.images || "[]");
-          if (images.length > 0) {
-            setMainImage(images[0]);
-          }
+          let initialImage = "/images/placeholder.png";
+          try {
+            const parsed = JSON.parse(data.images || "[]");
+            if (Array.isArray(parsed)) {
+              if (parsed.length > 0) initialImage = parsed[0];
+            } else if (uniqueColors.length > 0 && parsed[uniqueColors[0]] && parsed[uniqueColors[0]].length > 0) {
+              initialImage = parsed[uniqueColors[0]][0];
+            } else if (parsed["Default"] && parsed["Default"].length > 0) {
+              initialImage = parsed["Default"][0];
+            } else {
+              const keys = Object.keys(parsed);
+              if (keys.length > 0 && parsed[keys[0]].length > 0) {
+                initialImage = parsed[keys[0]][0];
+              }
+            }
+          } catch {}
+          setMainImage(initialImage);
         }
       } catch (error) {
         console.error("Failed to fetch product", error);
@@ -143,7 +158,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     );
   }
 
-  const images = JSON.parse(product.images || "[]");
+  const colorImages = useMemo(() => {
+    if (!product) return [];
+    return getProductImageUrls(product.images, product.colors, selectedColor);
+  }, [product, selectedColor]);
+
+  // Sync main image when color images update
+  useEffect(() => {
+    if (colorImages.length > 0) {
+      setMainImage(colorImages[0]);
+    }
+  }, [colorImages]);
+
   const variations = product.variations || [];
 
   // Get unique colors available for this product
@@ -228,7 +254,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           <div className="lg:col-span-6 flex flex-col-reverse md:flex-row gap-5">
             {/* Thumbnails */}
             <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-y-auto max-h-[600px] no-scrollbar">
-              {images.map((img: string, idx: number) => (
+              {colorImages.map((img: string, idx: number) => (
                 <button
                   key={idx}
                   onClick={() => setMainImage(img)}

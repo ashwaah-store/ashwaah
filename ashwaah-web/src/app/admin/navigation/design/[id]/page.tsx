@@ -34,6 +34,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import ProductSelectorModal from "@/components/admin/ProductSelectorModal";
+import { getFirstProductImageUrl } from "@/utils/product";
 
 interface Product {
   id: number;
@@ -143,12 +144,7 @@ function SortableSectionItem({
               >
                 <div className="w-6 h-6 rounded-lg overflow-hidden bg-white border border-brand/5">
                   <img 
-                    src={(() => {
-                      try {
-                        const imgs = JSON.parse(product.images || "[]");
-                        return imgs[0] || "/images/placeholder.png";
-                      } catch { return "/images/placeholder.png"; }
-                    })()} 
+                    src={getFirstProductImageUrl(product.images, undefined)} 
                     alt={product.name} 
                     className="w-full h-full object-cover" 
                   />

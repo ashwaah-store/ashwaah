@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Search, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getFirstProductImageUrl } from "@/utils/product";
 
 type Product = {
   id: number;
@@ -13,6 +14,7 @@ type Product = {
   basePrice: number;
   salePrice: number | null;
   images: string | null;
+  colors: string | null;
 };
 
 export default function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
@@ -100,8 +102,7 @@ export default function SearchModal({ isOpen, onClose }: { isOpen: boolean; onCl
           {!isLoading && results.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {results.map((product) => {
-                const images = product.images ? JSON.parse(product.images) : [];
-                const imgUrl = images.length > 0 ? images[0] : "/placeholder.png";
+                const imgUrl = getFirstProductImageUrl(product.images, product.colors);
                 return (
                   <Link
                     key={product.id}

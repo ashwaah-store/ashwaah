@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ProductCard from './ProductCard';
 import { Loader2 } from "lucide-react";
+import { getFirstProductImageUrl, getProductImageUrls } from "@/utils/product";
+
 
 interface Product {
   id: number;
@@ -94,8 +96,8 @@ export default function ProductGrid() {
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
         >
           {products.map((product: any) => {
-            const images = JSON.parse(product.images || "[]");
-            const firstImage = images.length > 0 ? images[0] : (product.imageUrl || "/images/placeholder.png");
+            const parsedImages = getProductImageUrls(product.images, product.colors);
+            const firstImage = getFirstProductImageUrl(product.images, product.colors);
             
             return (
               <motion.div key={product.id} variants={itemVariants}>
@@ -108,7 +110,7 @@ export default function ProductGrid() {
                     basePrice: product.basePrice,
                     salePrice: product.salePrice,
                     imageUrl: firstImage,
-                    images: images,
+                    images: parsedImages,
                     categorySlug: product.category || "all",
                     isCustomizable: product.isCustomizable
                   }} 

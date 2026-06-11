@@ -3,6 +3,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import ProductCard from "./ProductCard";
+import { getFirstProductImageUrl, getProductImageUrls } from "@/utils/product";
+
 
 interface Product {
   id: any;
@@ -58,21 +60,8 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {products.map((product: any) => {
-          let firstImage = "/images/placeholder.png";
-          let parsedImages: string[] = [];
-          try {
-            if (product.images) {
-              const parsed = JSON.parse(product.images);
-              if (Array.isArray(parsed)) {
-                parsedImages = parsed;
-                if (parsed.length > 0) {
-                  firstImage = parsed[0];
-                }
-              }
-            } else if (product.imageUrl) {
-              firstImage = product.imageUrl;
-            }
-          } catch (e) {}
+          const parsedImages = getProductImageUrls(product.images, product.colors);
+          const firstImage = getFirstProductImageUrl(product.images, product.colors);
 
           return (
             <div key={product.id} className="w-[220px] md:w-[240px] flex-shrink-0 snap-start h-auto flex">

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { X, Search, Plus, Loader2, Package } from "lucide-react";
+import { getFirstProductImageUrl } from "@/utils/product";
 
 interface Product {
   id: number;
@@ -118,7 +119,7 @@ export default function ProductSelectorModal({
           mrp: newPrice,
           salePrice: newSalePrice,
           category: newCategory,
-          images: newImageUrl ? [newImageUrl] : [],
+          images: newImageUrl ? { "Default": [newImageUrl] } : { "Default": [] },
           variations: newSizes.length > 0 ? newSizes : [{ size: "Free Size", stock: 10 }],
           gender: "unisex"
         })
@@ -337,7 +338,6 @@ export default function ProductSelectorModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {products.map((product) => {
                     const isSelected = selectedIds.includes(product.id);
-                    const images = JSON.parse(product.images || "[]");
                     return (
                       <div 
                         key={product.id}
@@ -350,7 +350,7 @@ export default function ProductSelectorModal({
                       >
                         <div className="w-24 h-24 bg-brand/5 rounded-xl overflow-hidden flex-shrink-0 border border-brand/5">
                           <img 
-                            src={images[0] || "/images/placeholder.png"} 
+                            src={getFirstProductImageUrl(product.images, undefined)} 
                             alt={product.name} 
                             className="w-full h-full object-cover"
                           />

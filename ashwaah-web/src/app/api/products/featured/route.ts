@@ -12,6 +12,7 @@ export async function GET() {
       basePrice: products.basePrice,
       salePrice: products.salePrice,
       images: products.images,
+      colors: products.colors,
       avgRating: products.avgRating,
       numReviews: products.numReviews,
       category: products.category,

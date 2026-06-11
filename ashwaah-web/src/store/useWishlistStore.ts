@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { getFirstProductImageUrl, getProductImageUrls } from "@/utils/product";
+
 
 export interface WishlistItem {
   wishlistId: number;
@@ -42,21 +44,9 @@ export const useWishlistStore = create<WishlistStore>((set, get) => ({
         const data = await res.json();
         if (data.success) {
           const mapped = data.items.map((item: any) => {
-            let firstImage = "/images/placeholder.png";
-            let parsedImagesList: string[] = [];
-            try {
-              const parsedImages = JSON.parse(item.product.images || "[]");
-              if (Array.isArray(parsedImages)) {
-                parsedImagesList = parsedImages;
-                if (parsedImages.length > 0) {
-                  firstImage = parsedImages[0];
-                }
-              } else if (item.product.imageUrl) {
-                firstImage = item.product.imageUrl;
-              }
-            } catch (e) {
-              if (item.product.imageUrl) firstImage = item.product.imageUrl;
-            }
+            const parsedImagesList = getProductImageUrls(item.product.images, item.product.colors);
+            const firstImage = getFirstProductImageUrl(item.product.images, item.product.colors);
+
 
             const basePrice = item.product.basePrice ?? 0;
             const salePrice = item.product.salePrice ?? 0;

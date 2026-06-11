@@ -3,6 +3,8 @@
 import { useEffect, useState, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
+import { getFirstProductImageUrl, getProductImageUrls } from "@/utils/product";
+
 import { Loader2, Search as SearchIcon, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 
@@ -552,13 +554,8 @@ function SearchResults() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredAndSortedProducts.map((product) => {
-              let parsedImages: string[] = [];
-              try {
-                parsedImages = JSON.parse(product.images || "[]");
-              } catch {
-                parsedImages = [];
-              }
-              const firstImage = parsedImages.length > 0 ? parsedImages[0] : "/images/placeholder.png";
+              const parsedImages = getProductImageUrls(product.images, product.colors);
+              const firstImage = getFirstProductImageUrl(product.images, product.colors);
 
               return (
                 <ProductCard 

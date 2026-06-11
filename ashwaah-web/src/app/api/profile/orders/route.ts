@@ -54,8 +54,16 @@ export async function GET() {
           try {
             if (item.productImage) {
               const parsed = typeof item.productImage === 'string' ? JSON.parse(item.productImage) : item.productImage;
-              if (Array.isArray(parsed) && parsed.length > 0) {
-                imageUrl = parsed[0];
+              if (Array.isArray(parsed)) {
+                if (parsed.length > 0) imageUrl = parsed[0];
+              } else if (parsed && typeof parsed === 'object') {
+                const keys = Object.keys(parsed);
+                for (const key of keys) {
+                  if (parsed[key] && parsed[key].length > 0) {
+                    imageUrl = parsed[key][0];
+                    break;
+                  }
+                }
               }
             }
           } catch (e) {
