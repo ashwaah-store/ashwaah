@@ -144,7 +144,9 @@ function SearchResults() {
       const pSizes = p.sizes || [];
       pSizes.forEach((s) => {
         const normalized = s.toUpperCase().trim();
-        if (normalized) {
+        // Exclude generic size values from filters to keep them relevant
+        const genericSizes = ["STANDARD", "ONE SIZE", "FREE SIZE", "NO SIZE", "DEFAULT"];
+        if (normalized && !genericSizes.includes(normalized)) {
           counts[normalized] = (counts[normalized] || 0) + 1;
         }
       });
