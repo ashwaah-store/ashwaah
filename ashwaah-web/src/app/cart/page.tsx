@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCartStore } from "@/store/useCartStore";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Loader2, CreditCard, ShieldCheck, CheckCircle2, Scissors, Sparkles, MapPin, AlertTriangle } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Loader2, CreditCard, ShieldCheck, CheckCircle2, Scissors, Sparkles, MapPin, AlertTriangle, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function CartPage() {
-  const { items, updateQuantity, removeItem, getTotalPrice, getTotalItems, clearCart } = useCartStore();
+  const { items, updateQuantity, removeItem, getTotalPrice, getTotalItems, clearCart, setQuantity, updateItemVariant } = useCartStore();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [productDetailsMap, setProductDetailsMap] = useState<Record<number, { variations: any[] }>>({});
+  const [loadingDetails, setLoadingDetails] = useState(true);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentStep, setPaymentStep] = useState<"agreement" | "address" | "details" | "processing">("agreement");
@@ -31,6 +33,39 @@ export default function CartPage() {
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  const serializedProductIds = JSON.stringify(Array.from(new Set(items.map(item => item.productId))).sort());
+
+  useEffect(() => {
+    async function fetchAllProductDetails() {
+      if (items.length === 0) {
+        setLoadingDetails(false);
+        return;
+      }
+      
+      const uniqueProductIds = Array.from(new Set(items.map(item => item.productId)));
+      const details: Record<number, any> = {};
+      
+      try {
+        await Promise.all(
+          uniqueProductIds.map(async (productId) => {
+            const res = await fetch(`/api/products/${productId}`);
+            if (res.ok) {
+              const data = await res.json();
+              details[productId] = data;
+            }
+          })
+        );
+        setProductDetailsMap(details);
+      } catch (err) {
+        console.error("Error fetching product variations in cart:", err);
+      } finally {
+        setLoadingDetails(false);
+      }
+    }
+    
+    fetchAllProductDetails();
+  }, [serializedProductIds]);
 
   if (!isHydrated) {
     return (
@@ -141,6 +176,21 @@ export default function CartPage() {
         <div className="lg:col-span-8 space-y-6 lg:max-h-[70vh] lg:overflow-y-auto lg:pr-4 no-scrollbar">
           {items.map((item) => {
             const isBespoke = item.customizations?.type === "Bespoke";
+            const productVariationsList = productDetailsMap[item.productId]?.variations || [];
+            const itemColor = (item.color || "").toLowerCase();
+            const colorMatchedVariations = productVariationsList.filter(
+              (v: any) => !v.color || v.color.toLowerCase() === itemColor
+            );
+            const activeVariations = colorMatchedVariations.length > 0 ? colorMatchedVariations : productVariationsList;
+            const availableSizes = activeVariations.length > 0 
+              ? Array.from(new Set(activeVariations.map((v: any) => v.size))) 
+              : [item.size];
+            const currentVariation = activeVariations.find(
+              (v: any) => v.size.toLowerCase() === item.size.toLowerCase()
+            );
+            const maxStock = currentVariation ? currentVariation.stock : 10;
+            const stockLimit = Math.max(item.quantity, maxStock, 1);
+
             return (
               <div 
                 key={item.id} 
@@ -173,9 +223,6 @@ export default function CartPage() {
                       )}
                     </div>
                     <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-2">
-                      <span className="text-[10px] font-bold text-brand/40 uppercase tracking-widest bg-brand/5 px-2 py-0.5 rounded-full">
-                        Size: {item.size}
-                      </span>
                       <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full flex items-center gap-1 ${
                         isBespoke 
                           ? 'text-[#C5A059] bg-[#C5A059]/10 border border-[#C5A059]/20' 
@@ -192,23 +239,52 @@ export default function CartPage() {
                 </div>
 
                 <div className="mt-auto pt-6 flex flex-col sm:flex-row items-center justify-between border-t border-brand/5">
-                  {/* Quantity Selector */}
-                  <div className="flex items-center bg-brand-light border border-brand/10 rounded-xl overflow-hidden shadow-sm">
-                    <button 
-                      onClick={() => updateQuantity(item.id, -1)}
-                      className="p-3 hover:bg-brand/5 text-brand/60 transition-colors"
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus size={16} />
-                    </button>
-                    <span className="w-10 text-center font-bold text-brand text-sm">{item.quantity}</span>
-                    <button 
-                      onClick={() => updateQuantity(item.id, 1)}
-                      className="p-3 hover:bg-brand/5 text-brand/60 transition-colors"
-                      aria-label="Increase quantity"
-                    >
-                      <Plus size={16} />
-                    </button>
+                  {/* Size & Quantity Dropdowns */}
+                  <div className="flex flex-wrap gap-3 items-center">
+                    {!isBespoke && availableSizes.length > 0 && (
+                      <div className="relative">
+                        <select
+                          value={item.size}
+                          onChange={(e) => {
+                            const newSize = e.target.value;
+                            const variation = activeVariations.find((v: any) => v.size === newSize);
+                            const price = variation ? (variation.salePrice || variation.mrp || item.price) : item.price;
+                            updateItemVariant(item.id, newSize, price);
+                          }}
+                          className="appearance-none bg-brand/5 hover:bg-brand/10 text-brand text-xs font-bold py-2.5 pl-4 pr-9 rounded-xl cursor-pointer transition-colors outline-none border border-brand/10"
+                        >
+                          {availableSizes.map((sz) => (
+                            <option key={sz} value={sz} className="text-brand bg-[#FFFDF6]">
+                              Size: {sz}
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand/50 pointer-events-none" />
+                      </div>
+                    )}
+
+                    {isBespoke && (
+                      <span className="text-xs font-bold text-[#C5A059] bg-[#C5A059]/10 border border-[#C5A059]/20 px-4 py-2.5 rounded-xl">
+                        Size: Custom
+                      </span>
+                    )}
+
+                    <div className="relative">
+                      <select
+                        value={item.quantity}
+                        onChange={(e) => {
+                          setQuantity(item.id, Number(e.target.value));
+                        }}
+                        className="appearance-none bg-brand/5 hover:bg-brand/10 text-brand text-xs font-bold py-2.5 pl-4 pr-9 rounded-xl cursor-pointer transition-colors outline-none border border-brand/10"
+                      >
+                        {Array.from({ length: stockLimit }, (_, i) => i + 1).map((qty) => (
+                          <option key={qty} value={qty} className="text-brand bg-[#FFFDF6]">
+                            Qty: {qty}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand/50 pointer-events-none" />
+                    </div>
                   </div>
 
                   {/* Remove Button */}
