@@ -59,11 +59,15 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
       >
         {products.map((product: any) => {
           let firstImage = "/images/placeholder.png";
+          let parsedImages: string[] = [];
           try {
             if (product.images) {
               const parsed = JSON.parse(product.images);
-              if (Array.isArray(parsed) && parsed.length > 0) {
-                firstImage = parsed[0];
+              if (Array.isArray(parsed)) {
+                parsedImages = parsed;
+                if (parsed.length > 0) {
+                  firstImage = parsed[0];
+                }
               }
             } else if (product.imageUrl) {
               firstImage = product.imageUrl;
@@ -81,6 +85,7 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
                   basePrice: product.basePrice,
                   salePrice: product.salePrice,
                   imageUrl: firstImage,
+                  images: parsedImages,
                   categorySlug: product.category || ""
                 }} 
               />

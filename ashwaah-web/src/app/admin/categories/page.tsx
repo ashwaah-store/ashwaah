@@ -365,11 +365,11 @@ export default function CategorySettingsPage() {
                 )}
                 
                 {/* Overlay Card */}
-                <div className="relative z-10 w-full p-2.5 bg-[#cd5533] text-white rounded-t-xl text-center flex flex-col items-center justify-center">
+                <div className="relative z-10 w-full p-2.5 bg-[#064e3b] text-white rounded-t-xl text-center flex flex-col items-center justify-center">
                   <span className="text-[9px] tracking-wide uppercase font-medium text-center w-full block break-words">
                     {name || "Category Name"}
                   </span>
-                  <span className="text-xs font-bold font-playfair tracking-tight leading-tight my-0.5 uppercase text-center w-full block break-words">
+                  <span className="text-base font-bold tracking-tight leading-tight my-0.5 uppercase text-center w-full block break-words">
                     {promoText || "Promo Text"}
                   </span>
                   <span className="text-[8px] font-bold tracking-widest uppercase opacity-90 border-t border-white/20 pt-1 mt-1 w-full block">
@@ -441,7 +441,7 @@ export default function CategorySettingsPage() {
                       <div className="flex-1 flex flex-col justify-between py-1 min-w-0">
                         <div>
                           <h3 className="font-playfair font-bold text-brand text-lg truncate leading-tight">{item.name}</h3>
-                          <p className="text-[#cd5533] text-xs font-bold uppercase tracking-wider mt-1">{item.promoText}</p>
+                          <p className="text-[#064e3b] text-xs font-bold uppercase tracking-wider mt-1">{item.promoText}</p>
                           <span className="text-[10px] text-brand/40 uppercase tracking-widest font-black block mt-2">
                             Link: <span className="text-brand/60 font-semibold lowercase tracking-normal truncate inline-block max-w-[120px] align-middle">{item.link || "none"}</span>
                           </span>

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { Sparkles, ArrowLeft, ShoppingBag, Check, X } from "lucide-react";
+import { Sparkles, ArrowLeft, ShoppingBag, Check, X, Heart } from "lucide-react";
 import Link from "next/link";
 import { useCartStore } from "@/store/useCartStore";
+import { useWishlistStore } from "@/store/useWishlistStore";
+import { usePathname } from "next/navigation";
 import RefineDrawer from "@/components/RefineDrawer";
 
 interface Variation {
@@ -30,6 +32,30 @@ interface Product {
   variations: Variation[];
 }
 
+const COLOR_MAP: Record<string, string> = {
+  white: "#FFFFFF",
+  black: "#171717",
+  red: "#EF4444",
+  blue: "#3B82F6",
+  "sky blue": "#0EA5E9",
+  navy: "#1E3A8A",
+  grey: "#737373",
+  gray: "#737373",
+  brown: "#78350F",
+  maroon: "#5C1D16",
+  pink: "#EC4899",
+  beige: "#EADED2",
+  gold: "#C5A059",
+  "forest green": "#1B3022",
+  green: "#22C55E",
+  yellow: "#EAB308",
+};
+
+const getColorHex = (colorName: string) => {
+  const lower = colorName.toLowerCase();
+  return COLOR_MAP[lower] || (colorName.startsWith("#") ? colorName : "#CCCCCC");
+};
+
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [product, setProduct] = useState<Product | null>(null);
@@ -44,6 +70,25 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
   const addItem = useCartStore((state) => state.addItem);
+
+  const pathname = usePathname();
+  const isWishlisted = useWishlistStore((state) => state.items.some((item) => item.productId === Number(id)));
+  const addItemToWishlist = useWishlistStore((state) => state.addItem);
+  const removeItemFromWishlist = useWishlistStore((state) => state.removeItem);
+  const isAuthenticated = useWishlistStore((state) => state.isAuthenticated);
+
+  const handleWishlistClick = async () => {
+    if (!isAuthenticated) {
+      window.location.href = `/login?redirect=${encodeURIComponent(pathname)}`;
+      return;
+    }
+
+    if (isWishlisted) {
+      await removeItemFromWishlist(Number(id));
+    } else {
+      await addItemToWishlist(Number(id));
+    }
+  };
 
   useEffect(() => {
     async function fetchProduct() {
@@ -273,7 +318,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   >
                     <div
                       className="w-full h-full rounded-full border border-black/5"
-                      style={{ backgroundColor: color.toLowerCase() }}
+                      style={{ backgroundColor: getColorHex(color) }}
                     >
                       {selectedColor === color && (
                         <div className="absolute inset-0 flex items-center justify-center text-white">
@@ -383,12 +428,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </div>
             )}
 
-            {/* Add to Cart */}
-            <div className="mt-auto pt-6 border-t border-brand/5">
+            {/* Add to Cart & Wishlist */}
+            <div className="mt-auto pt-6 border-t border-brand/5 flex items-center gap-4 w-full">
               <button
                 disabled={!!(selectedColor && selectedSize && currentStock === 0)}
                 onClick={handleAddToCart}
-                className={`w-full flex items-center justify-center space-x-3 font-bold py-4 rounded-2xl transition-all text-base shadow-xl ${selectedColor && selectedSize && currentStock === 0
+                className={`flex-1 flex items-center justify-center space-x-3 font-bold py-4 rounded-2xl transition-all text-base shadow-xl ${selectedColor && selectedSize && currentStock === 0
                     ? "bg-brand/10 text-brand/30 cursor-not-allowed"
                     : "bg-brand text-white hover:bg-brand-hover active:scale-[0.98] border border-transparent hover:border-brand-accent"
                   }`}
@@ -402,7 +447,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   {selectedColor && selectedSize && currentStock === 0 ? "Out of Stock" : added ? "Added to Bag!" : "Add to Bag"}
                 </span>
               </button>
-
+              
+              <button
+                type="button"
+                onClick={handleWishlistClick}
+                className="flex-1 flex items-center justify-center space-x-3 font-bold py-4 rounded-2xl transition-all text-base shadow-xl bg-brand text-white hover:bg-brand-hover active:scale-[0.98] border border-transparent hover:border-brand-accent cursor-pointer"
+                title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+              >
+                <Heart className={`w-5 h-5 transition-colors ${isWishlisted ? "fill-red-500 text-red-500 animate-pulse" : "text-white"}`} />
+                <span>{isWishlisted ? "Wishlisted" : "Add to Wishlist"}</span>
+              </button>
             </div>
           </div>
         </div>

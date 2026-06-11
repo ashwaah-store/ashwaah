@@ -115,6 +115,7 @@ function SearchResults() {
                   basePrice: product.basePrice,
                   salePrice: product.salePrice,
                   imageUrl: firstImage,
+                  images: images,
                   categorySlug: product.category || "all"
                 }} 
               />

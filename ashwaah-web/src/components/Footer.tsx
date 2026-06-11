@@ -55,7 +55,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full bg-[#5C1D16] pt-16 pb-8 px-6 md:px-12 border-t border-white/10 text-[#F5EBE0] font-inter">
+    <footer className="w-full bg-[#064e3b] pt-16 pb-8 px-6 md:px-12 border-t border-white/10 text-[#F5EBE0] font-inter">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
         {/* Column 1: Brand Info */}
         <div className="md:col-span-5 space-y-4">
@@ -65,7 +65,7 @@ export default function Footer() {
               alt="Ashwaah Logo" 
               className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
             />
-            <span className="font-playfair text-xl font-medium tracking-wide text-white group-hover:text-[#C5A059] transition-colors">
+            <span className="font-gabriola text-2xl font-bold tracking-wide text-white group-hover:text-[#C5A059] transition-colors">
               Ashwaah
             </span>
           </Link>
@@ -122,7 +122,7 @@ export default function Footer() {
               <Facebook size={18} />
             </a>
             <a 
-              href="https://www.instagram.com/ashwaah1988?igsh=MWpucWdvdWFmbzJnZA%3D%3D&utm_source=qr" 
+              href="https://www.instagram.com/ashwaah_store?igsh=MWpucWdvdWFmbzJnZA%3D%3D&utm_source=qr" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="hover:text-white transition" 

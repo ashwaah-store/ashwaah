@@ -108,6 +108,7 @@ export default function ProductGrid() {
                     basePrice: product.basePrice,
                     salePrice: product.salePrice,
                     imageUrl: firstImage,
+                    images: images,
                     categorySlug: product.category || "all",
                     isCustomizable: product.isCustomizable
                   }} 

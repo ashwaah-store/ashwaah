@@ -100,7 +100,7 @@ export default function MyStory() {
             <h4 className="text-xl font-playfair font-bold mb-8 text-[#1B3022]">Follow Our Journey</h4>
             <div className="grid grid-cols-2 gap-4">
               <a 
-                href="https://www.instagram.com/ashwaah1988?igsh=MWpucWdvdWFmbzJnZA%3D%3D&utm_source=qr" 
+                href="https://www.instagram.com/ashwaah_store?igsh=MWpucWdvdWFmbzJnZA%3D%3D&utm_source=qr" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="flex items-center justify-center gap-3 p-4 bg-[#1B3022]/5 text-[#1B3022] hover:text-white rounded-2xl hover:bg-[#C5A059] transition-all group"

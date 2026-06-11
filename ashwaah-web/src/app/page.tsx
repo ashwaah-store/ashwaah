@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import ProductGrid from "@/components/ProductGrid";
 
 type NavItem = {
@@ -15,6 +14,20 @@ type NavItem = {
 };
 
 import { motion, AnimatePresence } from "framer-motion";
+
+function parseOfferText(text: string) {
+  if (text.includes("|")) {
+    const parts = text.split("|");
+    return { title: parts[0].trim(), subtitle: parts[1].trim() };
+  }
+  if (text.includes("!")) {
+    const parts = text.split("!");
+    const title = parts[0].trim();
+    const subtitle = parts.slice(1).join("!").trim();
+    return { title, subtitle: subtitle || null };
+  }
+  return { title: text.trim(), subtitle: null };
+}
 
 export default function Home() {
   const [navItems, setNavItems] = useState<NavItem[]>([]);
@@ -121,11 +134,44 @@ export default function Home() {
     <div className="min-h-screen bg-brand-light text-brand font-sans selection:bg-brand-accent/30">
       {/* Dynamic Offer Announcement Bar (Carousel, 1cm - 2cm Height) */}
       {offers.length > 0 && (
-        <div className="w-full bg-[#FFFDF6] text-[#5C1D16] h-14 flex items-center justify-center overflow-hidden border-b border-[#5C1D16]/10 relative z-30 shadow-sm">
+        <div className="w-full bg-[#F5EBE0] text-[#064e3b] h-24 flex items-center justify-center overflow-hidden border-b border-[#064e3b]/10 relative z-30 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 w-full text-center flex items-center justify-center h-full relative">
             <AnimatePresence mode="wait">
-              {offers.map((offer, idx) => (
-                idx === currentOfferIndex && (
+              {offers.map((offer, idx) => {
+                const { title, subtitle } = parseOfferText(offer.text);
+                 const TicketContent = (
+                  <div className={`relative flex items-center h-16 bg-[#064e3b] text-white px-10 rounded-l-2xl rounded-r-md shadow-md overflow-hidden font-inter ${!subtitle ? "justify-center" : ""}`}>
+                    {/* Left Title */}
+                    <span className={`font-extrabold text-lg md:text-xl uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${subtitle ? "pr-4" : ""}`}>
+                      {title}
+                    </span>
+                    
+                    {subtitle && (
+                      <>
+                        {/* Dashed Divider with top/bottom circular cutouts */}
+                        <div className="relative h-full flex items-center px-1">
+                          <div className="absolute -top-[10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-[#F5EBE0] rounded-full"></div>
+                          <div className="h-3/5 border-l border-dashed border-white/50"></div>
+                          <div className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-[#F5EBE0] rounded-full"></div>
+                        </div>
+                        
+                        {/* Right Subtitle */}
+                        <span className="text-sm md:text-base font-black uppercase tracking-widest pl-4 pr-2 opacity-95 whitespace-nowrap">
+                          {subtitle}
+                        </span>
+                      </>
+                    )}
+
+                    {/* Jagged right edge (torn coupon effect) */}
+                    <div className="absolute right-0 top-0 bottom-0 w-1 flex flex-col justify-between py-1">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="w-1 h-1.5 bg-[#F5EBE0] rounded-l-full"></div>
+                      ))}
+                    </div>
+                  </div>
+                );
+
+                return idx === currentOfferIndex && (
                   <motion.div
                     key={offer.id}
                     initial={{ opacity: 0, x: "-100%" }}
@@ -135,60 +181,23 @@ export default function Home() {
                     className="absolute inset-0 flex items-center justify-center px-4"
                   >
                     {offer.link ? (
-                      <Link href={offer.link} className="hover:text-brand-accent transition-colors duration-300 flex items-center gap-2">
-                        <span className="text-[14px] md:text-[15px] font-black uppercase tracking-[0.25em]">📢 {offer.text}</span>
-                        <span className="text-[10px] md:text-[11px] font-black bg-[#C5A059] text-white px-2.5 py-0.5 rounded-full uppercase tracking-widest shadow-sm">Shop Now →</span>
+                      <Link href={offer.link} className="hover:scale-[1.02] transition-transform duration-300 shadow-sm hover:shadow-md block">
+                        {TicketContent}
                       </Link>
                     ) : (
-                      <span className="text-[14px] md:text-[15px] font-black uppercase tracking-[0.25em]">📢 {offer.text}</span>
+                      <div className="shadow-sm">
+                        {TicketContent}
+                      </div>
                     )}
                   </motion.div>
-                )
-              ))}
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>
       )}
 
-      {/* Hero Section */}
-      <header className="relative w-full min-h-[45vh] flex flex-col items-center justify-center overflow-hidden border-b border-brand/10 bg-brand-light pt-10 pb-12">
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative z-20 text-center px-4 max-w-5xl mx-auto"
-        >
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center space-x-2 bg-brand/5 border border-brand/10 text-brand text-xs font-bold px-4 py-1.5 rounded-full mb-6 shadow-sm tracking-widest uppercase"
-          >
-            <Sparkles size={14} className="text-brand-accent" />
-            <span>Curated for All. Customized for You</span>
-          </motion.div>
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-4xl md:text-6xl font-playfair font-bold tracking-tight mb-6 text-brand leading-[1.15]"
-          >
-            Standard Sizes. <br /> <span className="text-brand-accent italic">Perfected Fits.</span>
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-            className="text-brand/70 text-base md:text-lg max-w-2xl mx-auto mb-4 font-inter leading-relaxed"
-          >
-            At Ashwaah, Our crafted designs meet your individuality — pre‑made or personalised, always perfect for you
-          </motion.p>
-        </motion.div>
-        
-        {/* Subtle background element */}
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-brand/5 to-transparent"></div>
-      </header>
 
       {/* Dynamic Promo Banner Image */}
       {bannerUrl && (
@@ -231,7 +240,7 @@ export default function Home() {
                   href={item.href} 
                   className="group flex flex-col items-center shrink-0"
                 >
-                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden border-2 border-[#5C1D16]/30 shadow-lg transition-transform duration-500 group-hover:scale-105 group-hover:border-[#5C1D16] group-hover:shadow-[#5C1D16]/20 relative">
+                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden border-2 border-[#064e3b]/30 shadow-lg transition-transform duration-500 group-hover:scale-105 group-hover:border-[#064e3b] group-hover:shadow-[#064e3b]/20 relative">
                     <img 
                       src={item.imageUrl || "/images/placeholder.png"} 
                       alt={item.label} 
@@ -239,7 +248,7 @@ export default function Home() {
                       onError={e => (e.currentTarget.src = "/images/placeholder.png")}
                     />
                   </div>
-                  <span className="mt-4 text-xs md:text-sm font-bold tracking-wide text-brand/80 group-hover:text-[#5C1D16] transition-colors text-center w-full max-w-[12rem] break-words block">
+                  <span className="mt-4 text-xs md:text-sm font-bold tracking-wide text-brand/80 group-hover:text-[#064e3b] transition-colors text-center w-full max-w-[12rem] break-words block">
                     {item.label}
                   </span>
                 </Link>
@@ -279,11 +288,11 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none"></div>
                     
                     {/* Overlaid coral-orange card at bottom */}
-                    <div className="relative z-10 w-full p-3 bg-[#cd5533]/90 backdrop-blur-sm text-white rounded-t-2xl text-center transition-all duration-300 group-hover:bg-[#cd5533] flex flex-col items-center justify-center">
+                    <div className="relative z-10 w-full p-3 bg-[#064e3b]/90 backdrop-blur-sm text-white rounded-t-2xl text-center transition-all duration-300 group-hover:bg-[#064e3b] flex flex-col items-center justify-center">
                       <span className="text-[9px] md:text-[10px] tracking-wider uppercase font-medium text-center w-full block break-words">
                         {item.name}
                       </span>
-                      <span className="text-xs md:text-sm font-bold font-playfair tracking-tight leading-tight my-0.5 uppercase text-center w-full block break-words">
+                      <span className="text-base md:text-lg font-bold tracking-tight leading-tight my-0.5 uppercase text-center w-full block break-words">
                         {item.promoText}
                       </span>
                       <span className="text-[8px] font-bold tracking-widest uppercase border-t border-white/20 pt-1 mt-1 w-full block transition-colors group-hover:text-white">

@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Map, 
-  Shirt, 
-  Package, 
-  Users, 
+import {
+  LayoutDashboard,
+  Map,
+  Shirt,
+  Package,
+  Users,
   LogOut,
   ChevronRight,
   Sparkles,
@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span className="font-serif font-bold text-lg text-[#1B3022]">A</span>
             </div>
             <div>
-              <span className="font-playfair font-medium text-lg tracking-wide leading-none block">Ashwaah</span>
+              <h1 className="font-gabriola font-bold text-xl tracking-wide leading-none">Ashwaah</h1>
               <p className="text-[8px] uppercase tracking-[0.2em] text-[#C5A059] font-black mt-1">Admin Panel</p>
             </div>
           </Link>
@@ -66,16 +66,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {sidebarLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;
-            
+
             return (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`flex items-center justify-between px-3 py-3 rounded-xl transition-all group ${
-                  isActive 
-                    ? "bg-[#C5A059] text-[#1B3022] shadow-lg translate-x-1" 
+                className={`flex items-center justify-between px-3 py-3 rounded-xl transition-all group ${isActive
+                    ? "bg-[#C5A059] text-[#1B3022] shadow-lg translate-x-1"
                     : "text-white/60 hover:text-white hover:bg-white/5"
-                }`}
+                  }`}
               >
                 <div className="flex items-center space-x-4">
                   <Icon size={18} className={isActive ? "text-[#1B3022]" : "text-[#C5A059]/60 group-hover:text-[#C5A059]"} />
@@ -88,7 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="p-6 border-t border-white/5">
-          <button 
+          <button
             onClick={() => setShowLogoutConfirm(true)}
             className="w-full flex items-center space-x-4 px-4 py-4 rounded-2xl text-white/40 hover:text-red-400 hover:bg-red-500/5 transition-all group"
           >
@@ -111,7 +110,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div 
+          <div
             className="absolute inset-0 bg-[#1B3022]/80 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={() => setShowLogoutConfirm(false)}
           />
@@ -122,15 +121,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
               <h3 className="text-xl font-bold text-[#1B3022] mb-2">Confirm Logout</h3>
               <p className="text-[#1B3022]/60 text-sm mb-8">Are you sure you want to exit the admin panel? You will need to login again to access these settings.</p>
-              
+
               <div className="grid grid-cols-2 gap-4">
-                <button 
+                <button
                   onClick={() => setShowLogoutConfirm(false)}
                   className="px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest text-[#1B3022]/40 hover:text-[#1B3022] hover:bg-brand-light transition-all"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={handleLogout}
                   className="px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
                 >
@@ -138,8 +137,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </button>
               </div>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => setShowLogoutConfirm(false)}
               className="absolute top-4 right-4 p-2 text-[#1B3022]/20 hover:text-[#1B3022] transition-all"
             >

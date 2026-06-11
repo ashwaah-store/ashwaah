@@ -11,6 +11,20 @@ interface Offer {
   order: number;
 }
 
+function parseOfferText(text: string) {
+  if (text.includes("|")) {
+    const parts = text.split("|");
+    return { title: parts[0].trim(), subtitle: parts[1].trim() };
+  }
+  if (text.includes("!")) {
+    const parts = text.split("!");
+    const title = parts[0].trim();
+    const subtitle = parts.slice(1).join("!").trim();
+    return { title, subtitle: subtitle || null };
+  }
+  return { title: text.trim(), subtitle: null };
+}
+
 export default function SettingsPage() {
   const router = useRouter();
   const [bannerUrl, setBannerUrl] = useState("");
@@ -23,6 +37,7 @@ export default function SettingsPage() {
 
   // New offer form state
   const [newOfferText, setNewOfferText] = useState("");
+  const [newOfferSubtext, setNewOfferSubtext] = useState("");
   const [newOfferLink, setNewOfferLink] = useState("");
 
   const fetchData = async () => {
@@ -122,12 +137,16 @@ export default function SettingsPage() {
     setError("");
     setSuccess("");
 
+    const combinedText = newOfferSubtext.trim()
+      ? `${newOfferText.trim()} | ${newOfferSubtext.trim()}`
+      : newOfferText.trim();
+
     try {
       const res = await fetch("/api/admin/offers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: newOfferText,
+          text: combinedText,
           link: newOfferLink || null,
           order: offers.length,
         }),
@@ -136,6 +155,7 @@ export default function SettingsPage() {
       if (data.success) {
         setSuccess("Offer banner added successfully!");
         setNewOfferText("");
+        setNewOfferSubtext("");
         setNewOfferLink("");
         fetchData();
         router.refresh();
@@ -276,9 +296,20 @@ export default function SettingsPage() {
                   type="text"
                   value={newOfferText}
                   onChange={(e) => setNewOfferText(e.target.value)}
-                  placeholder="e.g. Free shipping on orders above ₹4,999!"
+                  placeholder="e.g. FLAT ₹500 OFF"
                   className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-xs font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
                   required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-2 ml-1">Add Offer Banner Subtext (Optional)</label>
+                <input
+                  type="text"
+                  value={newOfferSubtext}
+                  onChange={(e) => setNewOfferSubtext(e.target.value)}
+                  placeholder="e.g. On First Purchase"
+                  className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-xs font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
                 />
               </div>
 
@@ -309,7 +340,7 @@ export default function SettingsPage() {
 
             {/* List of current offers */}
             <div>
-              <p className="text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-4 border-b border-brand/5 pb-2">Active Slides ({offers.length})</p>
+              <p className="text-[10px] font-black text-brand/40 uppercase tracking-[0.25em] mb-4 border-b border-brand/5 pb-2">Active Slides ({offers.length})</p>
               
               {offers.length === 0 ? (
                 <div className="text-center py-6 border border-dashed border-brand/10 rounded-2xl text-brand/30">
@@ -321,7 +352,19 @@ export default function SettingsPage() {
                   {offers.map((offer) => (
                     <div key={offer.id} className="flex items-center justify-between p-4 bg-brand/5 border border-brand/5 rounded-2xl group transition-all hover:bg-brand/10">
                       <div className="flex-1 min-w-0 pr-4">
-                        <p className="text-xs font-bold text-brand truncate">{offer.text}</p>
+                        {(() => {
+                          const { title, subtitle } = parseOfferText(offer.text);
+                          return (
+                            <p className="text-xs font-bold text-brand truncate">
+                              {title}
+                              {subtitle && (
+                                <span className="text-brand/40 font-medium ml-2">
+                                  ({subtitle})
+                                </span>
+                              )}
+                            </p>
+                          );
+                        })()}
                         {offer.link && (
                           <p className="text-[9px] font-black text-[#C5A059] uppercase tracking-wider mt-1 truncate">Link: {offer.link}</p>
                         )}
@@ -343,31 +386,47 @@ export default function SettingsPage() {
 
         {/* Live Preview Column */}
         <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-brand/5 flex flex-col h-fit">
-          <h2 className="text-xl font-playfair font-bold text-brand mb-6 border-b border-brand/5 pb-4">Aesthetic Hero & Offer Preview</h2>
+          <h2 className="text-xl font-playfair font-bold text-brand mb-6 border-b border-brand/5 pb-4">Aesthetic Offer & Banner Preview</h2>
           
           <div className="rounded-2xl border border-brand/10 overflow-hidden relative flex flex-col p-0 bg-brand/5">
-            
-            {/* 1. Hero Section Mockup (Plain background) */}
-            <div className="min-h-[160px] relative flex flex-col items-center justify-center text-center p-6 border-b border-brand/10 bg-brand-light">
-              {/* Simulated Content */}
-              <div className="relative z-10 max-w-sm">
-                <span className="inline-flex items-center bg-[#5C1D16]/5 border border-[#5C1D16]/10 text-[#5C1D16] text-[8px] font-bold px-2 py-0.5 rounded-full mb-3 tracking-widest uppercase">
-                  Curated for All. Customized for You
-                </span>
-                <h3 className="text-2xl font-playfair font-bold text-brand leading-tight mb-2">
-                  Standard Sizes. <br /> <span className="text-[#C5A059] italic">Perfected Fits.</span>
-                </h3>
-              </div>
-            </div>
 
-            {/* 2. Offer Carousel Banner Mockup (1cm to 2cm) */}
-            <div className="h-14 bg-[#FFFDF6] text-[#5C1D16] flex items-center justify-center px-4 relative z-10 shadow-sm border-b border-[#5C1D16]/10">
+            {/* 2. Offer Carousel Banner Mockup */}
+            <div className="h-24 bg-[#F5EBE0] text-[#064e3b] flex items-center justify-center px-4 relative z-10 shadow-sm border-b border-[#064e3b]/10">
               {offers.length > 0 ? (
-                <div className="text-center w-full animate-pulse">
-                  <p className="text-[11px] md:text-[12px] font-black uppercase tracking-[0.25em] text-[#5C1D16]">
-                    📢 {offers[0].text}
-                  </p>
-                </div>
+                (() => {
+                  const { title, subtitle } = parseOfferText(offers[0].text);
+                  return (
+                    <div className={`relative flex items-center h-16 bg-[#064e3b] text-white px-10 rounded-l-2xl rounded-r-md shadow-md overflow-hidden font-inter ${!subtitle ? "justify-center" : ""}`}>
+                      {/* Left Title */}
+                      <span className={`font-extrabold text-lg md:text-xl uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${subtitle ? "pr-4" : ""}`}>
+                        {title}
+                      </span>
+                      
+                      {subtitle && (
+                        <>
+                          {/* Dashed Divider with top/bottom circular cutouts */}
+                          <div className="relative h-full flex items-center px-1">
+                            <div className="absolute -top-[10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-[#F5EBE0] rounded-full"></div>
+                            <div className="h-3/5 border-l border-dashed border-white/50"></div>
+                            <div className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-[#F5EBE0] rounded-full"></div>
+                          </div>
+                          
+                          {/* Right Subtitle */}
+                          <span className="text-sm md:text-base font-black uppercase tracking-widest pl-4 pr-2 opacity-95 whitespace-nowrap">
+                            {subtitle}
+                          </span>
+                        </>
+                      )}
+
+                      {/* Jagged right edge (torn coupon effect) */}
+                      <div className="absolute right-0 top-0 bottom-0 w-1 flex flex-col justify-between py-1">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="w-1 h-1.5 bg-[#F5EBE0] rounded-l-full"></div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()
               ) : (
                 <p className="text-[11px] md:text-[12px] font-black uppercase tracking-[0.25em] text-white/40">
                   Carousel Slide Offers Area (1 - 2 CM Height)
