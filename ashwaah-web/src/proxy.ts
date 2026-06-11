@@ -47,7 +47,7 @@ function verifySession(token: string | undefined): { phone: string } | null {
   return { phone: cleanPhone };
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get("auth_session")?.value;
   const adminSessionCookie = request.cookies.get("admin_session")?.value;
   const { pathname } = request.nextUrl;
