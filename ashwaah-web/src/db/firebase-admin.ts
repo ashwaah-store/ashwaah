@@ -6,6 +6,7 @@ const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL || process.env.FIREB
 const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY;
 
 let adminAuth: any = null;
+let firebaseInitError: string | null = null;
 
 const isDummyKey = !privateKey || privateKey.includes("...") || privateKey.includes("your-") || privateKey.includes("placeholder");
 
@@ -25,19 +26,25 @@ if (getApps().length === 0) {
       });
       console.log("[Firebase Admin] Initialized successfully with credentials.");
     } catch (err: any) {
+      firebaseInitError = `Initialization failed: ${err.message}`;
       console.error("[Firebase Admin] Initialization failed:", err.message);
-      console.warn("[Firebase Admin] Falling back to local mock mode.");
     }
   } else {
-    console.warn(
-      "[Firebase Admin] Missing or dummy credential variables. Local mock mode is enabled."
-    );
+    const missing = [];
+    if (!projectId) missing.push("projectId");
+    if (!clientEmail) missing.push("clientEmail");
+    if (!privateKey) missing.push("privateKey");
+    if (isDummyKey) missing.push("privateKey-is-dummy");
+    firebaseInitError = `Missing or dummy credentials. Missing components: ${missing.join(", ")}`;
+    console.warn(`[Firebase Admin] ${firebaseInitError}`);
   }
 }
 
 // Only expose auth service if an app is successfully initialized
 if (getApps().length > 0) {
   adminAuth = getAuth();
+} else if (!firebaseInitError) {
+  firebaseInitError = "No firebase apps exist after initialization check.";
 }
 
-export { adminAuth };
+export { adminAuth, firebaseInitError };

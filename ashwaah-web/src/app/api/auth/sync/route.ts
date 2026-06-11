@@ -20,7 +20,8 @@ export async function POST(request: Request) {
       // 1. Firebase Token Verification
       try {
         if (!adminAuth) {
-          throw new Error("Firebase adminAuth is null. Firebase Admin SDK was not initialized correctly.");
+          const { firebaseInitError } = await import("@/db/firebase-admin");
+          throw new Error(`Firebase adminAuth is null. Reason: ${firebaseInitError || "Unknown error during initialization"}`);
         }
         const decoded = await adminAuth.verifyIdToken(idToken);
         const firebasePhone = decoded.phone_number;
