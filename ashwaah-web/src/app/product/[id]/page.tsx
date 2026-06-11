@@ -330,7 +330,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         colorSizes[0] === "No Size" || 
                         colorSizes[0] === "Default"
                       );
-                      if (isSingle) {
+                      if (selectedSize && colorSizes.includes(selectedSize)) {
+                        // Keep selected size if available in the newly selected color
+                      } else if (isSingle) {
                         setSelectedSize(colorSizes[0]);
                       } else {
                         setSelectedSize(null);
