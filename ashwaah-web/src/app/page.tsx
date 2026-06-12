@@ -134,29 +134,29 @@ export default function Home() {
     <div className="min-h-screen bg-brand-light text-brand font-sans selection:bg-brand-accent/30">
       {/* Dynamic Offer Announcement Bar (Carousel, 1cm - 2cm Height) */}
       {offers.length > 0 && (
-        <div className="w-full bg-[#F5EBE0] text-[#064e3b] h-24 flex items-center justify-center overflow-hidden border-b border-[#064e3b]/10 relative z-30 shadow-sm">
+        <div className="w-full bg-[#F5EBE0] text-[#064e3b] h-24 flex items-center justify-center overflow-hidden border-b border-[#064e3b]/10 relative z-30 shadow-sm mt-4">
           <div className="max-w-7xl mx-auto px-4 w-full text-center flex items-center justify-center h-full relative">
             <AnimatePresence mode="wait">
               {offers.map((offer, idx) => {
                 const { title, subtitle } = parseOfferText(offer.text);
                  const TicketContent = (
-                  <div className={`relative flex items-center h-16 bg-[#064e3b] text-white px-10 rounded-l-2xl rounded-r-md shadow-md overflow-hidden font-inter ${!subtitle ? "justify-center" : ""}`}>
+                  <div className={`relative flex items-center h-16 bg-[#064e3b] text-white px-4 sm:px-8 md:px-12 lg:px-16 rounded-none shadow-md overflow-hidden font-inter ${!subtitle ? "justify-center" : ""}`}>
                     {/* Left Title */}
-                    <span className={`font-extrabold text-lg md:text-xl uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${subtitle ? "pr-4" : ""}`}>
+                    <span className={`font-extrabold text-[15px] sm:text-2xl md:text-4xl lg:text-5xl uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${subtitle ? "pr-2 sm:pr-6" : ""}`}>
                       {title}
                     </span>
                     
                     {subtitle && (
                       <>
                         {/* Dashed Divider with top/bottom circular cutouts */}
-                        <div className="relative h-full flex items-center px-1">
+                        <div className="relative h-full flex items-center px-0.5 sm:px-1">
                           <div className="absolute -top-[10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-[#F5EBE0] rounded-full"></div>
                           <div className="h-3/5 border-l border-dashed border-white/50"></div>
                           <div className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-[#F5EBE0] rounded-full"></div>
                         </div>
                         
                         {/* Right Subtitle */}
-                        <span className="text-sm md:text-base font-black uppercase tracking-widest pl-4 pr-2 opacity-95 whitespace-nowrap">
+                        <span className="text-[13px] sm:text-lg md:text-2xl lg:text-3xl font-black uppercase tracking-widest pl-2 sm:pl-6 pr-1 sm:pr-2 opacity-95 whitespace-nowrap">
                           {subtitle}
                         </span>
                       </>
@@ -178,7 +178,7 @@ export default function Home() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: "100%" }}
                     transition={{ duration: 0.4, ease: "easeInOut" }}
-                    className="absolute inset-0 flex items-center justify-center px-4"
+                    className="absolute inset-0 flex items-center justify-center px-2 sm:px-4"
                   >
                     {offer.link ? (
                       <Link href={offer.link} className="hover:scale-[1.02] transition-transform duration-300 shadow-sm hover:shadow-md block">

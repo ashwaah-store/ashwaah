@@ -143,14 +143,14 @@ export default function Navbar() {
           <div className="flex justify-between items-center h-16">
             
             {/* Logo */}
-            <div className="flex-shrink-0 flex items-center mr-8">
-              <Link href="/" className="flex items-center gap-1.5 group">
+            <div className="flex-shrink-0 flex items-center mr-2 sm:mr-4 md:mr-8">
+              <Link href="/" className="flex items-center gap-1 sm:gap-1.5 group">
                 <img 
                   src="/images/logo.png" 
                   alt="Ashwaah Logo" 
-                  className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
+                  className="h-9 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
                 />
-                <span className="font-gabriola text-3xl md:text-4xl font-bold text-white tracking-wide hover:text-[#C5A059] transition-colors">
+                <span className="font-gabriola text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-wide hover:text-[#C5A059] transition-colors">
                   Ashwaah
                 </span>
               </Link>
@@ -219,17 +219,17 @@ export default function Navbar() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="flex md:hidden items-center space-x-4">
-              <button onClick={() => setIsSearchOpen(true)} aria-label="Search" className="text-white p-2">
+            <div className="flex md:hidden items-center space-x-1 sm:space-x-2">
+              <button onClick={() => setIsSearchOpen(true)} aria-label="Search" className="text-white p-1 sm:p-2">
                 <Search className="h-5 w-5" />
               </button>
-              <Link href="/my-story" aria-label="My Story" className="text-white p-2">
+              <Link href="/my-story" aria-label="My Story" className="text-white p-1 sm:p-2">
                 <BookOpen className="h-5 w-5" />
               </Link>
               <Link
                 href={user ? "/wishlist" : `/login?redirect=${encodeURIComponent(pathname)}`}
                 aria-label="Wishlist"
-                className="text-white hover:text-[#C5A059] transition-colors relative p-2 cursor-pointer"
+                className="text-white hover:text-[#C5A059] transition-colors relative p-1 sm:p-2 cursor-pointer"
               >
                 <Heart className="h-5 w-5" />
                 {user && wishlistItems.length > 0 && (
@@ -239,7 +239,7 @@ export default function Navbar() {
                 )}
               </Link>
 
-              <Link href={user ? "/cart" : "/login"} aria-label="Cart" className="text-white hover:text-[#C5A059] transition-colors relative p-2">
+              <Link href={user ? "/cart" : "/login"} aria-label="Cart" className="text-white hover:text-[#C5A059] transition-colors relative p-1 sm:p-2">
                 <ShoppingCart className="h-5 w-5" />
                 <span className="absolute top-0 right-0 bg-[#FFFDF6] text-[#064e3b] text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-[#064e3b]">
                   {cartCount}
@@ -247,7 +247,7 @@ export default function Navbar() {
               </Link>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-white hover:text-[#C5A059] focus:outline-none p-2"
+                className="text-white hover:text-[#C5A059] focus:outline-none p-1 sm:p-2"
               >
                 {isMobileMenuOpen ? (
                   <X className="h-6 w-6" />

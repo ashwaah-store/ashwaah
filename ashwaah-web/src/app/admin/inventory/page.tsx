@@ -32,10 +32,15 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"all" | "most-selling" | "low-stock" | "out-of-stock">("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchInventory();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, activeTab]);
 
   const fetchInventory = async () => {
     try {
@@ -156,94 +161,178 @@ export default function InventoryPage() {
             <p className="text-brand/60 font-medium max-w-sm mx-auto">Try adjusting your search terms to find specific inventory items.</p>
           </div>
         ) : (
-          Object.entries(filteredData).map(([category, products]) => (
-            <div key={category} className="space-y-4">
-              <button 
-                onClick={() => toggleCategory(category)}
-                className="w-full flex items-center justify-between p-4 bg-brand/[0.02] hover:bg-brand/[0.05] rounded-2xl transition-all"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 rounded-full bg-[#C5A059]" />
-                  <h2 className="text-sm font-black uppercase tracking-widest text-brand">{category}</h2>
-                  <span className="text-[10px] font-bold text-brand/30 bg-white border border-brand/5 px-2 py-0.5 rounded-full">
-                    {products.length} Products
-                  </span>
-                </div>
-                {expandedCategories.includes(category) ? <ChevronUp size={16} className="text-brand/30" /> : <ChevronDown size={16} className="text-brand/30" />}
-              </button>
+          (() => {
+            // 1. Get sorted categories list
+            const sortedCategories = Object.keys(filteredData).sort((a, b) => a.localeCompare(b));
 
-              {expandedCategories.includes(category) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                  {products.map((product) => (
-                    <div key={product.id} className="bg-white rounded-[2rem] border border-brand/5 p-6 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
-                      {/* Product Header */}
-                      <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-20 h-20 bg-brand/5 rounded-2xl overflow-hidden flex-shrink-0 border border-brand/5">
-                          {product.image ? (
-                            <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-brand/20">
-                              <ImageIcon size={24} />
+            // 2. Build sorted flattened list of all products (grouped by category alphabetically, then sorted alphabetically within category)
+            const allSortedProducts: ProductStats[] = [];
+            sortedCategories.forEach(category => {
+              const categoryProducts = [...filteredData[category]].sort((a, b) => a.name.localeCompare(b.name));
+              allSortedProducts.push(...categoryProducts);
+            });
+
+            // 3. Paginate the global list
+            const productsPerPage = 20;
+            const totalPages = Math.ceil(allSortedProducts.length / productsPerPage);
+            const paginatedProducts = allSortedProducts.slice(
+              (currentPage - 1) * productsPerPage,
+              currentPage * productsPerPage
+            );
+
+            // 4. Group the paginated products back by category for display
+            const paginatedGrouped: Record<string, ProductStats[]> = {};
+            paginatedProducts.forEach(product => {
+              if (!paginatedGrouped[product.category]) {
+                paginatedGrouped[product.category] = [];
+              }
+              paginatedGrouped[product.category].push(product);
+            });
+
+            // 5. Total counts in each category for display on the headers
+            const categoryTotalCounts = Object.entries(filteredData).reduce((acc, [cat, prods]) => {
+              acc[cat] = prods.length;
+              return acc;
+            }, {} as Record<string, number>);
+
+            // 6. Get the categories present on the current page in alphabetical order
+            const categoriesOnPage = Object.keys(paginatedGrouped).sort((a, b) => a.localeCompare(b));
+
+            return (
+              <>
+                {categoriesOnPage.map((category) => {
+                  const products = paginatedGrouped[category];
+                  return (
+                    <div key={category} className="space-y-4">
+                      <button 
+                        onClick={() => toggleCategory(category)}
+                        className="w-full flex items-center justify-between p-4 bg-brand/[0.02] hover:bg-brand/[0.05] rounded-2xl transition-all"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 rounded-full bg-[#C5A059]" />
+                          <h2 className="text-sm font-black uppercase tracking-widest text-brand">{category}</h2>
+                          <span className="text-[10px] font-bold text-brand/30 bg-white border border-brand/5 px-2 py-0.5 rounded-full">
+                            {categoryTotalCounts[category]} Products
+                          </span>
+                        </div>
+                        {expandedCategories.includes(category) ? <ChevronUp size={16} className="text-brand/30" /> : <ChevronDown size={16} className="text-brand/30" />}
+                      </button>
+
+                      {expandedCategories.includes(category) && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                          {products.map((product) => (
+                            <div key={product.id} className="bg-white rounded-[2rem] border border-brand/5 p-6 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+                              {/* Product Header */}
+                              <div className="flex items-start space-x-4 mb-6">
+                                <div className="w-20 h-20 bg-brand/5 rounded-2xl overflow-hidden flex-shrink-0 border border-brand/5">
+                                  {product.image ? (
+                                    <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-brand/20">
+                                      <ImageIcon size={24} />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-lg font-bold text-brand truncate mb-1">{product.name}</h3>
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-[10px] font-black text-[#C5A059] uppercase tracking-widest">₹{product.basePrice.toLocaleString()}</span>
+                                    <span className="text-brand/10">|</span>
+                                    <span className="text-[10px] font-bold text-brand/40 uppercase tracking-widest truncate">{product.category}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Stats Grid */}
+                              <div className="grid grid-cols-3 gap-3">
+                                <div className="bg-green-50/50 p-4 rounded-2xl border border-green-100/50 text-center">
+                                  <p className="text-[8px] font-black text-green-600 uppercase tracking-widest mb-1">Sold</p>
+                                  <div className="flex items-center justify-center space-x-1">
+                                    <TrendingUp size={12} className="text-green-500" />
+                                    <p className="text-lg font-black text-green-700">{product.sold}</p>
+                                  </div>
+                                </div>
+                                
+                                <div className={`p-4 rounded-2xl border text-center ${product.remaining < 10 ? 'bg-red-50/50 border-red-100/50' : 'bg-brand/5 border-brand/5'}`}>
+                                  <p className={`text-[8px] font-black uppercase tracking-widest mb-1 ${product.remaining < 10 ? 'text-red-600' : 'text-brand/40'}`}>Remaining</p>
+                                  <div className="flex items-center justify-center space-x-1">
+                                    {product.remaining < 10 && <AlertCircle size={12} className="text-red-500" />}
+                                    <p className={`text-lg font-black ${product.remaining < 10 ? 'text-red-700' : 'text-brand'}`}>{product.remaining}</p>
+                                  </div>
+                                </div>
+
+                                <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50 text-center">
+                                  <p className="text-[8px] font-black text-blue-600 uppercase tracking-widest mb-1">To be Deliver</p>
+                                  <div className="flex items-center justify-center space-x-1">
+                                    <Truck size={12} className="text-blue-500" />
+                                    <p className="text-lg font-black text-blue-700">{product.toBeDelivered}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Low Stock Warning */}
+                              {product.remaining < 10 && product.remaining > 0 && (
+                                <div className="mt-4 py-2 px-3 bg-red-600 text-white rounded-xl flex items-center justify-center space-x-2 animate-pulse">
+                                  <AlertCircle size={12} />
+                                  <span className="text-[9px] font-black uppercase tracking-widest">Low Stock Warning</span>
+                                </div>
+                              )}
+                              
+                              {product.remaining === 0 && (
+                                <div className="mt-4 py-2 px-3 bg-gray-900 text-white rounded-xl flex items-center justify-center space-x-2">
+                                  <Box size={12} />
+                                  <span className="text-[9px] font-black uppercase tracking-widest">Out of Stock</span>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-bold text-brand truncate mb-1">{product.name}</h3>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-[10px] font-black text-[#C5A059] uppercase tracking-widest">₹{product.basePrice.toLocaleString()}</span>
-                            <span className="text-brand/10">|</span>
-                            <span className="text-[10px] font-bold text-brand/40 uppercase tracking-widest truncate">{product.category}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className="bg-green-50/50 p-4 rounded-2xl border border-green-100/50 text-center">
-                          <p className="text-[8px] font-black text-green-600 uppercase tracking-widest mb-1">Sold</p>
-                          <div className="flex items-center justify-center space-x-1">
-                            <TrendingUp size={12} className="text-green-500" />
-                            <p className="text-lg font-black text-green-700">{product.sold}</p>
-                          </div>
-                        </div>
-                        
-                        <div className={`p-4 rounded-2xl border text-center ${product.remaining < 10 ? 'bg-red-50/50 border-red-100/50' : 'bg-brand/5 border-brand/5'}`}>
-                          <p className={`text-[8px] font-black uppercase tracking-widest mb-1 ${product.remaining < 10 ? 'text-red-600' : 'text-brand/40'}`}>Remaining</p>
-                          <div className="flex items-center justify-center space-x-1">
-                            {product.remaining < 10 && <AlertCircle size={12} className="text-red-500" />}
-                            <p className={`text-lg font-black ${product.remaining < 10 ? 'text-red-700' : 'text-brand'}`}>{product.remaining}</p>
-                          </div>
-                        </div>
-
-                        <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50 text-center">
-                          <p className="text-[8px] font-black text-blue-600 uppercase tracking-widest mb-1">To be Deliver</p>
-                          <div className="flex items-center justify-center space-x-1">
-                            <Truck size={12} className="text-blue-500" />
-                            <p className="text-lg font-black text-blue-700">{product.toBeDelivered}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Low Stock Warning */}
-                      {product.remaining < 10 && product.remaining > 0 && (
-                        <div className="mt-4 py-2 px-3 bg-red-600 text-white rounded-xl flex items-center justify-center space-x-2 animate-pulse">
-                          <AlertCircle size={12} />
-                          <span className="text-[9px] font-black uppercase tracking-widest">Low Stock Warning</span>
-                        </div>
-                      )}
-                      
-                      {product.remaining === 0 && (
-                        <div className="mt-4 py-2 px-3 bg-gray-900 text-white rounded-xl flex items-center justify-center space-x-2">
-                          <Box size={12} />
-                          <span className="text-[9px] font-black uppercase tracking-widest">Out of Stock</span>
+                          ))}
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))
+                  );
+                })}
+
+                {/* Global Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center space-x-2 mt-10 pt-8 border-t border-brand/5">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1.5 rounded-xl border border-brand/10 text-xs font-bold text-brand hover:bg-brand/5 disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
+                    >
+                      Prev
+                    </button>
+                    
+                    {Array.from({ length: totalPages }).map((_, i) => {
+                      const pageNum = i + 1;
+                      const isCurrent = pageNum === currentPage;
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`w-8 h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            isCurrent
+                              ? "bg-brand text-[#C5A059] shadow-md scale-105"
+                              : "border border-brand/10 text-brand hover:bg-brand/5"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1.5 rounded-xl border border-brand/10 text-xs font-bold text-brand hover:bg-brand/5 disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()
         )}
       </div>
     </div>
