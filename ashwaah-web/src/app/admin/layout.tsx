@@ -62,7 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 mt-4">
+        <nav className="flex-1 overflow-y-auto min-h-0 p-4 space-y-1 mt-4 custom-scrollbar">
           {sidebarLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;
