@@ -121,6 +121,38 @@ export default function ProductManagement() {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [variations, setVariations] = useState<Variation[]>([]);
   const [sizeSystem, setSizeSystem] = useState<keyof typeof SIZE_SYSTEMS>("apparel");
+  const [customSizes, setCustomSizes] = useState<Record<string, string[]>>({
+    apparel: [],
+    waist: [],
+    footwear: [],
+    oneSize: [],
+    standard: []
+  });
+  const [customSizeInput, setCustomSizeInput] = useState("");
+
+  const handleAddCustomSize = () => {
+    const cleanSize = customSizeInput.trim();
+    if (!cleanSize) return;
+
+    // Check if it already exists in presets or customs
+    const currentSizes = [...(SIZE_SYSTEMS[sizeSystem]?.sizes || []), ...(customSizes[sizeSystem] || [])];
+    if (currentSizes.map(s => s.toLowerCase()).includes(cleanSize.toLowerCase())) {
+      const existingSizeName = currentSizes.find(s => s.toLowerCase() === cleanSize.toLowerCase()) || cleanSize;
+      if (!selectedSizes.includes(existingSizeName)) {
+        setSelectedSizes(prev => [...prev, existingSizeName]);
+      }
+      setCustomSizeInput("");
+      return;
+    }
+
+    setCustomSizes(prev => ({
+      ...prev,
+      [sizeSystem]: [...(prev[sizeSystem] || []), cleanSize]
+    }));
+
+    setSelectedSizes(prev => [...prev, cleanSize]);
+    setCustomSizeInput("");
+  };
 
   useEffect(() => { 
     fetchProducts(); 
@@ -230,6 +262,14 @@ export default function ProductManagement() {
     setColorImageInputs({});
     setSelectedSizes([]); setSelectedColors([]); setVariations([]);
     setSizeSystem("apparel");
+    setCustomSizes({
+      apparel: [],
+      waist: [],
+      footwear: [],
+      oneSize: [],
+      standard: []
+    });
+    setCustomSizeInput("");
     setEnabledMeasurements([]);
     setCustomMeasurements([]);
     setNewMeasurementInput("");
@@ -282,6 +322,15 @@ export default function ProductManagement() {
           
           const system = inferSizeSystem(sizes);
           setSizeSystem(system);
+          
+          const presetSizes = SIZE_SYSTEMS[system]?.sizes || [];
+          const loadedCustomSizes = sizes.filter(s => !presetSizes.includes(s));
+          if (loadedCustomSizes.length > 0) {
+            setCustomSizes(prev => ({
+              ...prev,
+              [system]: Array.from(new Set([...(prev[system] || []), ...loadedCustomSizes]))
+            }));
+          }
           
           setSelectedSizes(sizes);
           setSelectedColors(colors);
@@ -774,9 +823,9 @@ export default function ProductManagement() {
                 </select>
               </div>
 
-              {sizeSystem !== "oneSize" && sizeSystem !== "standard" ? (
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {SIZE_SYSTEMS[sizeSystem].sizes.map(size => (
+              <div className="space-y-4 pt-2">
+                <div className="flex flex-wrap gap-2">
+                  {[...(SIZE_SYSTEMS[sizeSystem]?.sizes || []), ...(customSizes[sizeSystem] || [])].map(size => (
                     <button 
                       key={size} 
                       type="button" 
@@ -791,14 +840,31 @@ export default function ProductManagement() {
                     </button>
                   ))}
                 </div>
-              ) : (
-                <div className="p-4 bg-brand/5 rounded-xl border border-brand/10 text-xs font-semibold text-brand/60 max-w-sm leading-relaxed">
-                  {sizeSystem === "oneSize" 
-                    ? "Free size product. The size 'One Size' has been automatically selected for all color variations." 
-                    : "No size product. The default size 'Standard' has been automatically selected for all color variations."
-                  }
+
+                {/* Add Custom Size Input and Plus Button */}
+                <div className="flex items-center gap-3 p-3 bg-brand/5 rounded-2xl border border-brand/10 border-dashed max-w-xs">
+                  <input 
+                    type="text"
+                    value={customSizeInput}
+                    onChange={(e) => setCustomSizeInput(e.target.value)}
+                    placeholder="Add custom (e.g. XXS)..."
+                    className="flex-1 bg-transparent border-none text-[10px] font-bold uppercase tracking-widest outline-none placeholder:text-brand/20 text-brand"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddCustomSize();
+                      }
+                    }}
+                  />
+                  <button 
+                    type="button"
+                    onClick={handleAddCustomSize}
+                    className="w-8 h-8 rounded-xl bg-brand hover:bg-brand-hover text-[#C5A059] flex items-center justify-center transition-all shadow-sm cursor-pointer"
+                  >
+                    <Plus size={16} />
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* ── Section 5: Available Colors ── */}
