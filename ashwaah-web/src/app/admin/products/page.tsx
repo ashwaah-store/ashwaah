@@ -859,9 +859,9 @@ export default function ProductManagement() {
                   <button 
                     type="button"
                     onClick={handleAddCustomSize}
-                    className="w-8 h-8 rounded-xl bg-brand hover:bg-brand-hover text-[#C5A059] flex items-center justify-center transition-all shadow-sm cursor-pointer"
+                    className="p-1.5 bg-brand rounded-lg hover:scale-105 transition-all shadow-sm cursor-pointer flex items-center justify-center"
                   >
-                    <Plus size={16} />
+                    <Plus size={12} className="text-[#C5A059]" />
                   </button>
                 </div>
               </div>
