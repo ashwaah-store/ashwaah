@@ -283,6 +283,16 @@ export default function ProductManagement() {
       if (data.success) {
         const p = data.data;
         setEditingId(p.id);
+        
+        // Clear previous custom sizes
+        setCustomSizes({
+          apparel: [],
+          waist: [],
+          footwear: [],
+          oneSize: [],
+          standard: []
+        });
+
         setName(p.name);
         setDescription(p.description || "");
         setGender(p.gender || "unisex");
@@ -328,7 +338,7 @@ export default function ProductManagement() {
           if (loadedCustomSizes.length > 0) {
             setCustomSizes(prev => ({
               ...prev,
-              [system]: Array.from(new Set([...(prev[system] || []), ...loadedCustomSizes]))
+              [system]: loadedCustomSizes
             }));
           }
           
