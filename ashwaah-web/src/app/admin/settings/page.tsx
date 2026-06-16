@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Save, Loader2, Upload, Sparkles, AlertCircle, Check, Image as ImageIcon, Plus, Trash2, Megaphone } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Save, Loader2, Upload, Sparkles, AlertCircle, Check, Image as ImageIcon, Plus, Trash2, Megaphone, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Offer {
@@ -34,6 +34,27 @@ export default function SettingsPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
+
+  const bannerUrls = useMemo(() => {
+    if (!bannerUrl) return [];
+    return bannerUrl.split(",").map((url) => url.trim()).filter(Boolean);
+  }, [bannerUrl]);
+
+  useEffect(() => {
+    if (currentPreviewIndex >= bannerUrls.length && bannerUrls.length > 0) {
+      setCurrentPreviewIndex(0);
+    }
+  }, [bannerUrls.length, currentPreviewIndex]);
+
+  useEffect(() => {
+    if (bannerUrls.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentPreviewIndex((prev) => (prev + 1) % bannerUrls.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [bannerUrls.length]);
 
   // New offer form state
   const [newOfferText, setNewOfferText] = useState("");
@@ -88,7 +109,7 @@ export default function SettingsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setBannerUrl(data.url);
+        setBannerUrl(prev => prev ? `${prev}, ${data.url}` : data.url);
         setSuccess("Image uploaded successfully!");
       } else {
         setError(data.error || "Failed to upload image.");
@@ -246,6 +267,32 @@ export default function SettingsPage() {
                   className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-4 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
                 />
               </div>
+
+              {bannerUrls.length > 0 && (
+                <div className="space-y-3">
+                  <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] ml-1">Configured Banner Images ({bannerUrls.length})</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {bannerUrls.map((url, idx) => (
+                      <div key={idx} className="relative group rounded-xl border border-brand/10 overflow-hidden bg-brand/5 aspect-[16/9] flex items-center justify-center">
+                        <img src={url} alt={`Banner thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newUrls = bannerUrls.filter((_, i) => i !== idx);
+                            setBannerUrl(newUrls.join(", "));
+                          }}
+                          className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md opacity-90 hover:opacity-100 transition-opacity z-10"
+                        >
+                          <X size={14} />
+                        </button>
+                        <div className="absolute bottom-1 left-1 bg-brand/80 text-white text-[9px] px-1.5 py-0.5 rounded font-black">
+                          #{idx + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="relative border-2 border-dashed border-brand/10 hover:border-[#C5A059]/30 rounded-2xl p-8 text-center transition-all bg-brand/5">
                 <input
@@ -435,13 +482,59 @@ export default function SettingsPage() {
             </div>
 
             {/* 3. Promo Banner Preview Section */}
-            {bannerUrl ? (
-              <div className="relative w-full overflow-hidden bg-white">
-                <img
-                  src={bannerUrl}
-                  alt="Banner Preview"
-                  className="w-full h-auto"
-                />
+            {bannerUrls.length > 0 ? (
+              <div className="relative w-full overflow-hidden bg-white aspect-[21/9] flex items-center justify-center">
+                {bannerUrls.length === 1 ? (
+                  <img
+                    src={bannerUrls[0]}
+                    alt="Banner Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="relative w-full h-full">
+                    <img
+                      src={bannerUrls[currentPreviewIndex]}
+                      alt={`Banner Preview ${currentPreviewIndex + 1}`}
+                      className="w-full h-full object-cover transition-all duration-500"
+                    />
+                    {/* Navigation Arrows */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentPreviewIndex(
+                          (prev) => (prev - 1 + bannerUrls.length) % bannerUrls.length
+                        )
+                      }
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white/80 hover:bg-white text-brand shadow-sm flex items-center justify-center z-10"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentPreviewIndex(
+                          (prev) => (prev + 1) % bannerUrls.length
+                        )
+                      }
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white/80 hover:bg-white text-brand shadow-sm flex items-center justify-center z-10"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                    {/* Pagination Indicator */}
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1 z-10">
+                      {bannerUrls.map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setCurrentPreviewIndex(idx)}
+                          className={`w-1.5 h-1.5 rounded-full transition-all ${
+                            idx === currentPreviewIndex ? "bg-[#C5A059] w-3" : "bg-white/60"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>
               </div>
             ) : (

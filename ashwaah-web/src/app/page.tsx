@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import ProductGrid from "@/components/ProductGrid";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type NavItem = {
   id: number;
@@ -37,6 +38,7 @@ export default function Home() {
   const [bannerUrl, setBannerUrl] = useState("");
   const [offers, setOffers] = useState<any[]>([]);
   const [homepageCatCards, setHomepageCatCards] = useState<any[]>([]);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   const [isHovered, setIsHovered] = useState(false);
   const scrollPosRef = useRef(0);
@@ -122,6 +124,19 @@ export default function Home() {
     fetchData();
   }, []);
 
+  const bannerUrls = useMemo(() => {
+    if (!bannerUrl) return [];
+    return bannerUrl.split(",").map((url) => url.trim()).filter(Boolean);
+  }, [bannerUrl]);
+
+  useEffect(() => {
+    if (bannerUrls.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prev) => (prev + 1) % bannerUrls.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [bannerUrls.length]);
+
   const marqueeItems = useMemo(() => {
     if (offers.length === 0) return [];
     const repeats = offers.length === 1 ? 12 : offers.length === 2 ? 6 : 4;
@@ -186,16 +201,73 @@ export default function Home() {
 
 
 
-      {/* Dynamic Promo Banner Image */}
-      {bannerUrl && (
-        <div className="w-full relative overflow-hidden border-b border-brand/10 group mt-0">
-          <img 
-            src={bannerUrl} 
-            alt="Current Offers & Collections" 
-            className="w-full h-auto transition-transform duration-1000 ease-out group-hover:scale-[1.01]" 
-          />
-          {/* Subtle overlay for depth */}
-          <div className="absolute inset-0 bg-black/[0.02] pointer-events-none"></div>
+      {/* Dynamic Promo Banner Carousel */}
+      {bannerUrls.length > 0 && (
+        <div className="w-full relative overflow-hidden border-b border-brand/10 group mt-0 bg-brand-light">
+          {bannerUrls.length === 1 ? (
+            <div className="w-full relative h-auto">
+              <img
+                src={bannerUrls[0]}
+                alt="Current Offers & Collections"
+                className="w-full h-auto transition-transform duration-1000 ease-out group-hover:scale-[1.01]"
+              />
+              <div className="absolute inset-0 bg-black/[0.02] pointer-events-none"></div>
+            </div>
+          ) : (
+            <div className="relative w-full overflow-hidden aspect-[21/9] sm:aspect-[21/9] md:aspect-[3/1] lg:aspect-[21/9]">
+              <AnimatePresence initial={false} mode="wait">
+                <motion.img
+                  key={currentBannerIndex}
+                  src={bannerUrls[currentBannerIndex]}
+                  alt={`Promo Banner ${currentBannerIndex + 1}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </AnimatePresence>
+              <div className="absolute inset-0 bg-black/[0.02] pointer-events-none"></div>
+
+              {/* Navigation Arrows */}
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentBannerIndex(
+                    (prev) => (prev - 1 + bannerUrls.length) % bannerUrls.length
+                  )
+                }
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-brand shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentBannerIndex((prev) => (prev + 1) % bannerUrls.length)
+                }
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-brand shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+              >
+                <ChevronRight size={20} />
+              </button>
+
+              {/* Pagination Dots */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+                {bannerUrls.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setCurrentBannerIndex(idx)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      idx === currentBannerIndex
+                        ? "bg-[#C5A059] w-6"
+                        : "bg-white/60 hover:bg-white"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
