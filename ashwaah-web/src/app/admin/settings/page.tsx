@@ -61,6 +61,26 @@ export default function SettingsPage() {
   const [newOfferSubtext, setNewOfferSubtext] = useState("");
   const [newOfferLink, setNewOfferLink] = useState("");
 
+  const [tempBannerUrl, setTempBannerUrl] = useState("");
+
+  const handleAddBannerUrl = () => {
+    const trimmed = tempBannerUrl.trim();
+    if (!trimmed) return;
+
+    setBannerUrl((prev) => {
+      const existing = prev ? prev.split(",").map((url) => url.trim()).filter(Boolean) : [];
+      if (existing.includes(trimmed)) {
+        setError("This banner URL is already added.");
+        return prev;
+      }
+      const combined = [...existing, trimmed];
+      return combined.join(", ");
+    });
+
+    setTempBannerUrl("");
+    setSuccess("Banner URL added successfully!");
+  };
+
   const fetchData = async () => {
     try {
       // Fetch Homepage Banner
@@ -283,15 +303,31 @@ export default function SettingsPage() {
             <h2 className="text-xl font-playfair font-bold text-brand mb-6 border-b border-brand/5 pb-4">Homepage Hero Banner</h2>
             
             <form onSubmit={handleSaveBanner} className="space-y-6">
-              <div>
-                <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-3 ml-1">Banner Image URL</label>
-                <input
-                  type="text"
-                  value={bannerUrl}
-                  onChange={(e) => setBannerUrl(e.target.value)}
-                  placeholder="e.g. /images/hero_banner.jpg or paste external URL"
-                  className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-4 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
-                />
+              <div className="flex gap-3 items-end">
+                <div className="flex-grow">
+                  <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-3 ml-1">Banner Image URL</label>
+                  <input
+                    type="text"
+                    value={tempBannerUrl}
+                    onChange={(e) => setTempBannerUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddBannerUrl();
+                      }
+                    }}
+                    placeholder="Paste banner image URL here"
+                    className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-4 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddBannerUrl}
+                  className="flex items-center gap-1.5 bg-[#1B3022] hover:bg-[#2c4d37] text-[#C5A059] px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-md h-fit mb-[1px]"
+                >
+                  <Plus size={14} />
+                  <span>Add</span>
+                </button>
               </div>
 
               {bannerUrls.length > 0 && (
