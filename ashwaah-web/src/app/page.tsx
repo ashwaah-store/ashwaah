@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import ProductGrid from "@/components/ProductGrid";
 
@@ -36,7 +36,6 @@ export default function Home() {
 
   const [bannerUrl, setBannerUrl] = useState("");
   const [offers, setOffers] = useState<any[]>([]);
-  const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
   const [homepageCatCards, setHomepageCatCards] = useState<any[]>([]);
 
   const [isHovered, setIsHovered] = useState(false);
@@ -123,76 +122,64 @@ export default function Home() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (offers.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentOfferIndex((prev) => (prev + 1) % offers.length);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [offers.length]);
+  const marqueeItems = useMemo(() => {
+    if (offers.length === 0) return [];
+    const repeats = offers.length === 1 ? 12 : offers.length === 2 ? 6 : 4;
+    const list = [];
+    for (let i = 0; i < repeats; i++) {
+      list.push(...offers);
+    }
+    return list;
+  }, [offers]);
+
   return (
     <div className="min-h-screen bg-brand-light text-brand font-sans selection:bg-brand-accent/30">
-      {/* Dynamic Offer Announcement Bar (Carousel, 1cm - 2cm Height) */}
+      {/* Dynamic Offer Announcement Bar (Continuous Scrolling Marquee) */}
       {offers.length > 0 && (
-        <div className="w-full bg-[#F5EBE0] text-[#064e3b] h-24 flex items-center justify-center overflow-hidden border-b border-[#064e3b]/10 relative z-30 shadow-sm mt-4">
-          <div className="max-w-7xl mx-auto px-4 w-full text-center flex items-center justify-center h-full relative">
-            <AnimatePresence mode="wait">
-              {offers.map((offer, idx) => {
-                const { title, subtitle } = parseOfferText(offer.text);
-                 const TicketContent = (
-                  <div className={`relative flex items-center h-16 bg-[#064e3b] text-white px-4 sm:px-8 md:px-12 lg:px-16 rounded-none shadow-md overflow-hidden font-inter ${!subtitle ? "justify-center" : ""}`}>
-                    {/* Left Title */}
-                    <span className={`font-extrabold text-[15px] sm:text-2xl md:text-4xl lg:text-5xl uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${subtitle ? "pr-2 sm:pr-6" : ""}`}>
-                      {title}
-                    </span>
-                    
-                    {subtitle && (
-                      <>
-                        {/* Dashed Divider with top/bottom circular cutouts */}
-                        <div className="relative h-full flex items-center px-0.5 sm:px-1">
-                          <div className="absolute -top-[10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-[#F5EBE0] rounded-full"></div>
-                          <div className="h-3/5 border-l border-dashed border-white/50"></div>
-                          <div className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-[#F5EBE0] rounded-full"></div>
-                        </div>
-                        
-                        {/* Right Subtitle */}
-                        <span className="text-[13px] sm:text-lg md:text-2xl lg:text-3xl font-black uppercase tracking-widest pl-2 sm:pl-6 pr-1 sm:pr-2 opacity-95 whitespace-nowrap">
-                          {subtitle}
+        <div className="w-full bg-[#064e3b] text-white h-11 flex items-center overflow-hidden border-b border-[#064e3b]/10 relative z-30 shadow-sm">
+          <div className="w-full flex items-center overflow-hidden relative">
+            <div className="flex animate-marquee whitespace-nowrap">
+              <div className="flex shrink-0 gap-6 items-center px-3">
+                {marqueeItems.map((offer, idx) => {
+                  const { title, subtitle } = parseOfferText(offer.text);
+                  const displayText = subtitle ? `${title} — ${subtitle}` : title;
+                  return (
+                    <div key={idx} className="flex items-center gap-6 shrink-0">
+                      {offer.link ? (
+                        <Link href={offer.link} className="hover:text-brand-accent transition-colors duration-300 font-inter text-[11px] sm:text-xs font-semibold tracking-wider uppercase whitespace-nowrap">
+                          {displayText}
+                        </Link>
+                      ) : (
+                        <span className="font-inter text-[11px] sm:text-xs font-semibold tracking-wider uppercase whitespace-nowrap">
+                          {displayText}
                         </span>
-                      </>
-                    )}
-
-                    {/* Jagged right edge (torn coupon effect) */}
-                    <div className="absolute right-0 top-0 bottom-0 w-1 flex flex-col justify-between py-1">
-                      {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="w-1 h-1.5 bg-[#F5EBE0] rounded-l-full"></div>
-                      ))}
+                      )}
+                      <span className="text-brand-accent text-xs select-none">★</span>
                     </div>
-                  </div>
-                );
-
-                return idx === currentOfferIndex && (
-                  <motion.div
-                    key={offer.id}
-                    initial={{ opacity: 0, x: "-100%" }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: "100%" }}
-                    transition={{ duration: 0.4, ease: "easeInOut" }}
-                    className="absolute inset-0 flex items-center justify-center px-2 sm:px-4"
-                  >
-                    {offer.link ? (
-                      <Link href={offer.link} className="hover:scale-[1.02] transition-transform duration-300 shadow-sm hover:shadow-md block">
-                        {TicketContent}
-                      </Link>
-                    ) : (
-                      <div className="shadow-sm">
-                        {TicketContent}
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                  );
+                })}
+              </div>
+              <div className="flex shrink-0 gap-6 items-center px-3" aria-hidden="true">
+                {marqueeItems.map((offer, idx) => {
+                  const { title, subtitle } = parseOfferText(offer.text);
+                  const displayText = subtitle ? `${title} — ${subtitle}` : title;
+                  return (
+                    <div key={`dup-${idx}`} className="flex items-center gap-6 shrink-0">
+                      {offer.link ? (
+                        <Link href={offer.link} className="hover:text-brand-accent transition-colors duration-300 font-inter text-[11px] sm:text-xs font-semibold tracking-wider uppercase whitespace-nowrap">
+                          {displayText}
+                        </Link>
+                      ) : (
+                        <span className="font-inter text-[11px] sm:text-xs font-semibold tracking-wider uppercase whitespace-nowrap">
+                          {displayText}
+                        </span>
+                      )}
+                      <span className="text-brand-accent text-xs select-none">★</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       )}
