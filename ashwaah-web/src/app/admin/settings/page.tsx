@@ -92,32 +92,58 @@ export default function SettingsPage() {
   }, [router]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setIsUploading(true);
     setError("");
     setSuccess("");
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const uploadedUrls: string[] = [];
+    let uploadErrors = 0;
 
     try {
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        try {
+          const res = await fetch("/api/admin/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          if (data.success) {
+            uploadedUrls.push(data.url);
+          } else {
+            uploadErrors++;
+          }
+        } catch (err) {
+          uploadErrors++;
+        }
       });
-      const data = await res.json();
-      if (data.success) {
-        setBannerUrl(prev => prev ? `${prev}, ${data.url}` : data.url);
-        setSuccess("Image uploaded successfully!");
-      } else {
-        setError(data.error || "Failed to upload image.");
+
+      await Promise.all(uploadPromises);
+
+      if (uploadedUrls.length > 0) {
+        setBannerUrl((prev) => {
+          const existing = prev ? prev.split(",").map(url => url.trim()).filter(Boolean) : [];
+          const combined = [...existing, ...uploadedUrls];
+          return combined.join(", ");
+        });
+        
+        if (uploadErrors > 0) {
+          setSuccess(`Uploaded ${uploadedUrls.length} image(s), but ${uploadErrors} failed.`);
+        } else {
+          setSuccess(`Successfully uploaded ${uploadedUrls.length} image(s)!`);
+        }
+      } else if (uploadErrors > 0) {
+        setError("Failed to upload selected image(s).");
       }
     } catch (err) {
       setError("An error occurred during file upload.");
     } finally {
       setIsUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -298,6 +324,7 @@ export default function SettingsPage() {
                 <input
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleUpload}
                   disabled={isUploading}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
