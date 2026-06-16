@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { SlidersHorizontal, ChevronDown, Check, X, LayoutGrid } from "lucide-react";
+import { SlidersHorizontal, ChevronDown, Check, X, LayoutGrid, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import ProductCarousel from "@/components/ProductCarousel";
 import ProductCard from "@/components/ProductCard";
 import { getFirstProductImageUrl, getProductImageUrls } from "@/utils/product";
@@ -430,6 +431,40 @@ export default function CategoryFilterSection({
     setSortBy("default");
     setPriceRange([minLimit, maxLimit]);
   };
+
+  if (allProducts.length === 0) {
+    return (
+      <div className="flex-grow min-w-0 px-4 sm:px-6 lg:px-8 py-12 lg:py-16 max-w-7xl mx-auto w-full flex flex-col justify-center">
+        {/* Header Title & Description */}
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl md:text-5xl font-playfair font-bold text-brand mb-3 tracking-tight">{categoryName}</h1>
+          <div className="w-20 h-1 bg-[#C5A059] mx-auto rounded-full mb-3"></div>
+          <p className="text-brand/70 max-w-2xl mx-auto font-inter leading-relaxed text-sm">
+            Explore our curated selection of premium {categoryName.toLowerCase()} pieces, 
+            each designed with meticulous attention to detail and crafted for an impeccable fit.
+          </p>
+        </div>
+        
+        <div
+          className="py-16 md:py-20 text-center bg-brand/5 rounded-[2.5rem] border border-brand/10 px-8 max-w-xl mx-auto shadow-sm"
+        >
+          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <ShoppingBag className="text-[#C5A059]" size={24} />
+          </div>
+          <h2 className="text-xl font-playfair font-bold text-brand mb-2">Coming Soon</h2>
+          <p className="text-brand/60 max-w-xs mx-auto text-xs mb-8 leading-relaxed font-inter">
+            No products have been added to this collection yet. We are currently curating new premium styles for you.
+          </p>
+          <Link
+            href="/"
+            className="inline-block bg-brand text-white text-xs font-bold uppercase tracking-widest px-8 py-3.5 rounded-2xl hover:bg-brand-hover shadow-md transition-all duration-300 cursor-pointer"
+          >
+            Browse Collections
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col lg:flex-row w-full items-stretch relative z-30">
