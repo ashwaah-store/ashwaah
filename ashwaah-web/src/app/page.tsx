@@ -136,7 +136,7 @@ export default function Home() {
     <div className="min-h-screen bg-brand-light text-brand font-sans selection:bg-brand-accent/30">
       {/* Dynamic Offer Announcement Bar (Continuous Scrolling Marquee) */}
       {offers.length > 0 && (
-        <div className="w-full bg-[#064e3b] text-white h-11 flex items-center overflow-hidden border-b border-[#064e3b]/10 relative z-30 shadow-sm">
+        <div className="w-full bg-[#064e3b] text-white h-12 flex items-center overflow-hidden border-b border-[#064e3b]/10 relative z-30 shadow-sm">
           <div className="w-full flex items-center overflow-hidden relative">
             <div className="flex animate-marquee whitespace-nowrap">
               <div className="flex shrink-0 gap-6 items-center px-3">
@@ -146,15 +146,15 @@ export default function Home() {
                   return (
                     <div key={idx} className="flex items-center gap-6 shrink-0">
                       {offer.link ? (
-                        <Link href={offer.link} className="hover:text-brand-accent transition-colors duration-300 font-inter text-[11px] sm:text-xs font-semibold tracking-wider uppercase whitespace-nowrap">
+                        <Link href={offer.link} className="hover:text-brand-accent transition-colors duration-300 font-inter text-[13px] sm:text-sm font-bold tracking-wider uppercase whitespace-nowrap">
                           {displayText}
                         </Link>
                       ) : (
-                        <span className="font-inter text-[11px] sm:text-xs font-semibold tracking-wider uppercase whitespace-nowrap">
+                        <span className="font-inter text-[13px] sm:text-sm font-bold tracking-wider uppercase whitespace-nowrap">
                           {displayText}
                         </span>
                       )}
-                      <span className="text-brand-accent text-xs select-none">★</span>
+                      <span className="text-brand-accent text-[13px] sm:text-sm select-none">★</span>
                     </div>
                   );
                 })}
@@ -166,15 +166,15 @@ export default function Home() {
                   return (
                     <div key={`dup-${idx}`} className="flex items-center gap-6 shrink-0">
                       {offer.link ? (
-                        <Link href={offer.link} className="hover:text-brand-accent transition-colors duration-300 font-inter text-[11px] sm:text-xs font-semibold tracking-wider uppercase whitespace-nowrap">
+                        <Link href={offer.link} className="hover:text-brand-accent transition-colors duration-300 font-inter text-[13px] sm:text-sm font-bold tracking-wider uppercase whitespace-nowrap">
                           {displayText}
                         </Link>
                       ) : (
-                        <span className="font-inter text-[11px] sm:text-xs font-semibold tracking-wider uppercase whitespace-nowrap">
+                        <span className="font-inter text-[13px] sm:text-sm font-bold tracking-wider uppercase whitespace-nowrap">
                           {displayText}
                         </span>
                       )}
-                      <span className="text-brand-accent text-xs select-none">★</span>
+                      <span className="text-brand-accent text-[13px] sm:text-sm select-none">★</span>
                     </div>
                   );
                 })}
