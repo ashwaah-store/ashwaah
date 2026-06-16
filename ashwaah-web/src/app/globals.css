@@ -97,3 +97,7 @@ body {
   transform: scale(1.15);
 }
 
+body.hide-footer footer {
+  display: none !important;
+}
+

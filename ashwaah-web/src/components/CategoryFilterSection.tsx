@@ -269,6 +269,15 @@ export default function CategoryFilterSection({
     setCurrentPage(1);
   }, [selectedTypes, selectedColors, selectedSizes, priceRange, sortBy]);
 
+  useEffect(() => {
+    if (allProducts.length === 0) {
+      document.body.classList.add("hide-footer");
+      return () => {
+        document.body.classList.remove("hide-footer");
+      };
+    }
+  }, [allProducts.length]);
+
   const isPriceFilterActive = priceRange[0] !== minLimit || priceRange[1] !== maxLimit;
   const isFilterOrSortActive =
     selectedTypes.length > 0 ||
@@ -434,32 +443,32 @@ export default function CategoryFilterSection({
 
   if (allProducts.length === 0) {
     return (
-      <div className="flex-grow min-w-0 px-4 sm:px-6 lg:px-8 py-12 lg:py-16 max-w-7xl mx-auto w-full flex flex-col justify-center">
+      <div className="flex-grow min-w-0 px-4 py-4 md:py-6 max-w-lg mx-auto w-full flex flex-col justify-center">
         {/* Header Title & Description */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-playfair font-bold text-brand mb-3 tracking-tight">{categoryName}</h1>
-          <div className="w-20 h-1 bg-[#C5A059] mx-auto rounded-full mb-3"></div>
-          <p className="text-brand/70 max-w-2xl mx-auto font-inter leading-relaxed text-sm">
+        <div className="mb-4 text-center">
+          <h1 className="text-2xl md:text-3xl font-playfair font-bold text-brand mb-1 tracking-tight">{categoryName}</h1>
+          <div className="w-12 h-0.5 bg-[#C5A059] mx-auto rounded-full mb-2"></div>
+          <p className="text-brand/70 max-w-sm mx-auto font-inter leading-relaxed text-[11px]">
             Explore our curated selection of premium {categoryName.toLowerCase()} pieces, 
             each designed with meticulous attention to detail and crafted for an impeccable fit.
           </p>
         </div>
         
         <div
-          className="py-16 md:py-20 text-center bg-brand/5 rounded-[2.5rem] border border-brand/10 px-8 max-w-xl mx-auto shadow-sm"
+          className="py-6 md:py-8 text-center bg-brand/5 rounded-[1.5rem] border border-brand/10 px-5 max-w-sm w-full mx-auto shadow-sm"
         >
-          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-            <ShoppingBag className="text-[#C5A059]" size={24} />
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+            <ShoppingBag className="text-[#C5A059]" size={16} />
           </div>
-          <h2 className="text-xl font-playfair font-bold text-brand mb-2">Coming Soon</h2>
-          <p className="text-brand/60 max-w-xs mx-auto text-xs mb-8 leading-relaxed font-inter">
+          <h2 className="text-base font-playfair font-bold text-brand mb-0.5">Coming Soon</h2>
+          <p className="text-brand/60 max-w-xs mx-auto text-[10px] mb-4 leading-relaxed font-inter">
             No products have been added to this collection yet. We are currently curating new premium styles for you.
           </p>
           <Link
             href="/"
-            className="inline-block bg-brand text-white text-xs font-bold uppercase tracking-widest px-8 py-3.5 rounded-2xl hover:bg-brand-hover shadow-md transition-all duration-300 cursor-pointer"
+            className="inline-block bg-brand text-white text-[9px] font-black uppercase tracking-widest px-5 py-2.5 rounded-lg hover:bg-brand-hover shadow-md transition-all duration-300 cursor-pointer"
           >
-            Browse Collections
+            Browse Other Collections
           </Link>
         </div>
       </div>
