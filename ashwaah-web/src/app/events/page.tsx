@@ -15,7 +15,12 @@ import {
   ChevronDown,
   Info,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Hourglass,
+  Users,
+  Languages,
+  Theater,
+  Navigation
 } from "lucide-react";
 import Link from "next/link";
 
@@ -203,7 +208,7 @@ function EventCard({ item }: { item: EventItem }) {
   }
 
   return (
-    <div className="flex flex-col bg-white border border-brand/10 rounded-[2rem] overflow-hidden shadow-lg transition-all duration-500 hover:border-brand-accent/30 hover:shadow-brand-accent/5 mb-10 group">
+    <div className="flex flex-col bg-[#FAF6F0] border border-brand/10 rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 mb-12 group">
       
       {/* Upper Main Body: Slide Show and Details Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 md:p-8">
@@ -240,84 +245,91 @@ function EventCard({ item }: { item: EventItem }) {
               </p>
             )}
 
-            {/* Grid details */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-brand/10">
-              
-              {/* Date */}
-              <div className="bg-brand-light/50 border border-brand/5 rounded-2xl p-4 flex flex-col justify-between">
-                <span className="text-[9px] font-black text-brand/50 uppercase tracking-widest block mb-1">Date</span>
-                <span className="text-xs font-bold text-brand-dark">{item.date}</span>
+            {/* Mockup-style Details Card Container */}
+            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-4 text-brand-dark max-w-md">
+              <div className="space-y-3">
+                {/* Date */}
+                <div className="flex items-center space-x-3.5 text-xs font-semibold text-gray-700">
+                  <Calendar size={16} className="text-gray-500 shrink-0" />
+                  <span>{item.date}</span>
+                </div>
+
+                {/* Time */}
+                <div className="flex items-center space-x-3.5 text-xs font-semibold text-gray-700">
+                  <Clock size={16} className="text-gray-500 shrink-0" />
+                  <span>{item.time}</span>
+                </div>
+
+                {/* Duration */}
+                {item.duration && (
+                  <div className="flex items-center space-x-3.5 text-xs font-semibold text-gray-700">
+                    <Hourglass size={16} className="text-gray-500 shrink-0" />
+                    <span>{item.duration}</span>
+                  </div>
+                )}
+
+                {/* Age Limit */}
+                {item.ageLimit && (
+                  <div className="flex items-center space-x-3.5 text-xs font-semibold text-gray-700">
+                    <Users size={16} className="text-gray-500 shrink-0" />
+                    <span>
+                      {item.ageLimit.toLowerCase().startsWith("age limit") 
+                        ? item.ageLimit 
+                        : `Age Limit - ${item.ageLimit}`}
+                    </span>
+                  </div>
+                )}
+
+                {/* Language */}
+                {item.language && (
+                  <div className="flex items-center space-x-3.5 text-xs font-semibold text-gray-700">
+                    <Languages size={16} className="text-gray-500 shrink-0" />
+                    <span>{item.language}</span>
+                  </div>
+                )}
+
+                {/* Genre */}
+                {item.genre && (
+                  <div className="flex items-center space-x-3.5 text-xs font-semibold text-gray-700">
+                    <Theater size={16} className="text-gray-500 shrink-0" />
+                    <span>{item.genre}</span>
+                  </div>
+                )}
+
+                {/* Location */}
+                <div className="flex items-start space-x-3.5 text-xs font-semibold text-gray-700">
+                  <MapPin size={16} className="text-gray-500 mt-0.5 shrink-0" />
+                  <div className="flex items-center flex-wrap">
+                    <span>{item.location}</span>
+                    <Navigation size={12} className="text-[#3b82f6] ml-2 fill-current rotate-45 shrink-0" />
+                  </div>
+                </div>
               </div>
 
-              {/* Time */}
-              <div className="bg-brand-light/50 border border-brand/5 rounded-2xl p-4 flex flex-col justify-between">
-                <span className="text-[9px] font-black text-brand/50 uppercase tracking-widest block mb-1">Time</span>
-                <span className="text-xs font-bold text-brand-dark">{item.time}</span>
+              {/* Separator line & Bottom pricing/action row */}
+              <div className="border-t border-gray-200 pt-4 mt-2 flex items-center justify-between gap-4">
+                <div className="flex flex-col">
+                  <span className="text-sm font-black text-gray-800 tracking-tight leading-tight">{item.cost}</span>
+                  <span className="text-[10px] font-bold text-green-600 mt-0.5 uppercase tracking-wider">Available</span>
+                </div>
+
+                {item.bookingUrl ? (
+                  <a
+                    href={item.bookingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center px-6 py-3 bg-[#EE4B5E] hover:bg-[#D43F4F] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-[#EE4B5E]/20 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    Book Now
+                  </a>
+                ) : (
+                  <div className="text-center px-6 py-3 bg-gray-100 text-gray-400 font-bold text-xs uppercase tracking-wider rounded-xl border border-gray-200/50">
+                    Walk-In
+                  </div>
+                )}
               </div>
-
-              {/* Location */}
-              <div className="bg-brand-light/50 border border-brand/5 rounded-2xl p-4 flex flex-col justify-between col-span-2 md:col-span-1">
-                <span className="text-[9px] font-black text-brand/50 uppercase tracking-widest block mb-1">Location</span>
-                <span className="text-xs font-bold text-brand-accent flex items-center line-clamp-2">
-                  <MapPin size={10} className="mr-1 inline-shrink-0" />
-                  {item.location}
-                </span>
-              </div>
-
-              {/* Optional Fields */}
-              {item.duration && (
-                <div className="bg-brand-light/50 border border-brand/5 rounded-2xl p-4 flex flex-col justify-between">
-                  <span className="text-[9px] font-black text-brand/50 uppercase tracking-widest block mb-1">Duration</span>
-                  <span className="text-xs font-bold text-brand-dark">{item.duration}</span>
-                </div>
-              )}
-
-              {item.ageLimit && (
-                <div className="bg-brand-light/50 border border-brand/5 rounded-2xl p-4 flex flex-col justify-between">
-                  <span className="text-[9px] font-black text-brand/50 uppercase tracking-widest block mb-1">Age Limit</span>
-                  <span className="text-xs font-bold text-brand-dark">{item.ageLimit}</span>
-                </div>
-              )}
-
-              {item.language && (
-                <div className="bg-brand-light/50 border border-brand/5 rounded-2xl p-4 flex flex-col justify-between">
-                  <span className="text-[9px] font-black text-brand/50 uppercase tracking-widest block mb-1">Language</span>
-                  <span className="text-xs font-bold text-brand-dark line-clamp-1">{item.language}</span>
-                </div>
-              )}
-
-              {item.genre && (
-                <div className="bg-brand-light/50 border border-brand/5 rounded-2xl p-4 flex flex-col justify-between col-span-2 md:col-span-1">
-                  <span className="text-[9px] font-black text-brand/50 uppercase tracking-widest block mb-1">Genre</span>
-                  <span className="text-xs font-bold text-brand-dark line-clamp-1">{item.genre}</span>
-                </div>
-              )}
-
             </div>
-          </div>
 
-          {/* Pricing & Booking Button Row */}
-          <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 pt-6 mt-4 border-t border-brand/10">
-            <div className="text-center sm:text-left">
-              <span className="text-[9px] font-black text-brand/50 uppercase tracking-widest block mb-1">Price</span>
-              <span className="text-2xl font-black text-brand tracking-tight">{item.cost}</span>
-            </div>
-            
-            {item.bookingUrl ? (
-              <a
-                href={item.bookingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto flex items-center justify-center px-8 py-4 bg-brand text-white font-bold uppercase text-xs tracking-widest rounded-2xl hover:bg-brand-hover transition-all duration-300 shadow-md hover:shadow-brand-hover/10 hover:-translate-y-0.5 active:translate-y-0 border border-transparent hover:border-brand-accent"
-              >
-                Book Now
-                <ExternalLink size={12} className="ml-2" />
-              </a>
-            ) : (
-              <div className="w-full sm:w-auto text-center px-8 py-4 bg-brand-light/70 text-brand/50 font-bold uppercase text-xs tracking-widest rounded-2xl border border-brand/5">
-                Walk-In Entry
-              </div>
-            )}
           </div>
         </div>
 
@@ -326,7 +338,7 @@ function EventCard({ item }: { item: EventItem }) {
       {/* Lower footer: Disclaimer text */}
       {item.disclaimer && (
         <div className="bg-brand/5 px-8 py-3 border-t border-brand/10 flex items-start space-x-2">
-          <Info size={12} className="text-brand/30 mt-0.5" />
+          <Info size={12} className="text-brand/30 mt-0.5 shrink-0" />
           <p className="text-[10px] font-medium text-brand/60 uppercase tracking-wider leading-relaxed">
             {item.disclaimer}
           </p>
