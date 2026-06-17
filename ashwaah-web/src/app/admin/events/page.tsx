@@ -21,7 +21,8 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
-  Upload
+  Upload,
+  Users
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -147,6 +148,32 @@ export default function AdminEventsPage() {
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(""), 3000);
+  };
+
+  // Registrations state
+  const [selectedRegEvent, setSelectedRegEvent] = useState<EventItem | null>(null);
+  const [isRegModalOpen, setIsRegModalOpen] = useState(false);
+  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [isLoadingRegs, setIsLoadingRegs] = useState(false);
+
+  const fetchAndShowRegistrations = async (event: EventItem) => {
+    setSelectedRegEvent(event);
+    setIsRegModalOpen(true);
+    setIsLoadingRegs(true);
+    try {
+      const res = await fetch(`/api/admin/events/registrations?eventId=${event.id}`);
+      const data = await res.json();
+      if (data.success) {
+        setRegistrations(data.data);
+      } else {
+        showToast(data.error || "Failed to load registrations.");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Error loading registrations.");
+    } finally {
+      setIsLoadingRegs(false);
+    }
   };
 
   const fetchEvents = async () => {
@@ -575,6 +602,13 @@ export default function AdminEventsPage() {
                       <td className="py-5 px-6">
                         <div className="flex items-center justify-center space-x-2">
                           <button
+                            onClick={() => fetchAndShowRegistrations(evt)}
+                            className="p-2 hover:bg-brand/5 rounded-lg text-brand/70 hover:text-brand transition-all flex items-center justify-center"
+                            title="View Registrations"
+                          >
+                            <Users size={16} />
+                          </button>
+                          <button
                             onClick={() => openEditModal(evt)}
                             className="p-2 hover:bg-brand/5 rounded-lg text-brand/70 hover:text-brand transition-all"
                             title="Edit Event"
@@ -950,6 +984,123 @@ export default function AdminEventsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* REGISTRATIONS VIEW MODAL */}
+      {isRegModalOpen && selectedRegEvent && (
+        <div 
+          className="fixed inset-0 z-50 bg-[#1B3022]/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+          onClick={() => setIsRegModalOpen(false)}
+        >
+          <div 
+            className="relative w-full max-w-4xl bg-white rounded-[2.5rem] shadow-2xl border border-brand/5 overflow-hidden animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-8 border-b border-brand/5 flex items-center justify-between bg-brand/5">
+              <div>
+                <span className="bg-[#1B3022]/10 text-[#1B3022] text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full">
+                  Registrations
+                </span>
+                <h3 className="text-2xl font-playfair font-black text-brand mt-2">
+                  {selectedRegEvent.title}
+                </h3>
+                <p className="text-xs text-brand/50 font-medium mt-1">
+                  List of customers registered for this event.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsRegModalOpen(false)}
+                className="p-3 bg-white hover:bg-gray-100 rounded-full border border-brand/5 shadow-sm text-brand transition-all cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+              {isLoadingRegs ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <Loader2 className="w-10 h-10 text-[#C5A059] animate-spin mb-4" />
+                  <p className="text-xs font-bold text-brand/40 uppercase tracking-widest">Loading registrations...</p>
+                </div>
+              ) : registrations.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <Users className="w-16 h-16 text-[#C5A059]/30 mb-4 animate-pulse" />
+                  <h4 className="text-lg font-bold text-brand font-playfair mb-1">No Registrations Yet</h4>
+                  <p className="text-xs text-brand/60 max-w-xs">
+                    Once users start registering for this event, their details will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto border border-brand/5 rounded-2xl">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-brand/5 border-b border-brand/5 text-[9px] font-black text-brand/35 uppercase tracking-widest">
+                        <th className="py-3.5 px-5">Name</th>
+                        <th className="py-3.5 px-5">Contact Details</th>
+                        <th className="py-3.5 px-5 text-center">Tickets</th>
+                        <th className="py-3.5 px-5">Additional Notes</th>
+                        <th className="py-3.5 px-5">Registered On</th>
+                        <th className="py-3.5 px-5 text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-brand/5">
+                      {registrations.map((reg) => (
+                        <tr key={reg.id} className="hover:bg-brand/[0.005] transition-colors text-sm text-brand">
+                          <td className="py-4 px-5 font-bold">{reg.name}</td>
+                          <td className="py-4 px-5">
+                            <div className="space-y-0.5">
+                              <p className="font-semibold">{reg.phone}</p>
+                              <p className="text-xs text-brand/50 font-normal">{reg.email}</p>
+                            </div>
+                          </td>
+                          <td className="py-4 px-5 text-center">
+                            <span className="inline-block px-2.5 py-1 bg-brand/5 rounded-lg font-black text-xs">
+                              {reg.ticketsCount}
+                            </span>
+                          </td>
+                          <td className="py-4 px-5 max-w-[200px] truncate text-xs text-brand/70" title={reg.additionalNotes || ""}>
+                            {reg.additionalNotes || <span className="text-brand/20 italic">None</span>}
+                          </td>
+                          <td className="py-4 px-5 text-xs text-brand/60">
+                            {reg.createdAt ? new Date(reg.createdAt).toLocaleDateString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            }) : "-"}
+                          </td>
+                          <td className="py-4 px-5 text-center">
+                            <a
+                              href={`https://wa.me/${reg.phone.replace(/[^0-9]/g, "")}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#25D366] hover:bg-[#20BA56] text-white text-xs font-bold rounded-xl shadow-sm hover:shadow transition-all cursor-pointer"
+                            >
+                              WhatsApp
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-brand/5 bg-gray-50 flex justify-end">
+              <button
+                onClick={() => setIsRegModalOpen(false)}
+                className="px-6 py-2.5 bg-[#1B3022] hover:bg-[#1B3022]/90 text-white font-bold rounded-2xl text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -163,4 +163,15 @@ export const events = sqliteTable("events", {
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
+export const eventRegistrations = sqliteTable("event_registrations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  ticketsCount: integer("tickets_count").notNull().default(1),
+  additionalNotes: text("additional_notes"),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
+
 

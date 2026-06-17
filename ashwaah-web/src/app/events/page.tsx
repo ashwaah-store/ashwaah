@@ -296,7 +296,7 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
 }
 
 // Individual Event Card
-function EventCard({ item }: { item: EventItem }) {
+function EventCard({ item, onRegisterClick }: { item: EventItem; onRegisterClick: (item: EventItem) => void }) {
   // Parse media
   let mediaList: string[] = [];
   try {
@@ -411,20 +411,12 @@ function EventCard({ item }: { item: EventItem }) {
                   <span className="text-[10px] font-bold text-green-600 mt-0.5 uppercase tracking-wider">Available</span>
                 </div>
 
-                {item.bookingUrl ? (
-                  <a
-                    href={item.bookingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center px-6 py-3 bg-[#EE4B5E] hover:bg-[#D43F4F] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-[#EE4B5E]/20 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    Book Now
-                  </a>
-                ) : (
-                  <div className="text-center px-6 py-3 bg-gray-100 text-gray-400 font-bold text-xs uppercase tracking-wider rounded-xl border border-gray-200/50">
-                    Walk-In
-                  </div>
-                )}
+                <button
+                  onClick={() => onRegisterClick(item)}
+                  className="flex items-center justify-center px-6 py-3 bg-[#EE4B5E] hover:bg-[#D43F4F] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-[#EE4B5E]/20 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                >
+                  Register Now
+                </button>
               </div>
             </div>
 
@@ -452,6 +444,21 @@ export default function EventsPage() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "indoor" | "outdoor">("all");
 
+  const [currentUser, setCurrentUser] = useState<{ fullName: string | null; phoneNumber: string } | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+  const [regName, setRegName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regPhone, setRegPhone] = useState("");
+  const [regTickets, setRegTickets] = useState(1);
+  const [regNotes, setRegNotes] = useState("");
+  const [isSubmittingReg, setIsSubmittingReg] = useState(false);
+  const [toast, setToast] = useState("");
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 4000);
+  };
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -468,8 +475,86 @@ export default function EventsPage() {
         setIsLoading(false);
       }
     };
+
+    const fetchSession = async () => {
+      try {
+        const res = await fetch("/api/auth/session");
+        const data = await res.json();
+        if (data.authenticated) {
+          setCurrentUser(data.user);
+        }
+      } catch (e) {
+        console.error("Fetch session error:", e);
+      }
+    };
+
     fetchEvents();
+    fetchSession();
   }, []);
+
+  // Autofill details when selectedEvent changes
+  useEffect(() => {
+    if (selectedEvent) {
+      setRegName(currentUser?.fullName || "");
+      setRegPhone(currentUser?.phoneNumber || "");
+      setRegEmail("");
+      setRegTickets(1);
+      setRegNotes("");
+    }
+  }, [selectedEvent, currentUser]);
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedEvent) return;
+
+    setIsSubmittingReg(true);
+    try {
+      const res = await fetch("/api/events/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: selectedEvent.id,
+          name: regName,
+          email: regEmail,
+          phone: regPhone,
+          ticketsCount: regTickets,
+          additionalNotes: regNotes,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        showToast("✓ Registered! Opening WhatsApp...");
+        
+        // Formulate WhatsApp message to send to 9611526047
+        const formattedMsg = `Hello Ashwaah! I have registered for the event:
+*Event:* ${selectedEvent.title}
+*Date:* ${selectedEvent.date}
+*Time:* ${selectedEvent.time}
+*Location:* ${selectedEvent.location}
+
+*My Details:*
+*Name:* ${regName}
+*Phone:* ${regPhone}
+*Email:* ${regEmail}
+*Tickets:* ${regTickets}
+${regNotes ? `*Notes:* ${regNotes}` : ""}`;
+
+        const encodedMsg = encodeURIComponent(formattedMsg);
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=919611526047&text=${encodedMsg}`;
+        window.open(whatsappUrl, "_blank");
+
+        setSelectedEvent(null);
+      } else {
+        showToast(data.error || "Failed to register. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsSubmittingReg(false);
+    }
+  };
 
   return (
     <div className="bg-brand-light text-brand-dark min-h-screen font-inter pb-24 selection:bg-brand-accent selection:text-white">
@@ -493,12 +578,12 @@ export default function EventsPage() {
 
       {/* TAB NAVIGATION */}
       <section className="max-w-6xl mx-auto px-4 mt-4">
-        <div className="flex items-center justify-center p-1.5 bg-white border border-brand/10 rounded-3xl max-w-lg mx-auto shadow-md">
+        <div className="flex items-center justify-center p-1 bg-white border border-brand/10 rounded-2xl max-w-md mx-auto shadow-sm">
           <button
             onClick={() => setActiveTab("all")}
-            className={`flex-1 flex items-center justify-center py-4 px-6 text-xs font-black uppercase tracking-widest rounded-2xl transition-all duration-300 ${
+            className={`flex-1 flex items-center justify-center py-2.5 px-4 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-300 ${
               activeTab === "all"
-                ? "bg-brand text-white shadow-lg"
+                ? "bg-brand text-white shadow-md"
                 : "text-brand/60 hover:text-brand hover:bg-brand/5"
             }`}
           >
@@ -506,9 +591,9 @@ export default function EventsPage() {
           </button>
           <button
             onClick={() => setActiveTab("indoor")}
-            className={`flex-1 flex items-center justify-center py-4 px-6 text-xs font-black uppercase tracking-widest rounded-2xl transition-all duration-300 ${
+            className={`flex-1 flex items-center justify-center py-2.5 px-4 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-300 ${
               activeTab === "indoor"
-                ? "bg-brand text-white shadow-lg"
+                ? "bg-brand text-white shadow-md"
                 : "text-brand/60 hover:text-brand hover:bg-brand/5"
             }`}
           >
@@ -516,9 +601,9 @@ export default function EventsPage() {
           </button>
           <button
             onClick={() => setActiveTab("outdoor")}
-            className={`flex-1 flex items-center justify-center py-4 px-6 text-xs font-black uppercase tracking-widest rounded-2xl transition-all duration-300 ${
+            className={`flex-1 flex items-center justify-center py-2.5 px-4 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-300 ${
               activeTab === "outdoor"
-                ? "bg-brand text-white shadow-lg"
+                ? "bg-brand text-white shadow-md"
                 : "text-brand/60 hover:text-brand hover:bg-brand/5"
             }`}
           >
@@ -590,7 +675,7 @@ export default function EventsPage() {
                   {/* Render events */}
                   <div className="grid grid-cols-1 gap-8">
                     {catEvents.map((item) => (
-                      <EventCard key={item.id} item={item} />
+                      <EventCard key={item.id} item={item} onRegisterClick={setSelectedEvent} />
                     ))}
                   </div>
                 </div>
@@ -613,7 +698,7 @@ export default function EventsPage() {
                   {/* Render events */}
                   <div className="grid grid-cols-1 gap-8">
                     {catEvents.map((item) => (
-                      <EventCard key={item.id} item={item} />
+                      <EventCard key={item.id} item={item} onRegisterClick={setSelectedEvent} />
                     ))}
                   </div>
                 </div>
@@ -623,6 +708,143 @@ export default function EventsPage() {
           </div>
         )}
       </section>
+
+      {/* REGISTRATION MODAL */}
+      {selectedEvent && (
+        <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div 
+            className="bg-[#FAF6F0] border border-brand/10 w-full max-w-lg rounded-[2.5rem] p-6 md:p-8 shadow-2xl relative animate-in zoom-in-95 duration-200 text-brand-dark"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button 
+              onClick={() => setSelectedEvent(null)}
+              className="absolute top-6 right-6 p-2 bg-white/60 hover:bg-white text-brand rounded-full border border-brand/5 transition-all cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Modal Header */}
+            <div className="mb-6">
+              <span className="bg-brand/10 text-brand border border-brand/20 text-[10px] font-black uppercase tracking-[0.2em] px-3.5 py-1.5 rounded-full">
+                {selectedEvent.category.replace(/-/g, " ")}
+              </span>
+              <h3 className="text-2xl font-playfair font-black text-brand leading-tight mt-3">
+                Register for {selectedEvent.title}
+              </h3>
+              <p className="text-xs text-brand-dark/60 mt-1">
+                Fill in your details below to register for this event.
+              </p>
+            </div>
+
+            {/* Form Fields */}
+            <form onSubmit={handleRegisterSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-brand/60 mb-1.5">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={regName}
+                  onChange={(e) => setRegName(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-brand/10 rounded-2xl text-sm focus:outline-none focus:border-brand text-brand font-medium"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-brand/60 mb-1.5">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={regPhone}
+                    onChange={(e) => setRegPhone(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-brand/10 rounded-2xl text-sm focus:outline-none focus:border-brand text-brand font-medium"
+                    placeholder="9611526047"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-brand/60 mb-1.5">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-brand/10 rounded-2xl text-sm focus:outline-none focus:border-brand text-brand font-medium"
+                    placeholder="johndoe@example.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-brand/60 mb-1.5">
+                  Number of Tickets / Guests
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  required
+                  value={regTickets}
+                  onChange={(e) => setRegTickets(Number(e.target.value))}
+                  className="w-full px-4 py-3 bg-white border border-brand/10 rounded-2xl text-sm focus:outline-none focus:border-brand text-brand font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-brand/60 mb-1.5">
+                  Additional Notes (Optional)
+                </label>
+                <textarea
+                  value={regNotes}
+                  onChange={(e) => setRegNotes(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-brand/10 rounded-2xl text-sm focus:outline-none focus:border-brand text-brand font-medium h-20 resize-none"
+                  placeholder="Any comments, dietary needs, or preferences..."
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex items-center justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedEvent(null)}
+                  className="px-5 py-3 border border-brand/10 text-brand/60 hover:bg-brand/5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReg}
+                  className="px-6 py-3 bg-[#EE4B5E] hover:bg-[#D43F4F] text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all duration-300 disabled:opacity-50 flex items-center justify-center cursor-pointer shadow-md shadow-[#EE4B5E]/20"
+                >
+                  {isSubmittingReg ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin mr-2" />
+                      Registering...
+                    </>
+                  ) : (
+                    "Confirm & Share on WhatsApp"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-8 right-8 z-[200] bg-brand text-white border border-brand-accent/25 px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3.5 animate-in fade-in slide-in-from-bottom-5 duration-350">
+          <Sparkles size={16} className="text-brand-accent animate-pulse" />
+          <span className="text-xs font-bold uppercase tracking-wider">{toast}</span>
+        </div>
+      )}
 
     </div>
   );
