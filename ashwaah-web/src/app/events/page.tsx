@@ -151,13 +151,13 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
           <video 
             src={currentUrl} 
             preload="metadata"
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-110" 
           />
         ) : (
           <img 
             src={currentUrl} 
             alt="Event Slide" 
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 group-hover/card:scale-110" 
           />
         )}
 
@@ -309,7 +309,7 @@ function EventCard({ item, onRegisterClick }: { item: EventItem; onRegisterClick
   }
 
   return (
-    <div className="flex flex-col bg-[#FAF6F0] border border-brand/10 rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 mb-12 group">
+    <div className="flex flex-col bg-[#FAF6F0] border border-brand/10 rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-[0_25px_50px_-12px_rgba(6,78,59,0.2)] hover:-translate-y-2 hover:scale-[1.01] hover:border-brand/25 transition-all duration-500 ease-out mb-12 group group/card">
       
       {/* Upper Main Body: Slide Show and Details Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6">
