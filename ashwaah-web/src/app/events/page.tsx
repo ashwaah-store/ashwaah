@@ -528,7 +528,7 @@ export default function EventsPage() {
       </section>
 
       {/* EVENTS CATALOG */}
-      <section className="max-w-6xl mx-auto px-4 mt-16">
+      <section className="max-w-6xl mx-auto px-4 mt-8">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="w-10 h-10 text-brand-accent animate-spin mb-4" />
@@ -583,12 +583,9 @@ export default function EventsPage() {
               return (
                 <div key={cat.key} className="space-y-6">
                   {/* Category Header */}
-                  <div className="flex items-center space-x-4">
-                    <h2 className="text-2xl md:text-3xl font-playfair font-black text-brand tracking-tight">
-                      {cat.label}
-                    </h2>
-                    <div className="flex-grow h-[1px] bg-gradient-to-r from-brand/30 to-transparent" />
-                  </div>
+                  <h2 className="text-2xl md:text-3xl font-playfair font-black text-brand tracking-tight">
+                    {cat.label}
+                  </h2>
 
                   {/* Render events */}
                   <div className="grid grid-cols-1 gap-8">
@@ -609,12 +606,9 @@ export default function EventsPage() {
               return (
                 <div key={cat.key} className="space-y-6">
                   {/* Category Header */}
-                  <div className="flex items-center space-x-4">
-                    <h2 className="text-2xl md:text-3xl font-playfair font-black text-brand tracking-tight">
-                      {cat.label}
-                    </h2>
-                    <div className="flex-grow h-[1px] bg-gradient-to-r from-brand/30 to-transparent" />
-                  </div>
+                  <h2 className="text-2xl md:text-3xl font-playfair font-black text-brand tracking-tight">
+                    {cat.label}
+                  </h2>
 
                   {/* Render events */}
                   <div className="grid grid-cols-1 gap-8">
