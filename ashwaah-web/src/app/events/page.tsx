@@ -638,9 +638,16 @@ ${regNotes ? `*Notes:* ${regNotes}` : ""}`;
               return (
                 <div key={cat.key} className="space-y-6">
                   {/* Category Header */}
-                  <h2 className="text-2xl md:text-3xl font-playfair font-black text-brand tracking-tight">
-                    {cat.label}
-                  </h2>
+                  <div className="space-y-1">
+                    <h2 className="text-2xl md:text-3xl font-playfair font-black text-brand tracking-tight">
+                      {cat.label}
+                    </h2>
+                    {cat.description && (
+                      <p className="text-brand-dark/60 text-xs md:text-sm font-medium max-w-2xl leading-relaxed">
+                        {cat.description}
+                      </p>
+                    )}
+                  </div>
 
                   {/* Render events */}
                   <div className="grid grid-cols-1 gap-8">
@@ -661,9 +668,16 @@ ${regNotes ? `*Notes:* ${regNotes}` : ""}`;
               return (
                 <div key={cat.key} className="space-y-6">
                   {/* Category Header */}
-                  <h2 className="text-2xl md:text-3xl font-playfair font-black text-brand tracking-tight">
-                    {cat.label}
-                  </h2>
+                  <div className="space-y-1">
+                    <h2 className="text-2xl md:text-3xl font-playfair font-black text-brand tracking-tight">
+                      {cat.label}
+                    </h2>
+                    {cat.description && (
+                      <p className="text-brand-dark/60 text-xs md:text-sm font-medium max-w-2xl leading-relaxed">
+                        {cat.description}
+                      </p>
+                    )}
+                  </div>
 
                   {/* Render events */}
                   <div className="grid grid-cols-1 gap-8">
