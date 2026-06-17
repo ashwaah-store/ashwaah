@@ -475,7 +475,7 @@ export default function EventsPage() {
     <div className="bg-brand-light text-brand-dark min-h-screen font-inter pb-24 selection:bg-brand-accent selection:text-white">
       
       {/* HERO BANNER SECTION */}
-      <section className="relative overflow-hidden py-12 md:py-16 border-b border-brand/10 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(6,78,59,0.15),rgba(0,0,0,0))]">
+      <section className="relative overflow-hidden pt-12 pb-2 md:pt-16 md:pb-4 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(6,78,59,0.15),rgba(0,0,0,0))]">
         <div className="absolute top-0 left-0 w-full h-full bg-[url('/images/hero-grid.svg')] bg-center opacity-5 pointer-events-none" />
         <div className="max-w-6xl mx-auto px-4 text-center space-y-6 relative z-10">
           <div className="inline-flex items-center space-x-2 bg-brand/10 border border-brand/20 px-4 py-2 rounded-full text-[10px] font-black uppercase text-brand tracking-[0.25em] shadow-sm animate-fade-in">
@@ -492,7 +492,7 @@ export default function EventsPage() {
       </section>
 
       {/* TAB NAVIGATION */}
-      <section className="max-w-6xl mx-auto px-4 mt-8">
+      <section className="max-w-6xl mx-auto px-4 mt-4">
         <div className="flex items-center justify-center p-1.5 bg-white border border-brand/10 rounded-3xl max-w-lg mx-auto shadow-md">
           <button
             onClick={() => setActiveTab("all")}
