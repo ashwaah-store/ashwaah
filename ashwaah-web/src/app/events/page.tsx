@@ -400,10 +400,7 @@ function EventCard({ item }: { item: EventItem }) {
                 {/* Location */}
                 <div className="flex items-start space-x-3.5 text-xs font-semibold text-gray-700">
                   <MapPin size={16} className="text-gray-500 mt-0.5 shrink-0" />
-                  <div className="flex items-center flex-wrap">
-                    <span>{item.location}</span>
-                    <Navigation size={12} className="text-[#3b82f6] ml-2 fill-current rotate-45 shrink-0" />
-                  </div>
+                  <span>{item.location}</span>
                 </div>
               </div>
 
