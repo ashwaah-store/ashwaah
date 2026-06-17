@@ -433,9 +433,42 @@ export default function EventsPage() {
         ) : (
           <div className="space-y-16">
             
-            {/* RENDER INDOOR TAB */}
+            {/* If no events match the active tab view, render a premium general empty state */}
+            {activeTab === "all" && events.length === 0 && (
+              <div className="bg-white border border-brand/10 p-12 rounded-[2rem] text-center flex flex-col items-center justify-center shadow-lg py-20">
+                <Calendar className="w-16 h-16 text-brand/35 mb-6" />
+                <h3 className="text-xl font-bold font-playfair text-brand mb-2">No Scheduled Events</h3>
+                <p className="text-brand-dark/70 text-sm max-w-md">
+                  There are no company events or outdoor activities scheduled at this moment. Please check back later.
+                </p>
+              </div>
+            )}
+
+            {activeTab === "indoor" && events.filter(e => INDOOR_CATEGORIES.some(c => c.key === e.category)).length === 0 && (
+              <div className="bg-white border border-brand/10 p-12 rounded-[2rem] text-center flex flex-col items-center justify-center shadow-lg py-20">
+                <Calendar className="w-16 h-16 text-brand/35 mb-6" />
+                <h3 className="text-xl font-bold font-playfair text-brand mb-2">No Scheduled Indoor Events</h3>
+                <p className="text-brand-dark/70 text-sm max-w-md">
+                  There are no indoor events or workshops scheduled at this moment. Please check back later or browse Outdoor Events.
+                </p>
+              </div>
+            )}
+
+            {activeTab === "outdoor" && events.filter(e => OUTDOOR_CATEGORIES.some(c => c.key === e.category)).length === 0 && (
+              <div className="bg-white border border-brand/10 p-12 rounded-[2rem] text-center flex flex-col items-center justify-center shadow-lg py-20">
+                <Calendar className="w-16 h-16 text-brand/35 mb-6" />
+                <h3 className="text-xl font-bold font-playfair text-brand mb-2">No Scheduled Outdoor Events</h3>
+                <p className="text-brand-dark/70 text-sm max-w-md">
+                  There are no outdoor festivals or adventure activities scheduled at this moment. Please check back later or browse Indoor Events.
+                </p>
+              </div>
+            )}
+            
+            {/* RENDER INDOOR CATEGORIES */}
             {(activeTab === "all" || activeTab === "indoor") && INDOOR_CATEGORIES.map((cat) => {
               const catEvents = events.filter((e) => e.category === cat.key);
+              
+              if (catEvents.length === 0) return null;
               
               return (
                 <div key={cat.key} className="space-y-6">
@@ -447,42 +480,21 @@ export default function EventsPage() {
                     <div className="flex-grow h-[1px] bg-gradient-to-r from-brand/30 to-transparent" />
                   </div>
 
-                  {/* Render events or fallback card */}
-                  {catEvents.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-8">
-                      {catEvents.map((item) => (
-                        <EventCard key={item.id} item={item} />
-                      ))}
-                    </div>
-                  ) : (
-                    /* Fallback empty box containing the description precisely as requested */
-                    <div className="bg-white border border-brand/10 p-8 md:p-12 rounded-[2rem] text-center flex flex-col items-center justify-center shadow-lg relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-brand/5 to-transparent rounded-bl-full pointer-events-none" />
-                      
-                      <div className="w-12 h-12 bg-brand/10 rounded-2xl flex items-center justify-center text-brand mb-6">
-                        <Calendar size={20} />
-                      </div>
-                      
-                      <h4 className="text-base font-bold font-playfair text-brand uppercase tracking-wide mb-3">
-                        About {cat.label}
-                      </h4>
-                      <p className="text-brand-dark/70 text-sm max-w-xl leading-relaxed italic">
-                        "{cat.description}"
-                      </p>
-                      
-                      <div className="mt-6 text-[9px] font-black text-brand-accent/60 uppercase tracking-[0.2em] flex items-center">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-accent/60 mr-2 animate-pulse" />
-                        No events currently scheduled
-                      </div>
-                    </div>
-                  )}
+                  {/* Render events */}
+                  <div className="grid grid-cols-1 gap-8">
+                    {catEvents.map((item) => (
+                      <EventCard key={item.id} item={item} />
+                    ))}
+                  </div>
                 </div>
               );
             })}
 
-            {/* RENDER OUTDOOR TAB */}
+            {/* RENDER OUTDOOR CATEGORIES */}
             {(activeTab === "all" || activeTab === "outdoor") && OUTDOOR_CATEGORIES.map((cat) => {
               const catEvents = events.filter((e) => e.category === cat.key);
+              
+              if (catEvents.length === 0) return null;
               
               return (
                 <div key={cat.key} className="space-y-6">
@@ -494,35 +506,12 @@ export default function EventsPage() {
                     <div className="flex-grow h-[1px] bg-gradient-to-r from-brand/30 to-transparent" />
                   </div>
 
-                  {/* Render events or fallback card */}
-                  {catEvents.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-8">
-                      {catEvents.map((item) => (
-                        <EventCard key={item.id} item={item} />
-                      ))}
-                    </div>
-                  ) : (
-                    /* Fallback empty box containing the description precisely as requested */
-                    <div className="bg-white border border-brand/10 p-8 md:p-12 rounded-[2rem] text-center flex flex-col items-center justify-center shadow-lg relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-brand/5 to-transparent rounded-bl-full pointer-events-none" />
-                      
-                      <div className="w-12 h-12 bg-brand/10 rounded-2xl flex items-center justify-center text-brand mb-6">
-                        <Calendar size={20} />
-                      </div>
-                      
-                      <h4 className="text-base font-bold font-playfair text-brand uppercase tracking-wide mb-3">
-                        About {cat.label}
-                      </h4>
-                      <p className="text-brand-dark/70 text-sm max-w-xl leading-relaxed italic">
-                        "{cat.description}"
-                      </p>
-                      
-                      <div className="mt-6 text-[9px] font-black text-brand-accent/60 uppercase tracking-[0.2em] flex items-center">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-accent/60 mr-2 animate-pulse" />
-                        No events currently scheduled
-                      </div>
-                    </div>
-                  )}
+                  {/* Render events */}
+                  <div className="grid grid-cols-1 gap-8">
+                    {catEvents.map((item) => (
+                      <EventCard key={item.id} item={item} />
+                    ))}
+                  </div>
                 </div>
               );
             })}
