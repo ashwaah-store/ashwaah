@@ -320,8 +320,7 @@ function EventCard({ item, onRegisterClick }: { item: EventItem; onRegisterClick
         </div>
 
         {/* Right Side: Metadata / Ticket details (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
-          <div className="space-y-4">
+        <div className="lg:col-span-7 space-y-4">
             
             {/* Header / Category Badge */}
             <div className="flex items-center justify-between">
@@ -419,9 +418,7 @@ function EventCard({ item, onRegisterClick }: { item: EventItem; onRegisterClick
                 </button>
               </div>
             </div>
-
           </div>
-        </div>
 
       </div>
 
