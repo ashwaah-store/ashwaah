@@ -51,7 +51,7 @@ export default function SettingsPage() {
       list.push({ label: `Nav Page: ${item.label}`, value: item.href });
     });
     homepageCategoriesList.forEach((item) => {
-      list.push({ label: `Category Card: ${item.name}`, value: item.link || `/category/${item.name.toLowerCase()}` });
+      list.push({ label: `Category Card: ${item.name}`, value: item.link || `/category/${item.name.toLowerCase().trim().replace(/\s+/g, "-")}` });
     });
     return list;
   }, [navItems, homepageCategoriesList]);
