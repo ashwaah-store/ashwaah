@@ -368,33 +368,6 @@ function EventCard({ item, onRegisterClick }: { item: EventItem; onRegisterClick
                   </div>
                 )}
 
-                {/* Age Limit */}
-                {item.ageLimit && (
-                  <div className="flex items-center space-x-3.5 text-xs font-semibold text-gray-700">
-                    <Users size={16} className="text-gray-500 shrink-0" />
-                    <span>
-                      {item.ageLimit.toLowerCase().startsWith("age limit") 
-                        ? item.ageLimit 
-                        : `Age Limit - ${item.ageLimit}`}
-                    </span>
-                  </div>
-                )}
-
-                {/* Language */}
-                {item.language && (
-                  <div className="flex items-center space-x-3.5 text-xs font-semibold text-gray-700">
-                    <Languages size={16} className="text-gray-500 shrink-0" />
-                    <span>{item.language}</span>
-                  </div>
-                )}
-
-                {/* Genre */}
-                {item.genre && (
-                  <div className="flex items-center space-x-3.5 text-xs font-semibold text-gray-700">
-                    <Theater size={16} className="text-gray-500 shrink-0" />
-                    <span>{item.genre}</span>
-                  </div>
-                )}
 
                 {/* Location */}
                 <div className="flex items-start space-x-3.5 text-xs font-semibold text-gray-700">
