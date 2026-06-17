@@ -20,7 +20,9 @@ import {
   Users,
   Languages,
   Theater,
-  Navigation
+  Navigation,
+  Maximize2,
+  X
 } from "lucide-react";
 import Link from "next/link";
 
@@ -116,6 +118,7 @@ function isVideo(url: string) {
 // Subcomponent for handling slideshow inside the card
 function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
   const [slideIndex, setSlideIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   if (mediaList.length === 0) {
     return (
@@ -139,58 +142,156 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
   };
 
   return (
-    <div className="relative w-full h-full group bg-brand-light/20 overflow-hidden rounded-3xl border border-brand/10 shadow-lg">
-      {isVid ? (
-        <video 
-          src={currentUrl} 
-          controls 
-          preload="metadata"
-          className="w-full h-full object-cover" 
-        />
-      ) : (
-        <img 
-          src={currentUrl} 
-          alt="Event Slide" 
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
-        />
-      )}
+    <>
+      <div 
+        onClick={() => setIsLightboxOpen(true)}
+        className="relative w-full h-full group bg-brand-light/20 overflow-hidden rounded-3xl border border-brand/10 shadow-lg cursor-pointer"
+      >
+        {isVid ? (
+          <video 
+            src={currentUrl} 
+            preload="metadata"
+            className="w-full h-full object-cover" 
+          />
+        ) : (
+          <img 
+            src={currentUrl} 
+            alt="Event Slide" 
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+          />
+        )}
 
-      {/* Navigation arrows (only if multiple slides) */}
-      {mediaList.length > 1 && (
-        <>
-          <button 
-            onClick={handlePrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm text-white border border-white/10 hover:bg-brand-accent hover:text-brand-dark opacity-0 group-hover:opacity-100 transition-all duration-300 animate-in fade-in"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button 
-            onClick={handleNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm text-white border border-white/10 hover:bg-brand-accent hover:text-brand-dark opacity-0 group-hover:opacity-100 transition-all duration-300 animate-in fade-in"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </>
-      )}
+        {/* Hover Zoom overlay button */}
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsLightboxOpen(true);
+          }}
+          className="absolute top-4 right-4 z-20 p-2.5 bg-black/55 backdrop-blur-md border border-white/10 rounded-xl text-white hover:bg-brand-accent hover:text-brand-dark hover:scale-105 transition-all shadow-md opacity-0 group-hover:opacity-100 duration-300 flex items-center justify-center"
+          title="View Enlarged"
+        >
+          <Maximize2 size={14} className="font-bold" />
+        </div>
 
-      {/* Slide Indicators */}
-      {mediaList.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-10 bg-brand-dark/20 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-brand/5">
-          {mediaList.map((_, idx) => (
+        {/* Navigation arrows (only if multiple slides) */}
+        {mediaList.length > 1 && (
+          <>
+            <button 
+              onClick={handlePrev}
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm text-white border border-white/10 hover:bg-brand-accent hover:text-brand-dark opacity-0 group-hover:opacity-100 transition-all duration-300 animate-in fade-in"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button 
+              onClick={handleNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm text-white border border-white/10 hover:bg-brand-accent hover:text-brand-dark opacity-0 group-hover:opacity-100 transition-all duration-300 animate-in fade-in"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </>
+        )}
+
+        {/* Slide Indicators */}
+        {mediaList.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-10 bg-brand-dark/20 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-brand/5">
+            {mediaList.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSlideIndex(idx);
+                }}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  idx === slideIndex ? "bg-brand-accent w-3" : "bg-brand-light/40"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* FULLSCREEN LIGHTBOX MODAL */}
+      {isLightboxOpen && (
+        <div 
+          className="fixed inset-0 z-[150] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Top Panel Controls */}
+          <div className="absolute top-6 left-6 right-6 flex items-center justify-between text-white z-10">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">
+              Media Gallery ({slideIndex + 1} / {mediaList.length})
+            </span>
             <button
-              key={idx}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSlideIndex(idx);
-              }}
-              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                idx === slideIndex ? "bg-brand-accent w-3" : "bg-brand-light/40"
-              }`}
-            />
-          ))}
+              onClick={() => setIsLightboxOpen(false)}
+              className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/5 transition-all hover:scale-105 active:scale-95"
+              title="Close Gallery"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Center Stage Media Container */}
+          <div 
+            className="relative flex items-center justify-center w-full max-w-5xl h-[70vh] px-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isVid ? (
+              <video 
+                src={currentUrl} 
+                controls 
+                autoPlay
+                preload="metadata"
+                className="max-w-full max-h-full object-contain rounded-2xl border border-white/5 shadow-2xl" 
+              />
+            ) : (
+              <img 
+                src={currentUrl} 
+                alt="Enlarged Slide" 
+                className="max-w-full max-h-full object-contain rounded-2xl border border-white/5 shadow-2xl" 
+              />
+            )}
+
+            {/* Lightbox navigation arrows */}
+            {mediaList.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrev}
+                  className="absolute -left-4 sm:left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/5 transition-all hover:scale-105 active:scale-95"
+                  title="Previous Media"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="absolute -right-4 sm:right-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/5 transition-all hover:scale-105 active:scale-95"
+                  title="Next Media"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Bottom indicators */}
+          {mediaList.length > 1 && (
+            <div className="absolute bottom-8 flex items-center space-x-2.5 z-10 bg-white/10 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/5">
+              {mediaList.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSlideIndex(idx);
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    idx === slideIndex ? "bg-brand-accent w-4" : "bg-white/40"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
