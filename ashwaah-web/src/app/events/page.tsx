@@ -565,7 +565,7 @@ ${regNotes ? `*Notes:* ${regNotes}` : ""}`;
             <span>Exclusive Gatherings</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-playfair font-black text-brand tracking-tight leading-tight">
-            Curated <span className="text-brand-accent">Ashwaah</span> Events
+            <span className="text-brand-accent">Ashwaah</span> Events
           </h1>
           <p className="max-w-2xl mx-auto text-brand-dark/70 text-base md:text-lg font-medium leading-relaxed">
             Experience fashion runways, masterclass workshops, screening events, and vibrant outdoor gatherings designed to inspire network connection and creativity.
