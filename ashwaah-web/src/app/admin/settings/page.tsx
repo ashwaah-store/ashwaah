@@ -40,9 +40,8 @@ export default function SettingsPage() {
   const [bannersList, setBannersList] = useState<{ url: string; link: string | null }[]>([]);
   const [navItems, setNavItems] = useState<any[]>([]);
   const [homepageCategoriesList, setHomepageCategoriesList] = useState<any[]>([]);
-  const [linkType, setLinkType] = useState<"none" | "premade" | "custom">("none");
-  const [selectedPremadeLink, setSelectedPremadeLink] = useState("#featured-collections");
-  const [customLink, setCustomLink] = useState("");
+  const [selectedBannerLink, setSelectedBannerLink] = useState("");
+  const [customLinkText, setCustomLinkText] = useState("");
 
   const premadeLinks = useMemo(() => {
     const list: { label: string; value: string }[] = [];
@@ -82,10 +81,10 @@ export default function SettingsPage() {
     if (!trimmed) return;
 
     let finalLink: string | null = null;
-    if (linkType === "premade") {
-      finalLink = selectedPremadeLink;
-    } else if (linkType === "custom") {
-      finalLink = customLink.trim() || null;
+    if (selectedBannerLink === "__custom__") {
+      finalLink = customLinkText.trim() || null;
+    } else if (selectedBannerLink !== "") {
+      finalLink = selectedBannerLink;
     }
 
     setBannersList((prev) => {
@@ -98,8 +97,8 @@ export default function SettingsPage() {
     });
 
     setTempBannerUrl("");
-    setLinkType("none");
-    setCustomLink("");
+    setSelectedBannerLink("");
+    setCustomLinkText("");
     setSuccess("Banner URL added successfully!");
   };
 
@@ -197,10 +196,10 @@ export default function SettingsPage() {
 
       if (uploadedUrls.length > 0) {
         let finalLink: string | null = null;
-        if (linkType === "premade") {
-          finalLink = selectedPremadeLink;
-        } else if (linkType === "custom") {
-          finalLink = customLink.trim() || null;
+        if (selectedBannerLink === "__custom__") {
+          finalLink = customLinkText.trim() || null;
+        } else if (selectedBannerLink !== "") {
+          finalLink = selectedBannerLink;
         }
 
         setBannersList((prev) => {
@@ -208,8 +207,8 @@ export default function SettingsPage() {
           return [...prev, ...newBanners];
         });
         
-        setLinkType("none");
-        setCustomLink("");
+        setSelectedBannerLink("");
+        setCustomLinkText("");
         
         if (uploadErrors > 0) {
           setSuccess(`Uploaded ${uploadedUrls.length} image(s), but ${uploadErrors} failed.`);
@@ -390,57 +389,35 @@ export default function SettingsPage() {
                 </button>
               </div>
 
-              {/* Link type options for the banner being added */}
+              {/* Single dropdown for banner click navigation link */}
               <div className="space-y-4 bg-brand/5 p-5 rounded-2xl border border-brand/10">
                 <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] ml-1">Banner Click Navigation Link (Optional)</label>
                 
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { type: "none", label: "No Link" },
-                    { type: "premade", label: "Pre-made Link" },
-                    { type: "custom", label: "Custom Link" },
-                  ].map((item) => (
-                    <button
-                      key={item.type}
-                      type="button"
-                      onClick={() => setLinkType(item.type as any)}
-                      className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${
-                        linkType === item.type
-                          ? "bg-[#1B3022] text-[#C5A059] border-transparent shadow-sm"
-                          : "bg-white text-brand/60 border-brand/10 hover:bg-brand/5"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
+                <div>
+                  <select
+                    value={selectedBannerLink}
+                    onChange={(e) => setSelectedBannerLink(e.target.value)}
+                    className="w-full bg-white border border-brand/20 rounded-xl px-4 py-3.5 text-xs font-semibold text-brand outline-none focus:border-[#C5A059]/50 transition-all cursor-pointer"
+                  >
+                    <option value="">No Navigation Link (Optional)</option>
+                    {premadeLinks.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                    <option value="__custom__">+ Add custom link</option>
+                  </select>
                 </div>
 
-                {linkType === "premade" && (
-                  <div>
-                    <label className="block text-[9px] font-bold text-brand/50 uppercase tracking-wider mb-2 ml-1">Select Pre-made Destination</label>
-                    <select
-                      value={selectedPremadeLink}
-                      onChange={(e) => setSelectedPremadeLink(e.target.value)}
-                      className="w-full bg-white border border-brand/20 rounded-xl px-4 py-3 text-sm font-semibold text-brand outline-none focus:border-[#C5A059]/50 transition-all"
-                    >
-                      {premadeLinks.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {linkType === "custom" && (
-                  <div>
+                {selectedBannerLink === "__custom__" && (
+                  <div className="animate-in fade-in slide-in-from-top-1 duration-300">
                     <label className="block text-[9px] font-bold text-[#C5A059] uppercase tracking-wider mb-2 ml-1">Custom Destination Link URL</label>
                     <input
                       type="text"
-                      value={customLink}
-                      onChange={(e) => setCustomLink(e.target.value)}
+                      value={customLinkText}
+                      onChange={(e) => setCustomLinkText(e.target.value)}
                       placeholder="e.g. /my-story or /product/12"
-                      className="w-full bg-white border border-brand/20 focus:border-[#C5A059]/50 rounded-xl px-4 py-3.5 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
+                      className="w-full bg-white border border-brand/20 focus:border-[#C5A059]/50 rounded-xl px-4 py-3.5 text-xs font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
                     />
                   </div>
                 )}
@@ -449,87 +426,29 @@ export default function SettingsPage() {
               {bannersList.length > 0 && (
                 <div className="space-y-3">
                   <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] ml-1">Configured Banner Images ({bannersList.length})</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {bannersList.map((banner, idx) => {
-                      const hasLink = banner.link !== null;
-                      const isPremade = hasLink && premadeLinks.some(l => l.value === banner.link);
-                      const isCustom = hasLink && !isPremade;
-                      const currentLinkType = !hasLink ? "none" : (isPremade ? "premade" : "custom");
-
-                      return (
-                        <div key={idx} className="flex flex-col bg-brand/5 border border-brand/10 rounded-2xl p-3 space-y-3">
-                          <div className="relative aspect-[21/9] rounded-xl overflow-hidden bg-white flex items-center justify-center border border-brand/5 shadow-sm">
-                            <img src={banner.url} alt={`Banner thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setBannersList(prev => prev.filter((_, i) => i !== idx));
-                              }}
-                              className="absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md opacity-90 hover:opacity-100 transition-opacity z-10"
-                            >
-                              <X size={12} />
-                            </button>
-                            <div className="absolute bottom-1.5 left-1.5 bg-brand/80 text-white text-[9px] px-2 py-0.5 rounded font-black z-10">
-                              #{idx + 1}
-                            </div>
-                          </div>
-
-                          {/* Link Editor on Card */}
-                          <div className="space-y-1.5 text-left">
-                            <label className="block text-[8px] font-black text-brand/40 uppercase tracking-wider ml-1">Destination Link</label>
-                            <div className="flex gap-2">
-                              <select
-                                value={currentLinkType}
-                                onChange={(e) => {
-                                  const type = e.target.value;
-                                  setBannersList(prev => prev.map((b, i) => {
-                                    if (i !== idx) return b;
-                                    if (type === "none") return { ...b, link: null };
-                                    if (type === "premade") return { ...b, link: "#featured-collections" };
-                                    return { ...b, link: "/" };
-                                  }));
-                                }}
-                                className="bg-white border border-brand/20 rounded-xl px-2 py-2 text-[10px] font-bold text-brand outline-none focus:border-[#C5A059]/50 transition-all w-[35%]"
-                              >
-                                <option value="none">No Link</option>
-                                <option value="premade">Pre-made</option>
-                                <option value="custom">Custom</option>
-                              </select>
-
-                              {currentLinkType === "premade" && (
-                                <select
-                                  value={banner.link || "#featured-collections"}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setBannersList(prev => prev.map((b, i) => i === idx ? { ...b, link: val } : b));
-                                  }}
-                                  className="bg-white border border-brand/20 rounded-xl px-2 py-2 text-[10px] font-bold text-brand outline-none focus:border-[#C5A059]/50 transition-all flex-grow w-[65%]"
-                                >
-                                  {premadeLinks.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                      {option.label}
-                                    </option>
-                                  ))}
-                                </select>
-                              )}
-
-                              {currentLinkType === "custom" && (
-                                <input
-                                  type="text"
-                                  value={banner.link || ""}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setBannersList(prev => prev.map((b, i) => i === idx ? { ...b, link: val } : b));
-                                  }}
-                                  placeholder="e.g. /my-story"
-                                  className="bg-white border border-brand/20 focus:border-[#C5A059]/50 rounded-xl px-3 py-2 text-[10px] font-bold text-brand outline-none transition-all flex-grow w-[65%]"
-                                />
-                              )}
-                            </div>
-                          </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {bannersList.map((banner, idx) => (
+                      <div key={idx} className="relative group rounded-xl border border-brand/10 overflow-hidden bg-brand/5 aspect-[16/9] flex items-center justify-center">
+                        <img src={banner.url} alt={`Banner thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBannersList(prev => prev.filter((_, i) => i !== idx));
+                          }}
+                          className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md opacity-90 hover:opacity-100 transition-opacity z-10"
+                        >
+                          <X size={14} />
+                        </button>
+                        <div className="absolute bottom-1 left-1 bg-brand/80 text-white text-[9px] px-1.5 py-0.5 rounded font-black z-10">
+                          #{idx + 1}
                         </div>
-                      );
-                    })}
+                        {banner.link && (
+                          <div className="absolute bottom-1 right-1 max-w-[60%] bg-black/70 text-white text-[8px] px-1 py-0.5 rounded truncate select-none z-10 font-bold animate-in fade-in" title={banner.link}>
+                            {banner.link}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
