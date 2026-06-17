@@ -124,18 +124,29 @@ export default function Home() {
     fetchData();
   }, []);
 
-  const bannerUrls = useMemo(() => {
+  const banners = useMemo(() => {
     if (!bannerUrl) return [];
-    return bannerUrl.split(",").map((url) => url.trim()).filter(Boolean);
+    try {
+      const parsed = JSON.parse(bannerUrl);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item: any) => {
+          if (typeof item === "string") return { url: item, link: null };
+          return { url: item.url || "", link: item.link || null };
+        });
+      }
+    } catch (e) {
+      // Fallback to legacy
+    }
+    return bannerUrl.split(",").map((url) => ({ url: url.trim(), link: null })).filter(b => b.url);
   }, [bannerUrl]);
 
   useEffect(() => {
-    if (bannerUrls.length <= 1) return;
+    if (banners.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentBannerIndex((prev) => (prev + 1) % bannerUrls.length);
+      setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [bannerUrls.length]);
+  }, [banners.length]);
 
   const marqueeItems = useMemo(() => {
     if (offers.length === 0) return [];
@@ -202,30 +213,90 @@ export default function Home() {
 
 
       {/* Dynamic Promo Banner Carousel */}
-      {bannerUrls.length > 0 && (
+      {banners.length > 0 && (
         <div className="w-full relative overflow-hidden border-b border-brand/10 group mt-0 bg-brand-light">
-          {bannerUrls.length === 1 ? (
+          {banners.length === 1 ? (
             <div className="w-full relative h-auto">
-              <img
-                src={bannerUrls[0]}
-                alt="Current Offers & Collections"
-                className="w-full h-auto transition-transform duration-1000 ease-out group-hover:scale-[1.01]"
-              />
+              {banners[0].link === "#featured-collections" ? (
+                <a
+                  href="#featured-collections"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById("featured-collections")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="block w-full h-auto cursor-pointer hover:scale-[1.005] active:scale-[0.995] transition-all duration-300"
+                >
+                  <img
+                    src={banners[0].url}
+                    alt="Current Offers & Collections"
+                    className="w-full h-auto transition-transform duration-1000 ease-out group-hover:scale-[1.01]"
+                  />
+                </a>
+              ) : banners[0].link ? (
+                <Link
+                  href={banners[0].link}
+                  className="block w-full h-auto cursor-pointer hover:scale-[1.005] active:scale-[0.995] transition-all duration-300"
+                >
+                  <img
+                    src={banners[0].url}
+                    alt="Current Offers & Collections"
+                    className="w-full h-auto transition-transform duration-1000 ease-out group-hover:scale-[1.01]"
+                  />
+                </Link>
+              ) : (
+                <img
+                  src={banners[0].url}
+                  alt="Current Offers & Collections"
+                  className="w-full h-auto transition-transform duration-1000 ease-out group-hover:scale-[1.01]"
+                />
+              )}
               <div className="absolute inset-0 bg-black/[0.02] pointer-events-none"></div>
             </div>
           ) : (
             <div className="relative w-full overflow-hidden aspect-[21/9] sm:aspect-[21/9] md:aspect-[3/1] lg:aspect-[21/9]">
               <AnimatePresence initial={false} mode="wait">
-                <motion.img
+                <motion.div
                   key={currentBannerIndex}
-                  src={bannerUrls[currentBannerIndex]}
-                  alt={`Promo Banner ${currentBannerIndex + 1}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                  className="absolute inset-0 w-full h-full"
+                >
+                  {banners[currentBannerIndex]?.link === "#featured-collections" ? (
+                    <a
+                      href="#featured-collections"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById("featured-collections")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="block w-full h-full cursor-pointer hover:scale-[1.005] active:scale-[0.995] transition-all duration-300"
+                    >
+                      <img
+                        src={banners[currentBannerIndex]?.url}
+                        alt={`Promo Banner ${currentBannerIndex + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </a>
+                  ) : banners[currentBannerIndex]?.link ? (
+                    <Link
+                      href={banners[currentBannerIndex].link}
+                      className="block w-full h-full cursor-pointer hover:scale-[1.005] active:scale-[0.995] transition-all duration-300"
+                    >
+                      <img
+                        src={banners[currentBannerIndex]?.url}
+                        alt={`Promo Banner ${currentBannerIndex + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </Link>
+                  ) : (
+                    <img
+                      src={banners[currentBannerIndex]?.url}
+                      alt={`Promo Banner ${currentBannerIndex + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </motion.div>
               </AnimatePresence>
               <div className="absolute inset-0 bg-black/[0.02] pointer-events-none"></div>
 
@@ -234,7 +305,7 @@ export default function Home() {
                 type="button"
                 onClick={() =>
                   setCurrentBannerIndex(
-                    (prev) => (prev - 1 + bannerUrls.length) % bannerUrls.length
+                    (prev) => (prev - 1 + banners.length) % banners.length
                   )
                 }
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-brand shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
@@ -244,7 +315,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() =>
-                  setCurrentBannerIndex((prev) => (prev + 1) % bannerUrls.length)
+                  setCurrentBannerIndex((prev) => (prev + 1) % banners.length)
                 }
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-brand shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
               >
@@ -253,7 +324,7 @@ export default function Home() {
 
               {/* Pagination Dots */}
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-                {bannerUrls.map((_, idx) => (
+                {banners.map((_, idx) => (
                   <button
                     key={idx}
                     type="button"

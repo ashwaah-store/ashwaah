@@ -69,7 +69,7 @@ export default function ProductGrid() {
   }
 
   return (
-    <section className="pt-4 pb-20">
+    <section id="featured-collections" className="pt-4 pb-20">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}

@@ -37,24 +37,38 @@ export default function SettingsPage() {
 
   const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
 
-  const bannerUrls = useMemo(() => {
-    if (!bannerUrl) return [];
-    return bannerUrl.split(",").map((url) => url.trim()).filter(Boolean);
-  }, [bannerUrl]);
+  const [bannersList, setBannersList] = useState<{ url: string; link: string | null }[]>([]);
+  const [navItems, setNavItems] = useState<any[]>([]);
+  const [homepageCategoriesList, setHomepageCategoriesList] = useState<any[]>([]);
+  const [linkType, setLinkType] = useState<"none" | "premade" | "custom">("none");
+  const [selectedPremadeLink, setSelectedPremadeLink] = useState("#featured-collections");
+  const [customLink, setCustomLink] = useState("");
+
+  const premadeLinks = useMemo(() => {
+    const list: { label: string; value: string }[] = [];
+    list.push({ label: "Featured Collection Section (Scroll target)", value: "#featured-collections" });
+    navItems.forEach((item) => {
+      list.push({ label: `Nav Page: ${item.label}`, value: item.href });
+    });
+    homepageCategoriesList.forEach((item) => {
+      list.push({ label: `Category Card: ${item.name}`, value: item.link || `/category/${item.name.toLowerCase()}` });
+    });
+    return list;
+  }, [navItems, homepageCategoriesList]);
 
   useEffect(() => {
-    if (currentPreviewIndex >= bannerUrls.length && bannerUrls.length > 0) {
+    if (currentPreviewIndex >= bannersList.length && bannersList.length > 0) {
       setCurrentPreviewIndex(0);
     }
-  }, [bannerUrls.length, currentPreviewIndex]);
+  }, [bannersList.length, currentPreviewIndex]);
 
   useEffect(() => {
-    if (bannerUrls.length <= 1) return;
+    if (bannersList.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentPreviewIndex((prev) => (prev + 1) % bannerUrls.length);
+      setCurrentPreviewIndex((prev) => (prev + 1) % bannersList.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [bannerUrls.length]);
+  }, [bannersList.length]);
 
   // New offer form state
   const [newOfferText, setNewOfferText] = useState("");
@@ -67,17 +81,25 @@ export default function SettingsPage() {
     const trimmed = tempBannerUrl.trim();
     if (!trimmed) return;
 
-    setBannerUrl((prev) => {
-      const existing = prev ? prev.split(",").map((url) => url.trim()).filter(Boolean) : [];
-      if (existing.includes(trimmed)) {
+    let finalLink: string | null = null;
+    if (linkType === "premade") {
+      finalLink = selectedPremadeLink;
+    } else if (linkType === "custom") {
+      finalLink = customLink.trim() || null;
+    }
+
+    setBannersList((prev) => {
+      const exists = prev.some((b) => b.url === trimmed);
+      if (exists) {
         setError("This banner URL is already added.");
         return prev;
       }
-      const combined = [...existing, trimmed];
-      return combined.join(", ");
+      return [...prev, { url: trimmed, link: finalLink }];
     });
 
     setTempBannerUrl("");
+    setLinkType("none");
+    setCustomLink("");
     setSuccess("Banner URL added successfully!");
   };
 
@@ -87,7 +109,22 @@ export default function SettingsPage() {
       const resBanner = await fetch("/api/admin/settings?key=homepage_banner");
       const dataBanner = await resBanner.json();
       if (dataBanner.success && dataBanner.data) {
-        setBannerUrl(dataBanner.data.value);
+        const val = dataBanner.data.value;
+        setBannerUrl(val);
+        try {
+          const parsed = JSON.parse(val);
+          if (Array.isArray(parsed)) {
+            setBannersList(parsed.map((item: any) => {
+              if (typeof item === "string") return { url: item, link: null };
+              return { url: item.url || "", link: item.link || null };
+            }));
+          } else {
+            setBannersList([]);
+          }
+        } catch {
+          // Legacy format
+          setBannersList(val.split(",").map((url: string) => ({ url: url.trim(), link: null })).filter((b: any) => b.url));
+        }
       }
 
       // Fetch Offers
@@ -95,6 +132,20 @@ export default function SettingsPage() {
       const dataOffers = await resOffers.json();
       if (dataOffers.success) {
         setOffers(dataOffers.data);
+      }
+
+      // Fetch Nav Items
+      const resNav = await fetch("/api/admin/nav");
+      const dataNav = await resNav.json();
+      if (dataNav.success) {
+        setNavItems(dataNav.data);
+      }
+
+      // Fetch Categories
+      const resCat = await fetch("/api/admin/homepage-categories");
+      const dataCat = await resCat.json();
+      if (dataCat.success) {
+        setHomepageCategoriesList(dataCat.data);
       }
 
       if (resBanner.status === 401 || resOffers.status === 401) {
@@ -145,11 +196,20 @@ export default function SettingsPage() {
       await Promise.all(uploadPromises);
 
       if (uploadedUrls.length > 0) {
-        setBannerUrl((prev) => {
-          const existing = prev ? prev.split(",").map(url => url.trim()).filter(Boolean) : [];
-          const combined = [...existing, ...uploadedUrls];
-          return combined.join(", ");
+        let finalLink: string | null = null;
+        if (linkType === "premade") {
+          finalLink = selectedPremadeLink;
+        } else if (linkType === "custom") {
+          finalLink = customLink.trim() || null;
+        }
+
+        setBannersList((prev) => {
+          const newBanners = uploadedUrls.map((url) => ({ url, link: finalLink }));
+          return [...prev, ...newBanners];
         });
+        
+        setLinkType("none");
+        setCustomLink("");
         
         if (uploadErrors > 0) {
           setSuccess(`Uploaded ${uploadedUrls.length} image(s), but ${uploadErrors} failed.`);
@@ -179,7 +239,7 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           key: "homepage_banner",
-          value: bannerUrl,
+          value: JSON.stringify(bannersList),
         }),
       });
       const data = await res.json();
@@ -330,26 +390,86 @@ export default function SettingsPage() {
                 </button>
               </div>
 
-              {bannerUrls.length > 0 && (
+              {/* Link type options for the banner being added */}
+              <div className="space-y-4 bg-brand/5 p-5 rounded-2xl border border-brand/10">
+                <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] ml-1">Banner Click Navigation Link (Optional)</label>
+                
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { type: "none", label: "No Link" },
+                    { type: "premade", label: "Pre-made Link" },
+                    { type: "custom", label: "Custom Link" },
+                  ].map((item) => (
+                    <button
+                      key={item.type}
+                      type="button"
+                      onClick={() => setLinkType(item.type as any)}
+                      className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${
+                        linkType === item.type
+                          ? "bg-[#1B3022] text-[#C5A059] border-transparent shadow-sm"
+                          : "bg-white text-brand/60 border-brand/10 hover:bg-brand/5"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+
+                {linkType === "premade" && (
+                  <div>
+                    <label className="block text-[9px] font-bold text-brand/50 uppercase tracking-wider mb-2 ml-1">Select Pre-made Destination</label>
+                    <select
+                      value={selectedPremadeLink}
+                      onChange={(e) => setSelectedPremadeLink(e.target.value)}
+                      className="w-full bg-white border border-brand/20 rounded-xl px-4 py-3 text-sm font-semibold text-brand outline-none focus:border-[#C5A059]/50 transition-all"
+                    >
+                      {premadeLinks.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {linkType === "custom" && (
+                  <div>
+                    <label className="block text-[9px] font-bold text-[#C5A059] uppercase tracking-wider mb-2 ml-1">Custom Destination Link URL</label>
+                    <input
+                      type="text"
+                      value={customLink}
+                      onChange={(e) => setCustomLink(e.target.value)}
+                      placeholder="e.g. /my-story or /product/12"
+                      className="w-full bg-white border border-brand/20 focus:border-[#C5A059]/50 rounded-xl px-4 py-3.5 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {bannersList.length > 0 && (
                 <div className="space-y-3">
-                  <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] ml-1">Configured Banner Images ({bannerUrls.length})</label>
+                  <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] ml-1">Configured Banner Images ({bannersList.length})</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {bannerUrls.map((url, idx) => (
+                    {bannersList.map((banner, idx) => (
                       <div key={idx} className="relative group rounded-xl border border-brand/10 overflow-hidden bg-brand/5 aspect-[16/9] flex items-center justify-center">
-                        <img src={url} alt={`Banner thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                        <img src={banner.url} alt={`Banner thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                         <button
                           type="button"
                           onClick={() => {
-                            const newUrls = bannerUrls.filter((_, i) => i !== idx);
-                            setBannerUrl(newUrls.join(", "));
+                            setBannersList(prev => prev.filter((_, i) => i !== idx));
                           }}
                           className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md opacity-90 hover:opacity-100 transition-opacity z-10"
                         >
                           <X size={14} />
                         </button>
-                        <div className="absolute bottom-1 left-1 bg-brand/80 text-white text-[9px] px-1.5 py-0.5 rounded font-black">
+                        <div className="absolute bottom-1 left-1 bg-brand/80 text-white text-[9px] px-1.5 py-0.5 rounded font-black z-10">
                           #{idx + 1}
                         </div>
+                        {banner.link && (
+                          <div className="absolute bottom-1 right-1 max-w-[60%] bg-black/70 text-white text-[8px] px-1 py-0.5 rounded truncate select-none z-10 font-bold animate-in fade-in" title={banner.link}>
+                            {banner.link}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -545,18 +665,18 @@ export default function SettingsPage() {
             </div>
 
             {/* 3. Promo Banner Preview Section */}
-            {bannerUrls.length > 0 ? (
+            {bannersList.length > 0 ? (
               <div className="relative w-full overflow-hidden bg-white aspect-[21/9] flex items-center justify-center">
-                {bannerUrls.length === 1 ? (
+                {bannersList.length === 1 ? (
                   <img
-                    src={bannerUrls[0]}
+                    src={bannersList[0].url}
                     alt="Banner Preview"
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="relative w-full h-full">
                     <img
-                      src={bannerUrls[currentPreviewIndex]}
+                      src={bannersList[currentPreviewIndex]?.url}
                       alt={`Banner Preview ${currentPreviewIndex + 1}`}
                       className="w-full h-full object-cover transition-all duration-500"
                     />
@@ -565,7 +685,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={() =>
                         setCurrentPreviewIndex(
-                          (prev) => (prev - 1 + bannerUrls.length) % bannerUrls.length
+                          (prev) => (prev - 1 + bannersList.length) % bannersList.length
                         )
                       }
                       className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white/80 hover:bg-white text-brand shadow-sm flex items-center justify-center z-10"
@@ -576,7 +696,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={() =>
                         setCurrentPreviewIndex(
-                          (prev) => (prev + 1) % bannerUrls.length
+                          (prev) => (prev + 1) % bannersList.length
                         )
                       }
                       className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white/80 hover:bg-white text-brand shadow-sm flex items-center justify-center z-10"
@@ -585,7 +705,7 @@ export default function SettingsPage() {
                     </button>
                     {/* Pagination Indicator */}
                     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1 z-10">
-                      {bannerUrls.map((_, idx) => (
+                      {bannersList.map((_, idx) => (
                         <button
                           key={idx}
                           type="button"
