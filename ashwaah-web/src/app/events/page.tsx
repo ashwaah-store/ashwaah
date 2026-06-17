@@ -312,15 +312,15 @@ function EventCard({ item, onRegisterClick }: { item: EventItem; onRegisterClick
     <div className="flex flex-col bg-[#FAF6F0] border border-brand/10 rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 mb-12 group">
       
       {/* Upper Main Body: Slide Show and Details Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6">
         
-        {/* Left Side: Slide Show (5 cols) */}
-        <div className="lg:col-span-5 h-[280px] sm:h-[320px] md:h-[350px] lg:h-[380px]">
+        {/* Left Side: Slide Show (6 cols) */}
+        <div className="lg:col-span-6 h-[280px] sm:h-[350px] md:h-[380px] lg:h-[400px]">
           <EventMediaSlideshow mediaList={mediaList} />
         </div>
 
-        {/* Right Side: Metadata / Ticket details (7 cols) */}
-        <div className="lg:col-span-7 space-y-4">
+        {/* Right Side: Metadata / Ticket details (6 cols) */}
+        <div className="lg:col-span-6 space-y-4">
             
             {/* Header / Category Badge */}
             <div className="flex items-center justify-between">
