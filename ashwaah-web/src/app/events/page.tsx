@@ -314,13 +314,13 @@ function EventCard({ item, onRegisterClick }: { item: EventItem; onRegisterClick
       {/* Upper Main Body: Slide Show and Details Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6">
         
-        {/* Left Side: Slide Show (6 cols) */}
-        <div className="lg:col-span-6 h-[280px] sm:h-[350px] md:h-[380px] lg:h-[400px]">
+        {/* Left Side: Slide Show (7 cols) */}
+        <div className="lg:col-span-7 h-[280px] sm:h-[350px] md:h-[400px] lg:h-[430px]">
           <EventMediaSlideshow mediaList={mediaList} />
         </div>
 
-        {/* Right Side: Metadata / Ticket details (6 cols) */}
-        <div className="lg:col-span-6 space-y-4">
+        {/* Right Side: Metadata / Ticket details (5 cols) */}
+        <div className="lg:col-span-5 space-y-4">
             
             {/* Header / Category Badge */}
             <div className="flex items-center justify-between">
@@ -346,7 +346,7 @@ function EventCard({ item, onRegisterClick }: { item: EventItem; onRegisterClick
             )}
 
             {/* Mockup-style Details Card Container */}
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-4 text-brand-dark max-w-md">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-3 text-brand-dark max-w-sm">
               <div className="space-y-3">
                 {/* Date */}
                 <div className="flex items-center space-x-3.5 text-xs font-semibold text-gray-700">
