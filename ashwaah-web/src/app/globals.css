@@ -113,7 +113,7 @@ body.hide-footer footer {
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee 35s linear infinite;
+  animation: marquee 75s linear infinite;
 }
 
 .animate-marquee:hover {
