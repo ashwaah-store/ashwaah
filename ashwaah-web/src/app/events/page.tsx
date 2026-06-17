@@ -340,7 +340,7 @@ export default function EventsPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"indoor" | "outdoor">("indoor");
+  const [activeTab, setActiveTab] = useState<"all" | "indoor" | "outdoor">("all");
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -383,7 +383,17 @@ export default function EventsPage() {
 
       {/* TAB NAVIGATION */}
       <section className="max-w-6xl mx-auto px-4 mt-16">
-        <div className="flex items-center justify-center p-1.5 bg-white border border-brand/10 rounded-3xl max-w-md mx-auto shadow-md">
+        <div className="flex items-center justify-center p-1.5 bg-white border border-brand/10 rounded-3xl max-w-lg mx-auto shadow-md">
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`flex-1 flex items-center justify-center py-4 px-6 text-xs font-black uppercase tracking-widest rounded-2xl transition-all duration-300 ${
+              activeTab === "all"
+                ? "bg-brand text-white shadow-lg"
+                : "text-brand/60 hover:text-brand hover:bg-brand/5"
+            }`}
+          >
+            All Events
+          </button>
           <button
             onClick={() => setActiveTab("indoor")}
             className={`flex-1 flex items-center justify-center py-4 px-6 text-xs font-black uppercase tracking-widest rounded-2xl transition-all duration-300 ${
@@ -392,7 +402,7 @@ export default function EventsPage() {
                 : "text-brand/60 hover:text-brand hover:bg-brand/5"
             }`}
           >
-            Event Types
+            Indoor Events
           </button>
           <button
             onClick={() => setActiveTab("outdoor")}
@@ -424,7 +434,7 @@ export default function EventsPage() {
           <div className="space-y-16">
             
             {/* RENDER INDOOR TAB */}
-            {activeTab === "indoor" && INDOOR_CATEGORIES.map((cat) => {
+            {(activeTab === "all" || activeTab === "indoor") && INDOOR_CATEGORIES.map((cat) => {
               const catEvents = events.filter((e) => e.category === cat.key);
               
               return (
@@ -471,7 +481,7 @@ export default function EventsPage() {
             })}
 
             {/* RENDER OUTDOOR TAB */}
-            {activeTab === "outdoor" && OUTDOOR_CATEGORIES.map((cat) => {
+            {(activeTab === "all" || activeTab === "outdoor") && OUTDOOR_CATEGORIES.map((cat) => {
               const catEvents = events.filter((e) => e.category === cat.key);
               
               return (
