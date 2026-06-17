@@ -643,7 +643,7 @@ ${regNotes ? `*Notes:* ${regNotes}` : ""}`;
                       {cat.label}
                     </h2>
                     {cat.description && (
-                      <p className="text-brand-dark/60 text-base md:text-lg font-medium max-w-5xl leading-relaxed">
+                      <p className="text-brand-dark/60 text-lg md:text-xl font-medium max-w-none leading-relaxed">
                         {cat.description}
                       </p>
                     )}
@@ -673,7 +673,7 @@ ${regNotes ? `*Notes:* ${regNotes}` : ""}`;
                       {cat.label}
                     </h2>
                     {cat.description && (
-                      <p className="text-brand-dark/60 text-base md:text-lg font-medium max-w-5xl leading-relaxed">
+                      <p className="text-brand-dark/60 text-lg md:text-xl font-medium max-w-none leading-relaxed">
                         {cat.description}
                       </p>
                     )}
