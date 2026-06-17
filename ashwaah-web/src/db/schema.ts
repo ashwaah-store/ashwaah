@@ -144,4 +144,23 @@ export const wishlists = sqliteTable("wishlists", {
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
+export const events = sqliteTable("events", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  category: text("category").notNull(), // e.g. 'meetups', 'workshops', 'performances', 'ramp-walks', 'fashion-expo', 'screening', 'carnivals-fairs', 'sports-fitness', 'concerts-music', 'cultural-gatherings', 'picnics-social', 'adventure'
+  description: text("description"),
+  imageUrl: text("image_url"), // JSON string array of image/video URLs
+  date: text("date").notNull(), // e.g. "Sat 20 Jun 2026 - Sat 27 Jun 2026"
+  time: text("time").notNull(), // e.g. "7:00 PM"
+  duration: text("duration"), // e.g. "1 Hour"
+  ageLimit: text("age_limit"), // e.g. "21yrs +"
+  language: text("language"), // e.g. "English, Hindi"
+  genre: text("genre"), // e.g. "Bollywood"
+  location: text("location").notNull(), // e.g. "Mindspace Social: Hyderabad"
+  cost: text("cost").notNull(), // e.g. "₹299 onwards"
+  bookingUrl: text("booking_url"), // RSVP URL
+  disclaimer: text("disclaimer"), // Disclaimer text
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
+
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, ShoppingCart, User, Menu, X, LogOut, AlertCircle, BookOpen, Heart, Trash2 } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, LogOut, AlertCircle, BookOpen, Heart, Trash2, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileDropdown from "./ProfileDropdown";
 import SearchModal from "./SearchModal";
@@ -182,6 +182,11 @@ export default function Navbar() {
                 <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block">My Story</span>
               </Link>
 
+              <Link href="/events" aria-label="Events" className="hover:text-[#C5A059] transition-colors p-2 flex items-center gap-1.5 group">
+                <Calendar className="h-5 w-5" />
+                <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block">Events</span>
+              </Link>
+
               <Link
                 href={user ? "/wishlist" : `/login?redirect=${encodeURIComponent(pathname)}`}
                 aria-label="Wishlist"
@@ -264,8 +269,26 @@ export default function Navbar() {
           <div className="md:hidden bg-[#064e3b] border-t border-white/10 animate-in slide-in-from-top duration-300">
             <div className="px-6 pt-8 pb-12 space-y-4">
               {/* Dynamic categories moved to home page */}
+              <div className="flex flex-col space-y-3 pb-6 border-b border-white/10">
+                <Link
+                  href="/my-story"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 text-white hover:text-[#C5A059] transition-colors py-2"
+                >
+                  <BookOpen className="h-5 w-5 text-[#C5A059]" />
+                  <span className="text-sm font-bold uppercase tracking-wider">My Story</span>
+                </Link>
+                <Link
+                  href="/events"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 text-white hover:text-[#C5A059] transition-colors py-2"
+                >
+                  <Calendar className="h-5 w-5 text-[#C5A059]" />
+                  <span className="text-sm font-bold uppercase tracking-wider">Events</span>
+                </Link>
+              </div>
               
-              <div className="pt-8 border-t border-white/10">
+              <div className="pt-4">
                 {user ? (
                   <div className="space-y-4">
                     <Link
