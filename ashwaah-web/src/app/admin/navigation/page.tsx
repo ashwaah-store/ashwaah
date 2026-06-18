@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Check, AlertCircle, Loader2, Save } from "lucide-react";
+import { Plus, Check, AlertCircle, Loader2, Save, Upload } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -42,6 +42,7 @@ export default function AdminNavigation() {
   // Form State
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ label: "", href: "", imageUrl: "", order: 0, isActive: true, filterTypes: "" });
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -85,6 +86,37 @@ export default function AdminNavigation() {
   const handleCancel = () => {
     setEditingId(null);
     setFormData({ label: "", href: "", imageUrl: "", order: 0, isActive: true, filterTypes: "" });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    setError("");
+    setSuccess("");
+
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formDataUpload,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFormData(prev => ({ ...prev, imageUrl: data.url }));
+        setSuccess("Image uploaded to Cloudinary!");
+      } else {
+        setError(data.error || "Upload failed.");
+      }
+    } catch (err) {
+      setError("Error uploading image.");
+    } finally {
+      setIsUploadingImage(false);
+      e.target.value = "";
+    }
   };
 
   const handleAddNew = () => {
@@ -235,13 +267,35 @@ export default function AdminNavigation() {
                       <img src={formData.imageUrl} alt="preview" className="w-full h-full object-cover" onError={e => (e.currentTarget.src = "/images/placeholder.png")} />
                     </div>
                   )}
-                  <input 
-                    type="text" 
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
-                    className="flex-1 bg-brand/5 border border-brand/10 rounded-xl py-3 px-4 text-sm font-bold text-brand focus:outline-none focus:border-[#C5A059]/30 focus:ring-4 focus:ring-[#C5A059]/10 transition-all"
-                  />
+                  <div className="flex-1 flex gap-3">
+                    <input 
+                      type="text" 
+                      value={formData.imageUrl}
+                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
+                      className="flex-1 bg-brand/5 border border-brand/10 rounded-xl py-3 px-4 text-sm font-bold text-brand focus:outline-none focus:border-[#C5A059]/30 focus:ring-4 focus:ring-[#C5A059]/10 transition-all"
+                    />
+                    <label className="cursor-pointer bg-[#C5A059] text-white px-5 py-3 rounded-xl font-bold text-xs hover:bg-[#B38E46] transition-all whitespace-nowrap flex items-center justify-center gap-1.5 shadow-sm">
+                      {isUploadingImage ? (
+                        <>
+                          <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={14} />
+                          <span>Upload</span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={isUploadingImage}
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col">

@@ -13,7 +13,8 @@ import {
   ArrowUp, 
   ArrowDown, 
   ImageIcon, 
-  ExternalLink 
+  ExternalLink,
+  Upload
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -47,6 +48,7 @@ export default function CategorySettingsPage() {
   const [link, setLink] = useState("");
   const [order, setOrder] = useState(0);
   const [filterTypes, setFilterTypes] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -81,6 +83,37 @@ export default function CategorySettingsPage() {
     setLink("");
     setOrder(categories.length);
     setFilterTypes("");
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    setError("");
+    setSuccess("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setImageUrl(data.url);
+        setSuccess("Image uploaded to Cloudinary!");
+      } else {
+        setError(data.error || "Upload failed.");
+      }
+    } catch (err) {
+      setError("Error uploading image.");
+    } finally {
+      setIsUploadingImage(false);
+      e.target.value = "";
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -260,14 +293,36 @@ export default function CategorySettingsPage() {
               <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-2 ml-1">
                 Category Image URL
               </label>
-              <input
-                type="text"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="e.g. https://images.unsplash.com/... or /images/..."
-                className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
-                required
-              />
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="e.g. https://images.unsplash.com/... or /images/..."
+                  className="flex-grow bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
+                  required
+                />
+                <label className="cursor-pointer bg-[#C5A059] text-white px-5 py-3 rounded-2xl font-bold text-xs hover:bg-[#B38E46] transition-all whitespace-nowrap flex items-center justify-center gap-1.5 shadow-sm">
+                  {isUploadingImage ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={14} />
+                      <span>Upload</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={isUploadingImage}
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
             </div>
 
             <div>
