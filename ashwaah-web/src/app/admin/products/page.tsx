@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { Plus, Package, Trash2, Edit3, X, Star, Loader2, Check, Tag, Sparkles, Search, Scissors } from "lucide-react";
+import { Plus, Package, Trash2, Edit3, X, Star, Loader2, Check, Tag, Sparkles, Search, Scissors, Upload } from "lucide-react";
 import { MALE_MEASUREMENTS, FEMALE_MEASUREMENTS } from "@/constants/measurements";
 
 const SIZE_SYSTEMS = {
@@ -96,6 +96,7 @@ export default function ProductManagement() {
   // Images per color
   const [colorImageInputs, setColorImageInputs] = useState<Record<string, string>>({});
   const [colorImages, setColorImages] = useState<Record<string, string[]>>({});
+  const [uploadingColor, setUploadingColor] = useState<Record<string, boolean>>({});
 
   const getFirstImage = (imagesStr: string | null | undefined) => {
     try {
@@ -327,6 +328,34 @@ export default function ProductManagement() {
         ...prev,
         [color]: ""
       }));
+    }
+  };
+
+  const handleUploadImageForColor = async (e: React.ChangeEvent<HTMLInputElement>, color: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingColor(prev => ({ ...prev, [color]: true }));
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setColorImageInputs(prev => ({ ...prev, [color]: data.url }));
+        showToast("Image uploaded to Cloudinary!");
+      } else {
+        showToast(data.error || "Upload failed.");
+      }
+    } catch (err) {
+      showToast("Error uploading image.");
+    } finally {
+      setUploadingColor(prev => ({ ...prev, [color]: false }));
+      e.target.value = "";
     }
   };
 
@@ -1086,26 +1115,50 @@ export default function ProductManagement() {
                         </span>
                       </div>
                       
-                      <div className="flex gap-3">
-                        <input 
-                          value={currentInput} 
-                          onChange={e => setColorImageInputs(prev => ({ ...prev, [color]: e.target.value }))} 
-                          onKeyDown={e => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              addColorImage(color);
-                            }
-                          }} 
-                          placeholder="Paste image URL and press Enter or click Add →" 
-                          className={`${INPUT} flex-1`} 
-                        />
-                        <button 
-                          type="button" 
-                          onClick={() => addColorImage(color)} 
-                          className="bg-[#1B3022] text-[#C5A059] px-5 py-2 rounded-2xl font-bold text-xs hover:bg-[#2c4d37] transition-all whitespace-nowrap"
-                        >
-                          Add URL
-                        </button>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex flex-1 gap-3">
+                          <input 
+                            value={currentInput} 
+                            onChange={e => setColorImageInputs(prev => ({ ...prev, [color]: e.target.value }))} 
+                            onKeyDown={e => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                addColorImage(color);
+                              }
+                            }} 
+                            placeholder="Paste URL or upload image →" 
+                            className={`${INPUT} flex-1`} 
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => addColorImage(color)} 
+                            className="bg-[#1B3022] text-[#C5A059] px-5 py-2 rounded-2xl font-bold text-xs hover:bg-[#2c4d37] transition-all whitespace-nowrap"
+                          >
+                            Add URL
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <label className="cursor-pointer bg-[#C5A059] text-white px-5 py-2.5 rounded-2xl font-bold text-xs hover:bg-[#B38E46] transition-all whitespace-nowrap flex items-center justify-center gap-1.5 shadow-sm">
+                            {uploadingColor[color] ? (
+                              <>
+                                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <span>Uploading...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload size={14} />
+                                <span>Upload Image</span>
+                              </>
+                            )}
+                            <input 
+                              type="file"
+                              accept="image/*"
+                              disabled={!!uploadingColor[color]}
+                              onChange={e => handleUploadImageForColor(e, color)}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
                       </div>
                       
                       {currentImages.length > 0 ? (

@@ -1,7 +1,13 @@
 import { verifyAdminRequest } from "@/utils/auth";
 import { NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+
+// Configure Cloudinary with keys from .env.local
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 async function isAdmin(request?: Request) {
   return !!(await verifyAdminRequest(request));
@@ -22,22 +28,29 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Ensure uploads folder exists in public directory
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(uploadDir, { recursive: true });
+    // Stream upload directly to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "ashwaah_store", // Folder name in Cloudinary media library
+          resource_type: "auto",   // Automatically detects image or video type
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(buffer);
+    }) as any;
 
-    // Generate unique name
-    const timestamp = Date.now();
-    const extension = path.extname(file.name) || ".png";
-    const filename = `banner_${timestamp}${extension}`;
-    const filePath = path.join(uploadDir, filename);
+    const secureUrl = uploadResult.secure_url;
+    
+    // Inject f_auto (auto format) and q_auto (auto quality) optimization parameters
+    const optimizedUrl = secureUrl.replace("/upload/", "/upload/f_auto,q_auto/");
 
-    await fs.writeFile(filePath, buffer);
-
-    const relativeUrl = `/uploads/${filename}`;
-    return NextResponse.json({ success: true, url: relativeUrl });
+    return NextResponse.json({ success: true, url: optimizedUrl });
   } catch (error: any) {
-    console.error("Upload Error:", error);
-    return NextResponse.json({ success: false, error: error.message || "Failed to upload file" }, { status: 500 });
+    console.error("Cloudinary Upload Error:", error);
+    return NextResponse.json({ success: false, error: error.message || "Failed to upload file to Cloudinary" }, { status: 500 });
   }
 }
