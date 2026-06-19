@@ -22,6 +22,7 @@ interface Product {
   gender: string | null;
   isCustomizable: boolean | null;
   tags?: string | null;
+  style?: string | null;
   sizes?: string[];
 }
 
@@ -95,11 +96,21 @@ export default function CategoryFilterSection({
   }, [filterTypes]);
 
   // Helper to check if a product matches a type, with special handling for T-Shirt vs Shirt
-  const isTypeMatch = (type: string, name: string, category: string, tags: string) => {
-    const lowerType = type.toLowerCase();
+  const isTypeMatch = (type: string, name: string, category: string, tags: string, style: string) => {
+    const lowerType = type.toLowerCase().trim();
     const lowerName = name.toLowerCase();
     const lowerCategory = category.toLowerCase();
     const lowerTags = tags.toLowerCase();
+    const lowerStyle = style.toLowerCase();
+
+    // Check direct inclusion
+    const matchesInclusion = 
+      lowerCategory.includes(lowerType) ||
+      lowerTags.includes(lowerType) ||
+      lowerName.includes(lowerType) ||
+      lowerStyle.includes(lowerType);
+
+    if (matchesInclusion) return true;
 
     // Special handling: "T-Shirt" (or T-Shirts / Tshirt) covers Sweatshirts, Hoodies, Polos, Tees, and T-Shirts
     if (
@@ -128,17 +139,31 @@ export default function CategoryFilterSection({
       }
     }
 
-    return (
-      lowerCategory.includes(lowerType) ||
-      lowerTags.includes(lowerType) ||
-      lowerName.includes(lowerType)
-    );
+    // Special logic for compound filter types (like "Blazers & Coats"): match if product's name/tags/style/category has "blazer" or "coat"
+    if (lowerType.includes("&") || lowerType.includes("and") || lowerType.includes("/")) {
+      const parts = lowerType
+        .split(/[\s&/]|and/g)
+        .map(p => p.trim())
+        .filter(p => p.length > 2); // match words longer than 2 letters like "blazer", "coat"
+      
+      if (parts.length > 0) {
+        return parts.some(part => 
+          lowerCategory.includes(part) ||
+          lowerTags.includes(part) ||
+          lowerName.includes(part) ||
+          lowerStyle.includes(part)
+        );
+      }
+    }
+
+    return false;
   };
 
   // Helper for default type classification
-  const classifyTypeFallback = (name: string, category: string) => {
+  const classifyTypeFallback = (name: string, category: string, style: string) => {
     const lowerName = name.toLowerCase();
     const lowerCategory = category.toLowerCase();
+    const lowerStyle = style.toLowerCase();
 
     if (
       lowerName.includes("sweatshirt") ||
@@ -168,7 +193,10 @@ export default function CategoryFilterSection({
       lowerCategory.includes("corporate") ||
       lowerName.includes("blazer") ||
       lowerName.includes("suit") ||
-      lowerName.includes("formal")
+      lowerName.includes("formal") ||
+      lowerStyle.includes("blazer") ||
+      lowerStyle.includes("coat") ||
+      lowerStyle.includes("suit")
     ) {
       return "Workwear";
     } else if (lowerName.includes("dress") || lowerName.includes("gown") || lowerName.includes("bodycon") || lowerCategory.includes("dresses")) {
@@ -186,14 +214,15 @@ export default function CategoryFilterSection({
       const name = (p.name || "").toLowerCase();
       const category = (p.category || "").toLowerCase();
       const tags = (p.tags || "").toLowerCase();
+      const style = (p.style || "").toLowerCase();
 
       if (adminFilterTypes && adminFilterTypes.length > 0) {
         // Sort types by length descending to match most specific first
         const sortedAdminTypes = [...adminFilterTypes].sort((a, b) => b.length - a.length);
-        const matchedType = sortedAdminTypes.find((t) => isTypeMatch(t, name, category, tags));
+        const matchedType = sortedAdminTypes.find((t) => isTypeMatch(t, name, category, tags, style));
         type = matchedType || "Other";
       } else {
-        type = classifyTypeFallback(name, category);
+        type = classifyTypeFallback(name, category, style);
       }
 
       return { ...p, classifiedType: type };
