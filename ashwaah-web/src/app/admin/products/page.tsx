@@ -109,7 +109,13 @@ export default function ProductManagement() {
   const [neckStyle, setNeckStyle] = useState("");
   const [keyWords, setKeyWords] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
-  const [specRows, setSpecRows] = useState<{ id: string; key: string; value: string; isCustom: boolean }[]>([]);
+  const [specRows, setSpecRows] = useState<{ id: string; key: string; value: string; isCustom: boolean }[]>(() => [
+    { id: "style-init", key: "Style", value: "", isCustom: false },
+    { id: "fabric-init", key: "Fabric", value: "", isCustom: false },
+    { id: "weave-init", key: "Weave", value: "", isCustom: false },
+    { id: "neck-style-init", key: "Neck Style", value: "", isCustom: false },
+    { id: "key-words-init", key: "Key Words", value: "", isCustom: false },
+  ]);
 
   const PRESET_SPEC_KEYS = ["Style", "Fabric", "Weave", "Neck Style", "Key Words"];
 
@@ -436,7 +442,13 @@ export default function ProductManagement() {
     setAvgRating("4.3"); setNumReviews("1");
     setIsFeatured(false); setIsCustomizable(false); setTags("");
     setStyle(""); setFabricComposition(""); setWeave(""); setNeckStyle(""); setKeyWords(""); setFilterCategory("");
-    setSpecRows([]);
+    setSpecRows([
+      { id: Math.random().toString(), key: "Style", value: "", isCustom: false },
+      { id: Math.random().toString(), key: "Fabric", value: "", isCustom: false },
+      { id: Math.random().toString(), key: "Weave", value: "", isCustom: false },
+      { id: Math.random().toString(), key: "Neck Style", value: "", isCustom: false },
+      { id: Math.random().toString(), key: "Key Words", value: "", isCustom: false },
+    ]);
     setColorImages({});
     setColorImageInputs({});
     setSelectedSizes([]); setSelectedColors([]); setVariations([]);
@@ -631,8 +643,9 @@ export default function ProductManagement() {
       const specsObj: Record<string, string> = {};
       specRows.forEach(row => {
         const cleanKey = row.key.trim();
-        if (cleanKey) {
-          specsObj[cleanKey] = row.value;
+        const cleanVal = row.value.trim();
+        if (cleanKey && cleanVal) {
+          specsObj[cleanKey] = cleanVal;
         }
       });
 
