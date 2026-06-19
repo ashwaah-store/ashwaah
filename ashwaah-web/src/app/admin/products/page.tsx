@@ -60,6 +60,12 @@ interface Product {
   isCustomizable: boolean | number | null;
   enabledMeasurements: string | null;
   tags: string | null;
+  style?: string | null;
+  fabricComposition?: string | null;
+  weave?: string | null;
+  neckStyle?: string | null;
+  keyWords?: string | null;
+  filterCategory?: string | null;
 }
 
 const LABEL = "block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-3";
@@ -93,6 +99,7 @@ export default function ProductManagement() {
   const [weave, setWeave] = useState("");
   const [neckStyle, setNeckStyle] = useState("");
   const [keyWords, setKeyWords] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
   const [enabledMeasurements, setEnabledMeasurements] = useState<string[]>([]);
   const [customMeasurements, setCustomMeasurements] = useState<string[]>([]);
   const [newMeasurementInput, setNewMeasurementInput] = useState("");
@@ -135,6 +142,16 @@ export default function ProductManagement() {
     standard: []
   });
   const [customSizeInput, setCustomSizeInput] = useState("");
+  
+  const existingFilterCategories = useMemo(() => {
+    const categoriesSet = new Set<string>();
+    products.forEach((p) => {
+      if (p.filterCategory && typeof p.filterCategory === "string" && p.filterCategory.trim()) {
+        categoriesSet.add(p.filterCategory.trim());
+      }
+    });
+    return Array.from(categoriesSet).sort();
+  }, [products]);
   
   // States and Refs for inline size button reordering
   const [allSizesOrder, setAllSizesOrder] = useState<string[]>([]);
@@ -376,7 +393,7 @@ export default function ProductManagement() {
     setName(""); setDescription(""); setGender("unisex"); setCategory("");
     setAvgRating("4.3"); setNumReviews("1");
     setIsFeatured(false); setIsCustomizable(false); setTags("");
-    setStyle(""); setFabricComposition(""); setWeave(""); setNeckStyle(""); setKeyWords("");
+    setStyle(""); setFabricComposition(""); setWeave(""); setNeckStyle(""); setKeyWords(""); setFilterCategory("");
     setColorImages({});
     setColorImageInputs({});
     setSelectedSizes([]); setSelectedColors([]); setVariations([]);
@@ -427,6 +444,7 @@ export default function ProductManagement() {
         setWeave(p.weave || "");
         setNeckStyle(p.neckStyle || "");
         setKeyWords(p.keyWords || "");
+        setFilterCategory(p.filterCategory || "");
         
         let parsedImages: Record<string, string[]> = {};
         try {
@@ -545,7 +563,7 @@ export default function ProductManagement() {
         avgRating, numReviews, category, gender, colors: selectedColors, tags, isFeatured,
         isCustomizable,
         enabledMeasurements: JSON.stringify(enabledMeasurements),
-        style, fabricComposition, weave, neckStyle, keyWords
+        style, fabricComposition, weave, neckStyle, keyWords, filterCategory
       };
       
       const res = await fetch("/api/admin/products", {
@@ -787,6 +805,25 @@ export default function ProductManagement() {
                 <div>
                   <label className={LABEL}>Tags (comma-separated)</label>
                   <input value={tags} onChange={e => setTags(e.target.value)} placeholder="cotton, festive, handloom, bestseller…" className={INPUT} />
+                </div>
+                <div>
+                  <label className={LABEL}>Filter Category (Sidebar Category Filter Name)</label>
+                  <input 
+                    type="text" 
+                    value={filterCategory} 
+                    onChange={e => setFilterCategory(e.target.value)} 
+                    placeholder="e.g. Blazers & Coats, Shirt, Trousers" 
+                    list="filter-categories-datalist" 
+                    className={INPUT} 
+                  />
+                  <datalist id="filter-categories-datalist">
+                    {existingFilterCategories.map(cat => (
+                      <option key={cat} value={cat} />
+                    ))}
+                  </datalist>
+                  <p className="mt-1.5 text-[10px] text-brand/50 font-medium leading-relaxed">
+                    Determines which checkbox option in the storefront's sidebar categories filter this product belongs to. Type any custom category or choose one of the existing ones.
+                  </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>

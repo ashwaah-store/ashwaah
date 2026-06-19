@@ -92,7 +92,7 @@ export async function POST(request: Request) {
       name, description, salePrice, images, variations,
       avgRating, numReviews, category, gender, colors, tags, isFeatured, 
       isCustomizable, enabledMeasurements,
-      style, fabricComposition, weave, neckStyle, keyWords
+      style, fabricComposition, weave, neckStyle, keyWords, filterCategory
     } = body;
 
     // Validation
@@ -125,6 +125,7 @@ export async function POST(request: Request) {
         weave: weave || null,
         neckStyle: neckStyle || null,
         keyWords: keyWords || null,
+        filterCategory: filterCategory || null,
       }).returning();
 
       if (!productResult || productResult.length === 0) {
@@ -171,7 +172,7 @@ export async function PATCH(request: Request) {
       id, name, description, salePrice, images, variations,
       avgRating, numReviews, category, gender, colors, tags, isFeatured, 
       isCustomizable, enabledMeasurements,
-      style, fabricComposition, weave, neckStyle, keyWords
+      style, fabricComposition, weave, neckStyle, keyWords, filterCategory
     } = body;
 
     if (!id) return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });
@@ -206,6 +207,7 @@ export async function PATCH(request: Request) {
     if (weave !== undefined) updateData.weave = weave || null;
     if (neckStyle !== undefined) updateData.neckStyle = neckStyle || null;
     if (keyWords !== undefined) updateData.keyWords = keyWords || null;
+    if (filterCategory !== undefined) updateData.filterCategory = filterCategory || null;
 
     // 1 & 2. Update Product and Variations in a Transaction
     await db.transaction(async (tx) => {

@@ -40,6 +40,7 @@ export const products = sqliteTable("products", {
   weave: text("weave"),
   neckStyle: text("neck_style"),
   keyWords: text("key_words"),
+  filterCategory: text("filter_category"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 

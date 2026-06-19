@@ -24,6 +24,7 @@ interface Product {
   tags?: string | null;
   style?: string | null;
   keyWords?: string | null;
+  filterCategory?: string | null;
   sizes?: string[];
 }
 
@@ -225,7 +226,15 @@ export default function CategoryFilterSection({
       const style = (p.style || "").toLowerCase();
       const keyWords = (p.keyWords || "").toLowerCase();
 
-      if (adminFilterTypes && adminFilterTypes.length > 0) {
+      const rawFilterCat = (p.filterCategory || "").trim();
+      if (rawFilterCat) {
+        if (adminFilterTypes && adminFilterTypes.length > 0) {
+          const matched = adminFilterTypes.find(t => t.toLowerCase() === rawFilterCat.toLowerCase());
+          type = matched || rawFilterCat;
+        } else {
+          type = rawFilterCat;
+        }
+      } else if (adminFilterTypes && adminFilterTypes.length > 0) {
         // Sort types by length descending to match most specific first
         const sortedAdminTypes = [...adminFilterTypes].sort((a, b) => b.length - a.length);
         const matchedType = sortedAdminTypes.find((t) => isTypeMatch(t, name, category, tags, style, keyWords));
