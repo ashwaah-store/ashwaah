@@ -791,54 +791,26 @@ export default function ProductManagement() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className={LABEL}>Style</label>
-                    <input 
-                      type="text" 
-                      value={style} 
-                      onChange={e => setStyle(e.target.value)} 
-                      placeholder="e.g. Sophisticated, tailored power suit" 
-                      className={INPUT} 
-                    />
+                    <input value={style} onChange={e => setStyle(e.target.value)} placeholder="e.g. Sophisticated, tailored women's power suit" className={INPUT} />
                   </div>
                   <div>
                     <label className={LABEL}>Fabric Composition</label>
-                    <input 
-                      type="text" 
-                      value={fabricComposition} 
-                      onChange={e => setFabricComposition(e.target.value)} 
-                      placeholder="e.g. Wool Crepe" 
-                      className={INPUT} 
-                    />
+                    <input value={fabricComposition} onChange={e => setFabricComposition(e.target.value)} placeholder="e.g. Wool Crepe" className={INPUT} />
                   </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className={LABEL}>Weave</label>
-                    <input 
-                      type="text" 
-                      value={weave} 
-                      onChange={e => setWeave(e.target.value)} 
-                      placeholder="e.g. Ultra Fine" 
-                      className={INPUT} 
-                    />
+                    <input value={weave} onChange={e => setWeave(e.target.value)} placeholder="e.g. Ultra Fine" className={INPUT} />
                   </div>
                   <div>
                     <label className={LABEL}>Neck Style</label>
-                    <input 
-                      type="text" 
-                      value={neckStyle} 
-                      onChange={e => setNeckStyle(e.target.value)} 
-                      placeholder="e.g. V" 
-                      className={INPUT} 
-                    />
+                    <input value={neckStyle} onChange={e => setNeckStyle(e.target.value)} placeholder="e.g. V-Neck" className={INPUT} />
                   </div>
                 </div>
                 <div>
-                  <label className={LABEL}>Key Words / Features (one per line)</label>
-                  <textarea 
-                    value={keyWords} 
-                    onChange={e => setKeyWords(e.target.value)} 
-                    placeholder="Single-breasted tailored blazer with classic notched lapels.&#10;Matching V-neck inner top or vest.&#10;High-waisted, wide-leg or straight-cut trousers." 
-                    rows={3} 
-                    className={`${INPUT} resize-none`} 
-                  />
+                  <label className={LABEL}>Key Words / Specific Details</label>
+                  <textarea value={keyWords} onChange={e => setKeyWords(e.target.value)} placeholder="e.g. Single-breasted tailored blazer, Matching V-neck inner top, etc." rows={2} className={`${INPUT} resize-none`} />
                 </div>
                 <div className="flex items-center justify-between p-6 bg-brand/5 rounded-[2.5rem] border border-brand/10 transition-all hover:bg-brand/[0.08]">
                   <div className="flex items-center space-x-4">
