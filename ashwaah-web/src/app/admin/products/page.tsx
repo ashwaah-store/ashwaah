@@ -73,6 +73,7 @@ interface Product {
   neckStyle?: string | null;
   keyWords?: string | null;
   filterCategory?: string | null;
+  specifications?: string | null;
 }
 
 const LABEL = "block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-3";
@@ -108,6 +109,33 @@ export default function ProductManagement() {
   const [neckStyle, setNeckStyle] = useState("");
   const [keyWords, setKeyWords] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [filterCategorySelect, setFilterCategorySelect] = useState("");
+  const [customFilterCategory, setCustomFilterCategory] = useState("");
+  const [specRows, setSpecRows] = useState<{ id: string; key: string; value: string; isCustom: boolean }[]>([]);
+
+  const PRESET_SPEC_KEYS = ["Style", "Fabric", "Weave", "Neck Style", "Key Words"];
+
+  const handleAddPreset = (key: string) => {
+    setSpecRows(prev => [
+      ...prev,
+      { id: Math.random().toString(), key, value: "", isCustom: false }
+    ]);
+  };
+
+  const handleAddCustom = () => {
+    setSpecRows(prev => [
+      ...prev,
+      { id: Math.random().toString(), key: "", value: "", isCustom: true }
+    ]);
+  };
+
+  const handleUpdateRow = (id: string, updates: Partial<{ key: string; value: string }>) => {
+    setSpecRows(prev => prev.map(row => row.id === id ? { ...row, ...updates } : row));
+  };
+
+  const handleRemoveRow = (id: string) => {
+    setSpecRows(prev => prev.filter(row => row.id !== id));
+  };
   const [enabledMeasurements, setEnabledMeasurements] = useState<string[]>([]);
   const [customMeasurements, setCustomMeasurements] = useState<string[]>([]);
   const [newMeasurementInput, setNewMeasurementInput] = useState("");
@@ -207,6 +235,14 @@ export default function ProductManagement() {
 
     return Array.from(categoriesSet).sort();
   }, [products, navItems, gender, category]);
+
+  const filterCategoryOptions = useMemo(() => {
+    const list = [...suggestedFilterCategories];
+    if (filterCategory && filterCategory !== "__custom" && !list.includes(filterCategory)) {
+      list.push(filterCategory);
+    }
+    return list;
+  }, [suggestedFilterCategories, filterCategory]);
   
   // States and Refs for inline size button reordering
   const [allSizesOrder, setAllSizesOrder] = useState<string[]>([]);
@@ -310,13 +346,16 @@ export default function ProductManagement() {
 
   const fetchAvailableCategories = async () => {
     try {
-      // Fetch Homepage Categories only
       const resHomeCat = await fetch("/api/admin/homepage-categories");
       const dataHomeCat = await resHomeCat.json();
       const homeCatLabels = dataHomeCat.success ? dataHomeCat.data.map((item: any) => item.name) : [];
 
-      // Sort alphabetically and filter out duplicates
-      const uniqueNames = Array.from(new Set(homeCatLabels))
+      const resNav = await fetch("/api/admin/nav?all=true");
+      const dataNav = await resNav.json();
+      const navLabels = dataNav.success ? dataNav.data.map((item: any) => item.label) : [];
+
+      const combined = [...homeCatLabels, ...navLabels];
+      const uniqueNames = Array.from(new Set(combined))
         .map(name => String(name).trim())
         .filter(name => name !== "")
         .sort((a, b) => a.localeCompare(b));
@@ -462,6 +501,9 @@ export default function ProductManagement() {
     setAvgRating("4.3"); setNumReviews("1");
     setIsFeatured(false); setIsCustomizable(false); setTags("");
     setStyle(""); setFabricComposition(""); setWeave(""); setNeckStyle(""); setKeyWords(""); setFilterCategory("");
+    setFilterCategorySelect("");
+    setCustomFilterCategory("");
+    setSpecRows([]);
     setColorImages({});
     setColorImageInputs({});
     setSelectedSizes([]); setSelectedColors([]); setVariations([]);
@@ -512,7 +554,36 @@ export default function ProductManagement() {
         setWeave(p.weave || "");
         setNeckStyle(p.neckStyle || "");
         setKeyWords(p.keyWords || "");
-        setFilterCategory(p.filterCategory || "");
+        
+        const savedFilterCat = p.filterCategory || "";
+        setFilterCategory(savedFilterCat);
+        setFilterCategorySelect(savedFilterCat);
+        setCustomFilterCategory("");
+
+        // Parse specifications
+        let specs: Record<string, string> = {};
+        if (p.specifications) {
+          try {
+            specs = JSON.parse(p.specifications);
+          } catch (e) {
+            console.error("Failed to parse specifications:", e);
+          }
+        } else {
+          // Fallback to legacy fields
+          if (p.style) specs["Style"] = p.style;
+          if (p.fabricComposition) specs["Fabric"] = p.fabricComposition;
+          if (p.weave) specs["Weave"] = p.weave;
+          if (p.neckStyle) specs["Neck Style"] = p.neckStyle;
+          if (p.keyWords) specs["Key Words"] = p.keyWords;
+        }
+
+        const rows = Object.entries(specs).map(([k, v]) => ({
+          id: Math.random().toString(),
+          key: k,
+          value: v,
+          isCustom: !PRESET_SPEC_KEYS.includes(k)
+        }));
+        setSpecRows(rows);
         
         let parsedImages: Record<string, string[]> = {};
         try {
@@ -626,12 +697,23 @@ export default function ProductManagement() {
     setIsSubmitting(true);
     try {
       const method = editingId ? "PATCH" : "POST";
+      // Convert specRows back to specifications JSON object
+      const specsObj: Record<string, string> = {};
+      specRows.forEach(row => {
+        const cleanKey = row.key.trim();
+        if (cleanKey) {
+          specsObj[cleanKey] = row.value;
+        }
+      });
+
       const payload = { 
         id: editingId, name, description, images: imagesToSave, variations, 
         avgRating, numReviews, category, gender, colors: selectedColors, tags, isFeatured,
         isCustomizable,
         enabledMeasurements: JSON.stringify(enabledMeasurements),
-        style, fabricComposition, weave, neckStyle, keyWords, filterCategory
+        style: null, fabricComposition: null, weave: null, neckStyle: null, keyWords: null,
+        filterCategory: filterCategorySelect === "__custom" ? customFilterCategory : filterCategorySelect,
+        specifications: specsObj
       };
       
       const res = await fetch("/api/admin/products", {
@@ -876,65 +958,131 @@ export default function ProductManagement() {
                 </div>
                 <div>
                   <label className={LABEL}>Filter Category (Sidebar Category Filter Name)</label>
-                  <input 
-                    type="text" 
-                    value={filterCategory} 
-                    onChange={e => setFilterCategory(e.target.value)} 
-                    placeholder="e.g. Blazers & Coats, Shirt, Trousers" 
-                    list="filter-categories-datalist" 
-                    className={INPUT} 
-                  />
-                  <datalist id="filter-categories-datalist">
-                    {suggestedFilterCategories.map(cat => (
-                      <option key={cat} value={cat} />
+                  <select
+                    value={filterCategorySelect}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFilterCategorySelect(val);
+                      if (val !== "__custom") {
+                        setFilterCategory(val);
+                      } else {
+                        const isPreset = suggestedFilterCategories.includes(filterCategory);
+                        const initialCustomVal = isPreset ? "" : filterCategory;
+                        setCustomFilterCategory(initialCustomVal);
+                        setFilterCategory(initialCustomVal);
+                      }
+                    }}
+                    className={INPUT}
+                  >
+                    <option value="">Select Filter Category...</option>
+                    {filterCategoryOptions.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
                     ))}
-                  </datalist>
-                  {suggestedFilterCategories.length > 0 && (
-                    <div className="mt-2.5 flex flex-wrap gap-1.5 items-center">
-                      <span className="text-[10px] text-brand/45 font-black uppercase tracking-[0.15em] mr-1">Suggestions:</span>
-                      {suggestedFilterCategories.map(cat => (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() => setFilterCategory(cat)}
-                          className={`px-3 py-1 text-[11px] font-bold rounded-full border transition-all ${
-                            filterCategory.trim().toLowerCase() === cat.trim().toLowerCase()
-                              ? "bg-[#C5A059]/15 border-[#C5A059]/40 text-[#C5A059]"
-                              : "bg-brand/5 border-transparent hover:border-brand/10 text-brand/70 hover:text-brand"
-                          }`}
+                    <option value="__custom">+ Add Custom Filter Category...</option>
+                  </select>
+
+                  {filterCategorySelect === "__custom" && (
+                    <div className="mt-3">
+                      <input
+                        type="text"
+                        value={customFilterCategory}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCustomFilterCategory(val);
+                          setFilterCategory(val);
+                        }}
+                        placeholder="Type custom filter category name..."
+                        className={INPUT}
+                      />
+                    </div>
+                  )}
+                  <p className="mt-1.5 text-[10px] text-brand/50 font-medium leading-relaxed">
+                    Determines which checkbox option in the storefront's sidebar categories filter this product belongs to. Choose one of the configured categories or add a custom one.
+                  </p>
+                </div>
+
+                {/* Optional & Custom Specifications Dynamic Editor */}
+                <div className="border-t border-brand/10 pt-6">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
+                    <div>
+                      <h4 className="text-xs font-black text-brand uppercase tracking-wider">Product Specifications</h4>
+                      <p className="text-[10px] text-brand/40 font-medium mt-0.5">Optional properties and custom specifications for this product.</p>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {PRESET_SPEC_KEYS.filter(k => !specRows.some(r => r.key.toLowerCase() === k.toLowerCase())).length > 0 && (
+                        <select
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleAddPreset(e.target.value);
+                              e.target.value = "";
+                            }
+                          }}
+                          className="bg-brand/5 border border-brand/10 hover:border-[#C5A059]/40 rounded-xl px-3 py-1.5 text-xs font-bold text-brand outline-none transition-all cursor-pointer"
                         >
-                          {cat}
-                        </button>
+                          <option value="">+ Add Preset Specification...</option>
+                          {PRESET_SPEC_KEYS
+                            .filter(k => !specRows.some(r => r.key.toLowerCase() === k.toLowerCase()))
+                            .map(k => (
+                              <option key={k} value={k}>{k}</option>
+                            ))
+                          }
+                        </select>
+                      )}
+                      
+                      <button
+                        type="button"
+                        onClick={handleAddCustom}
+                        className="bg-brand/5 border border-brand/10 hover:border-[#C5A059]/40 hover:bg-[#C5A059]/10 rounded-xl px-3 py-1.5 text-xs font-bold text-brand transition-all flex items-center gap-1"
+                      >
+                        <Plus size={12} /> Add Custom Attribute
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {specRows.length === 0 ? (
+                    <div className="bg-brand/5 rounded-2xl p-6 text-center border border-dashed border-brand/10">
+                      <p className="text-xs text-brand/40 font-medium">No specifications added yet. Add style, fabric, or other attributes above.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {specRows.map((row) => (
+                        <div key={row.id} className="flex gap-3 items-center bg-brand/5 p-3 rounded-2xl border border-brand/5">
+                          <div className="w-1/3">
+                            <input
+                              type="text"
+                              value={row.key}
+                              onChange={(e) => handleUpdateRow(row.id, { key: e.target.value })}
+                              placeholder="Attribute Name"
+                              disabled={!row.isCustom}
+                              className={`w-full bg-brand/5 border border-transparent rounded-xl px-3 py-2 text-xs font-bold text-brand outline-none ${
+                                !row.isCustom ? "opacity-60 cursor-not-allowed bg-transparent" : "focus:border-[#C5A059]/30"
+                              }`}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <input
+                              type="text"
+                              value={row.value}
+                              onChange={(e) => handleUpdateRow(row.id, { value: e.target.value })}
+                              placeholder={`Value for ${row.key || "attribute"}`}
+                              className="w-full bg-[#FFFDF6] border border-brand/10 focus:border-[#C5A059]/30 rounded-xl px-3 py-2 text-xs font-semibold text-brand outline-none"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveRow(row.id)}
+                            className="p-2 text-brand/40 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                            title="Remove attribute"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       ))}
                     </div>
                   )}
-                  <p className="mt-2 text-[10px] text-brand/50 font-medium leading-relaxed">
-                    Determines which checkbox option in the storefront's sidebar categories filter this product belongs to. Type any custom category or choose one of the existing ones.
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className={LABEL}>Style</label>
-                    <input value={style} onChange={e => setStyle(e.target.value)} placeholder="e.g. Sophisticated, tailored women's power suit" className={INPUT} />
-                  </div>
-                  <div>
-                    <label className={LABEL}>Fabric Composition</label>
-                    <input value={fabricComposition} onChange={e => setFabricComposition(e.target.value)} placeholder="e.g. Wool Crepe" className={INPUT} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className={LABEL}>Weave</label>
-                    <input value={weave} onChange={e => setWeave(e.target.value)} placeholder="e.g. Ultra Fine" className={INPUT} />
-                  </div>
-                  <div>
-                    <label className={LABEL}>Neck Style</label>
-                    <input value={neckStyle} onChange={e => setNeckStyle(e.target.value)} placeholder="e.g. V-Neck" className={INPUT} />
-                  </div>
-                </div>
-                <div>
-                  <label className={LABEL}>Key Words / Specific Details</label>
-                  <textarea value={keyWords} onChange={e => setKeyWords(e.target.value)} placeholder="e.g. Single-breasted tailored blazer, Matching V-neck inner top, etc." rows={2} className={`${INPUT} resize-none`} />
                 </div>
                 <div className="flex items-center justify-between p-6 bg-brand/5 rounded-[2.5rem] border border-brand/10 transition-all hover:bg-brand/[0.08]">
                   <div className="flex items-center space-x-4">

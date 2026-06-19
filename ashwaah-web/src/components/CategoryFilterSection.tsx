@@ -25,6 +25,7 @@ interface Product {
   style?: string | null;
   keyWords?: string | null;
   filterCategory?: string | null;
+  specifications?: string | null;
   sizes?: string[];
 }
 
@@ -223,8 +224,18 @@ export default function CategoryFilterSection({
       const name = (p.name || "").toLowerCase();
       const category = (p.category || "").toLowerCase();
       const tags = (p.tags || "").toLowerCase();
-      const style = (p.style || "").toLowerCase();
-      const keyWords = (p.keyWords || "").toLowerCase();
+      let resolvedStyle = p.style || "";
+      let resolvedKeyWords = p.keyWords || "";
+      if (p.specifications) {
+        try {
+          const specs = JSON.parse(p.specifications);
+          if (specs["Style"]) resolvedStyle = specs["Style"];
+          if (specs["Key Words"]) resolvedKeyWords = specs["Key Words"];
+          if (specs["Key Details"]) resolvedKeyWords = specs["Key Details"];
+        } catch {}
+      }
+      const style = resolvedStyle.toLowerCase();
+      const keyWords = resolvedKeyWords.toLowerCase();
 
       const rawFilterCat = (p.filterCategory || "").trim();
       if (rawFilterCat) {

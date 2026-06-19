@@ -36,6 +36,7 @@ interface Product {
   weave?: string | null;
   neckStyle?: string | null;
   keyWords?: string | null;
+  specifications?: string | null;
   variations: Variation[];
 }
 
@@ -83,6 +84,31 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const addItemToWishlist = useWishlistStore((state) => state.addItem);
   const removeItemFromWishlist = useWishlistStore((state) => state.removeItem);
   const isAuthenticated = useWishlistStore((state) => state.isAuthenticated);
+
+  // Parse specifications
+  const parsedSpecs = useMemo(() => {
+    if (!product?.specifications) return null;
+    try {
+      return JSON.parse(product.specifications) as Record<string, string>;
+    } catch (e) {
+      console.error("Failed to parse specifications:", e);
+      return null;
+    }
+  }, [product?.specifications]);
+
+  const hasSpecs = parsedSpecs ? Object.keys(parsedSpecs).length > 0 : false;
+  const legacySpecsExist = !!(product?.style || product?.fabricComposition || product?.weave || product?.neckStyle || product?.keyWords);
+
+  const specDetailsList = useMemo(() => {
+    if (!parsedSpecs) return [];
+    return Object.entries(parsedSpecs).filter(([k]) => k.toLowerCase() !== "key words" && k.toLowerCase() !== "key details");
+  }, [parsedSpecs]);
+
+  const specKeyWords = useMemo(() => {
+    if (!parsedSpecs) return null;
+    const found = Object.entries(parsedSpecs).find(([k]) => k.toLowerCase() === "key words" || k.toLowerCase() === "key details");
+    return found ? found[1] : null;
+  }, [parsedSpecs]);
 
   const handleWishlistClick = async () => {
     if (!isAuthenticated) {
@@ -495,7 +521,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         </div>
 
         {/* Product Details & Specifications Section */}
-        {(product.style || product.fabricComposition || product.weave || product.neckStyle || product.keyWords) && (
+        {(hasSpecs || legacySpecsExist) && (
           <div className="mt-16 pt-12 border-t border-brand/10">
             <h2 className="text-xl md:text-2xl font-serif font-bold text-brand mb-8">Product Specifications</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -503,39 +529,50 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div className="bg-brand/5 rounded-3xl p-8 border border-brand/5">
                 <h3 className="text-xs font-black text-brand uppercase tracking-widest mb-6">Details</h3>
                 <dl className="space-y-4">
-                  {product.style && (
-                    <div className="flex justify-between py-3 border-b border-brand/5">
-                      <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Style</dt>
-                      <dd className="text-xs font-bold text-brand text-right pl-4">{product.style}</dd>
-                    </div>
-                  )}
-                  {product.fabricComposition && (
-                    <div className="flex justify-between py-3 border-b border-brand/5">
-                      <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Fabric Composition</dt>
-                      <dd className="text-xs font-bold text-brand text-right pl-4">{product.fabricComposition}</dd>
-                    </div>
-                  )}
-                  {product.weave && (
-                    <div className="flex justify-between py-3 border-b border-brand/5">
-                      <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Weave</dt>
-                      <dd className="text-xs font-bold text-brand text-right pl-4">{product.weave}</dd>
-                    </div>
-                  )}
-                  {product.neckStyle && (
-                    <div className="flex justify-between py-3 border-b border-brand/5">
-                      <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Neck Style</dt>
-                      <dd className="text-xs font-bold text-brand text-right pl-4">{product.neckStyle}</dd>
-                    </div>
+                  {hasSpecs ? (
+                    specDetailsList.map(([key, val]) => (
+                      <div key={key} className="flex justify-between py-3 border-b border-brand/5">
+                        <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">{key}</dt>
+                        <dd className="text-xs font-bold text-brand text-right pl-4">{val}</dd>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      {product.style && (
+                        <div className="flex justify-between py-3 border-b border-brand/5">
+                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Style</dt>
+                          <dd className="text-xs font-bold text-brand text-right pl-4">{product.style}</dd>
+                        </div>
+                      )}
+                      {product.fabricComposition && (
+                        <div className="flex justify-between py-3 border-b border-brand/5">
+                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Fabric Composition</dt>
+                          <dd className="text-xs font-bold text-brand text-right pl-4">{product.fabricComposition}</dd>
+                        </div>
+                      )}
+                      {product.weave && (
+                        <div className="flex justify-between py-3 border-b border-brand/5">
+                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Weave</dt>
+                          <dd className="text-xs font-bold text-brand text-right pl-4">{product.weave}</dd>
+                        </div>
+                      )}
+                      {product.neckStyle && (
+                        <div className="flex justify-between py-3 border-b border-brand/5">
+                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Neck Style</dt>
+                          <dd className="text-xs font-bold text-brand text-right pl-4">{product.neckStyle}</dd>
+                        </div>
+                      )}
+                    </>
                   )}
                 </dl>
               </div>
 
               {/* Key Features / Key Words */}
-              {product.keyWords && (
+              {((hasSpecs && specKeyWords) || (!hasSpecs && product.keyWords)) && (
                 <div className="bg-[#FFFDF6] rounded-3xl p-8 border-2 border-brand/5 flex flex-col">
                   <h3 className="text-xs font-black text-brand uppercase tracking-widest mb-6">Key Details & Features</h3>
                   <div className="text-xs text-brand/70 leading-relaxed space-y-3 font-medium">
-                    {product.keyWords.split('\n').map((bullet, idx) => {
+                    {((hasSpecs ? specKeyWords : product.keyWords) || "").split('\n').map((bullet, idx) => {
                       const cleanBullet = bullet.replace(/^[-\*\s•\d\.]+\s*/, '').trim();
                       if (!cleanBullet) return null;
                       return (

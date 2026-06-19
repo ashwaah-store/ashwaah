@@ -41,6 +41,7 @@ export const products = sqliteTable("products", {
   neckStyle: text("neck_style"),
   keyWords: text("key_words"),
   filterCategory: text("filter_category"),
+  specifications: text("specifications"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
