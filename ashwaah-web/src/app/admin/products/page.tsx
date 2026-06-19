@@ -153,20 +153,9 @@ export default function ProductManagement() {
   
   const suggestedFilterCategories = useMemo(() => {
     const categoriesSet = new Set<string>();
+    let hasConfiguredFilters = false;
 
-    // 1. Add defaults for selected gender
-    const currentGender = (gender || "unisex").toLowerCase();
-    const defaults = DEFAULT_SUGGESTIONS[currentGender] || DEFAULT_SUGGESTIONS.unisex;
-    defaults.forEach(d => categoriesSet.add(d));
-
-    // 2. Add existing filter categories from products
-    products.forEach((p) => {
-      if (p.filterCategory && typeof p.filterCategory === "string" && p.filterCategory.trim()) {
-        categoriesSet.add(p.filterCategory.trim());
-      }
-    });
-
-    // 3. Add configured filter categories from navigation menu settings matching gender/category
+    // 1. Add configured filter categories from navigation menu settings matching gender/category
     if (navItems.length > 0) {
       const matchedNavItems = [];
 
@@ -193,15 +182,28 @@ export default function ProductManagement() {
 
       matchedNavItems.forEach(item => {
         if (item.filterTypes && typeof item.filterTypes === "string") {
-          item.filterTypes.split(",").forEach((t: string) => {
-            const trimmed = t.trim();
-            if (trimmed) {
-              categoriesSet.add(trimmed);
-            }
-          });
+          const types = item.filterTypes.split(",").map((t: string) => t.trim()).filter(Boolean);
+          if (types.length > 0) {
+            hasConfiguredFilters = true;
+            types.forEach((t: string) => categoriesSet.add(t));
+          }
         }
       });
     }
+
+    // 2. If no filters are configured in the navigation menu, fallback to defaults for selected gender
+    if (!hasConfiguredFilters) {
+      const currentGender = (gender || "unisex").toLowerCase();
+      const defaults = DEFAULT_SUGGESTIONS[currentGender] || DEFAULT_SUGGESTIONS.unisex;
+      defaults.forEach(d => categoriesSet.add(d));
+    }
+
+    // 3. Always include any existing filter categories already used by products
+    products.forEach((p) => {
+      if (p.filterCategory && typeof p.filterCategory === "string" && p.filterCategory.trim()) {
+        categoriesSet.add(p.filterCategory.trim());
+      }
+    });
 
     return Array.from(categoriesSet).sort();
   }, [products, navItems, gender, category]);
