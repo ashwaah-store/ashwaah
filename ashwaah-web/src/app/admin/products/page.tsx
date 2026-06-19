@@ -50,6 +50,13 @@ const PRESET_COLORS = [
   { name: "Brown", hex: "#92400E" },
 ];
 
+const DEFAULT_SUGGESTIONS: Record<string, string[]> = {
+  men: ["Shirt", "T-Shirt", "Pants & Joggers", "Suits & Blazers", "Ethnic Wear"],
+  women: ["Dresses", "Tops & Tees", "Shirts", "Trousers", "Sarees", "Kurtas & Kurtis", "Blazers & Coats"],
+  kids: ["T-Shirts", "Shirts", "Pants", "Dresses"],
+  unisex: ["Shirt", "T-Shirt", "Pants & Joggers", "Suits & Blazers", "Ethnic Wear"]
+};
+
 interface Variation { size: string; color: string; stock: number; sku: string; basePrice: number; salePrice: number; }
 interface Product {
   id: number; name: string; description: string | null;
@@ -146,12 +153,20 @@ export default function ProductManagement() {
   
   const suggestedFilterCategories = useMemo(() => {
     const categoriesSet = new Set<string>();
+
+    // 1. Add defaults for selected gender
+    const currentGender = (gender || "unisex").toLowerCase();
+    const defaults = DEFAULT_SUGGESTIONS[currentGender] || DEFAULT_SUGGESTIONS.unisex;
+    defaults.forEach(d => categoriesSet.add(d));
+
+    // 2. Add existing filter categories from products
     products.forEach((p) => {
       if (p.filterCategory && typeof p.filterCategory === "string" && p.filterCategory.trim()) {
         categoriesSet.add(p.filterCategory.trim());
       }
     });
 
+    // 3. Add configured filter categories from navigation menu settings matching gender/category
     if (navItems.length > 0) {
       const matchedNavItems = [];
 
@@ -872,7 +887,26 @@ export default function ProductManagement() {
                       <option key={cat} value={cat} />
                     ))}
                   </datalist>
-                  <p className="mt-1.5 text-[10px] text-brand/50 font-medium leading-relaxed">
+                  {suggestedFilterCategories.length > 0 && (
+                    <div className="mt-2.5 flex flex-wrap gap-1.5 items-center">
+                      <span className="text-[10px] text-brand/45 font-black uppercase tracking-[0.15em] mr-1">Suggestions:</span>
+                      {suggestedFilterCategories.map(cat => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setFilterCategory(cat)}
+                          className={`px-3 py-1 text-[11px] font-bold rounded-full border transition-all ${
+                            filterCategory.trim().toLowerCase() === cat.trim().toLowerCase()
+                              ? "bg-[#C5A059]/15 border-[#C5A059]/40 text-[#C5A059]"
+                              : "bg-brand/5 border-transparent hover:border-brand/10 text-brand/70 hover:text-brand"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <p className="mt-2 text-[10px] text-brand/50 font-medium leading-relaxed">
                     Determines which checkbox option in the storefront's sidebar categories filter this product belongs to. Type any custom category or choose one of the existing ones.
                   </p>
                 </div>
