@@ -109,8 +109,6 @@ export default function ProductManagement() {
   const [neckStyle, setNeckStyle] = useState("");
   const [keyWords, setKeyWords] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
-  const [filterCategorySelect, setFilterCategorySelect] = useState("");
-  const [customFilterCategory, setCustomFilterCategory] = useState("");
   const [specRows, setSpecRows] = useState<{ id: string; key: string; value: string; isCustom: boolean }[]>([]);
 
   const PRESET_SPEC_KEYS = ["Style", "Fabric", "Weave", "Neck Style", "Key Words"];
@@ -236,13 +234,6 @@ export default function ProductManagement() {
     return Array.from(categoriesSet).sort();
   }, [products, navItems, gender, category]);
 
-  const filterCategoryOptions = useMemo(() => {
-    const list = [...suggestedFilterCategories];
-    if (filterCategory && filterCategory !== "__custom" && !list.includes(filterCategory)) {
-      list.push(filterCategory);
-    }
-    return list;
-  }, [suggestedFilterCategories, filterCategory]);
   
   // States and Refs for inline size button reordering
   const [allSizesOrder, setAllSizesOrder] = useState<string[]>([]);
@@ -501,8 +492,6 @@ export default function ProductManagement() {
     setAvgRating("4.3"); setNumReviews("1");
     setIsFeatured(false); setIsCustomizable(false); setTags("");
     setStyle(""); setFabricComposition(""); setWeave(""); setNeckStyle(""); setKeyWords(""); setFilterCategory("");
-    setFilterCategorySelect("");
-    setCustomFilterCategory("");
     setSpecRows([]);
     setColorImages({});
     setColorImageInputs({});
@@ -555,10 +544,7 @@ export default function ProductManagement() {
         setNeckStyle(p.neckStyle || "");
         setKeyWords(p.keyWords || "");
         
-        const savedFilterCat = p.filterCategory || "";
-        setFilterCategory(savedFilterCat);
-        setFilterCategorySelect(savedFilterCat);
-        setCustomFilterCategory("");
+        setFilterCategory(p.filterCategory || "");
 
         // Parse specifications
         let specs: Record<string, string> = {};
@@ -712,7 +698,7 @@ export default function ProductManagement() {
         isCustomizable,
         enabledMeasurements: JSON.stringify(enabledMeasurements),
         style: null, fabricComposition: null, weave: null, neckStyle: null, keyWords: null,
-        filterCategory: filterCategorySelect === "__custom" ? customFilterCategory : filterCategorySelect,
+        filterCategory: filterCategory ? filterCategory.trim() : null,
         specifications: specsObj
       };
       
@@ -958,48 +944,21 @@ export default function ProductManagement() {
                 </div>
                 <div>
                   <label className={LABEL}>Filter Category (Sidebar Category Filter Name)</label>
-                  <select
-                    value={filterCategorySelect}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setFilterCategorySelect(val);
-                      if (val !== "__custom") {
-                        setFilterCategory(val);
-                      } else {
-                        const isPreset = suggestedFilterCategories.includes(filterCategory);
-                        const initialCustomVal = isPreset ? "" : filterCategory;
-                        setCustomFilterCategory(initialCustomVal);
-                        setFilterCategory(initialCustomVal);
-                      }
-                    }}
+                  <input
+                    type="text"
+                    list="suggested-filter-categories"
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    placeholder="e.g. Shirts, Blazers & Coats, Trousers"
                     className={INPUT}
-                  >
-                    <option value="">Select Filter Category...</option>
-                    {filterCategoryOptions.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
+                  />
+                  <datalist id="suggested-filter-categories">
+                    {suggestedFilterCategories.map((cat) => (
+                      <option key={cat} value={cat} />
                     ))}
-                    <option value="__custom">+ Add Custom Filter Category...</option>
-                  </select>
-
-                  {filterCategorySelect === "__custom" && (
-                    <div className="mt-3">
-                      <input
-                        type="text"
-                        value={customFilterCategory}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setCustomFilterCategory(val);
-                          setFilterCategory(val);
-                        }}
-                        placeholder="Type custom filter category name..."
-                        className={INPUT}
-                      />
-                    </div>
-                  )}
+                  </datalist>
                   <p className="mt-1.5 text-[10px] text-brand/50 font-medium leading-relaxed">
-                    Determines which checkbox option in the storefront's sidebar categories filter this product belongs to. Choose one of the configured categories or add a custom one.
+                    Determines which checkbox option in the storefront's sidebar categories filter this product belongs to. Type any custom category (e.g. Blazers & Coats).
                   </p>
                 </div>
 

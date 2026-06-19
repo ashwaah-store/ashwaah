@@ -260,15 +260,38 @@ export default function CategoryFilterSection({
 
   // 3. Extract unique types and colors dynamically
   const availableTypes = useMemo(() => {
-    if (adminFilterTypes && adminFilterTypes.length > 0) {
-      const hasOther = productsWithTypes.some((p) => p.classifiedType === "Other");
-      return hasOther ? [...adminFilterTypes, "Other"] : adminFilterTypes;
-    }
     const typesSet = new Set<string>();
+    
+    // 1. Add all configured admin filter types
+    if (adminFilterTypes && adminFilterTypes.length > 0) {
+      adminFilterTypes.forEach(t => typesSet.add(t));
+    }
+    
+    // 2. Add custom filter categories from products of this category
     productsWithTypes.forEach((p) => {
-      if (p.classifiedType) typesSet.add(p.classifiedType);
+      if (p.filterCategory && typeof p.filterCategory === "string" && p.filterCategory.trim()) {
+        const trimmed = p.filterCategory.trim();
+        // Match existing adminFilterTypes case-insensitively to prevent duplicates
+        const matched = adminFilterTypes?.find(t => t.toLowerCase() === trimmed.toLowerCase());
+        typesSet.add(matched || trimmed);
+      }
+      
+      // If no admin filter types are configured, fallback to classifiedType
+      if (!adminFilterTypes || adminFilterTypes.length === 0) {
+        if (p.classifiedType) typesSet.add(p.classifiedType);
+      }
     });
-    return Array.from(typesSet).sort();
+
+    // 3. Include "Other" if there are any products classified as "Other"
+    if (adminFilterTypes && adminFilterTypes.length > 0) {
+      const specificTypes = Array.from(typesSet);
+      const hasOther = productsWithTypes.some((p) => !specificTypes.includes(p.classifiedType));
+      if (hasOther) {
+        typesSet.add("Other");
+      }
+    }
+    
+    return Array.from(typesSet);
   }, [productsWithTypes, adminFilterTypes]);
 
   const availableColors = useMemo(() => {
