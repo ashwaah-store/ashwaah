@@ -182,10 +182,10 @@ export default function Navbar() {
                 <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block">My Story</span>
               </Link>
 
-              <Link href="/events" aria-label="Events" className="hover:text-[#C5A059] transition-colors p-2 flex items-center gap-1.5 group">
+              {/* <Link href="/events" aria-label="Events" className="hover:text-[#C5A059] transition-colors p-2 flex items-center gap-1.5 group">
                 <Calendar className="h-5 w-5" />
                 <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block">Events</span>
-              </Link>
+              </Link> */}
 
               <Link
                 href={user ? "/wishlist" : `/login?redirect=${encodeURIComponent(pathname)}`}
@@ -278,14 +278,14 @@ export default function Navbar() {
                   <BookOpen className="h-5 w-5 text-[#C5A059]" />
                   <span className="text-sm font-bold uppercase tracking-wider">My Story</span>
                 </Link>
-                <Link
+                {/* <Link
                   href="/events"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center space-x-3 text-white hover:text-[#C5A059] transition-colors py-2"
                 >
                   <Calendar className="h-5 w-5 text-[#C5A059]" />
                   <span className="text-sm font-bold uppercase tracking-wider">Events</span>
-                </Link>
+                </Link> */}
               </div>
               
               <div className="pt-4">
