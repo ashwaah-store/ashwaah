@@ -139,7 +139,7 @@ export default async function CategoryPage({ params }: PageProps) {
   }));
 
   return (
-    <div className="w-full bg-brand-light min-h-[calc(100vh-56px)] flex flex-col">
+    <div className="w-full bg-brand-light min-h-[calc(100vh-48px)] flex flex-col">
       {/* Rendering sections and fallback products via interactive CategoryFilterSection component */}
       <CategoryFilterSection
         initialSections={sectionsWithProducts}
