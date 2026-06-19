@@ -110,6 +110,34 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     return found ? found[1] : null;
   }, [parsedSpecs]);
 
+  const specKeyWordsList = useMemo(() => {
+    const rawStr = (hasSpecs ? specKeyWords : product?.keyWords) || "";
+    if (!rawStr) return [];
+    
+    // Split by newlines first
+    const lines = rawStr.split('\n');
+    const items: string[] = [];
+    
+    lines.forEach(line => {
+      // Clean leading list indicators (e.g. hyphens, bullets) but keep numbers
+      let cleanLine = line.replace(/^[-\*\s•]+\s*/, '').trim();
+      if (!cleanLine) return;
+      
+      // If it contains commas, split by commas
+      if (cleanLine.includes(',')) {
+        const parts = cleanLine.split(',');
+        parts.forEach(part => {
+          const cleanPart = part.replace(/^[-\*\s•]+\s*/, '').trim();
+          if (cleanPart) items.push(cleanPart);
+        });
+      } else {
+        items.push(cleanLine);
+      }
+    });
+    
+    return items;
+  }, [hasSpecs, specKeyWords, product?.keyWords]);
+
   const handleWishlistClick = async () => {
     if (!isAuthenticated) {
       window.location.href = `/login?redirect=${encodeURIComponent(pathname)}`;
@@ -568,20 +596,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </div>
 
               {/* Key Features / Key Words */}
-              {((hasSpecs && specKeyWords) || (!hasSpecs && product.keyWords)) && (
+              {specKeyWordsList.length > 0 && (
                 <div className="bg-[#FFFDF6] rounded-3xl p-8 border-2 border-brand/5 flex flex-col">
                   <h3 className="text-xs font-black text-brand uppercase tracking-widest mb-6">Key Details & Features</h3>
                   <div className="text-xs text-brand/70 leading-relaxed space-y-3 font-medium">
-                    {((hasSpecs ? specKeyWords : product.keyWords) || "").split('\n').map((bullet, idx) => {
-                      const cleanBullet = bullet.replace(/^[-\*\s•\d\.]+\s*/, '').trim();
-                      if (!cleanBullet) return null;
-                      return (
-                        <div key={idx} className="flex items-start space-x-3 py-1">
-                          <span className="text-[#C5A059] mt-0.5">•</span>
-                          <span>{cleanBullet}</span>
-                        </div>
-                      );
-                    })}
+                    {specKeyWordsList.map((cleanBullet, idx) => (
+                      <div key={idx} className="flex items-start space-x-3 py-1">
+                        <span className="text-[#C5A059] mt-0.5">•</span>
+                        <span>{cleanBullet}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
