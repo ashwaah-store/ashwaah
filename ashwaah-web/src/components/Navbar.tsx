@@ -140,7 +140,7 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 w-full bg-[#064e3b] border-b border-white/10 shadow-lg font-inter">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-14">
             
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center mr-2 sm:mr-4 md:mr-8">
@@ -148,7 +148,7 @@ export default function Navbar() {
                 <img 
                   src="/images/logo.png" 
                   alt="Ashwaah Logo" 
-                  className="h-9 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
+                  className="h-8 sm:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
                 />
                 <span className="font-gabriola text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-wide hover:text-[#C5A059] transition-colors">
                   Ashwaah

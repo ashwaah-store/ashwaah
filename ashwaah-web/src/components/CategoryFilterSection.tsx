@@ -479,7 +479,7 @@ export default function CategoryFilterSection({
     <div className="flex flex-col lg:flex-row w-full items-stretch relative z-30">
       
       {/* Mobile Show Filters Toggle Button */}
-      <div className="lg:hidden w-full sticky top-16 z-40 bg-brand-light/95 backdrop-blur-sm py-2 px-1 mb-2">
+      <div className="lg:hidden w-full sticky top-14 z-40 bg-brand-light/95 backdrop-blur-sm py-2 px-1 mb-2">
         <button
           onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
           className="w-full flex items-center justify-between bg-white border border-brand/10 px-5 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-brand shadow-sm active:scale-99 transition-all"
@@ -496,7 +496,7 @@ export default function CategoryFilterSection({
 
       {/* Left Column: Filter Sidebar Panel */}
       <aside
-        className={`w-full lg:w-60 flex-shrink-0 bg-[#FFFDF6] border-r border-brand/10 p-4 lg:px-4 lg:py-6 rounded-none lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] lg:overflow-y-auto custom-scrollbar lg:block ${
+        className={`w-full lg:w-60 flex-shrink-0 bg-[#FFFDF6] border-r border-brand/10 p-4 lg:px-4 lg:py-6 rounded-none lg:sticky lg:top-14 lg:h-[calc(100vh-56px)] lg:overflow-y-auto custom-scrollbar lg:block ${
           isMobileFiltersOpen ? "block" : "hidden"
         }`}
       >
