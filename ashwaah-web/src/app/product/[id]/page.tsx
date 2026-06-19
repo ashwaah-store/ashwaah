@@ -32,6 +32,11 @@ interface Product {
   enabledMeasurements: string | null; // JSON string array
   gender: string | null;
   variations: Variation[];
+  style?: string | null;
+  fabricComposition?: string | null;
+  weave?: string | null;
+  neckStyle?: string | null;
+  keyWords?: string | null;
 }
 
 const COLOR_MAP: Record<string, string> = {
@@ -306,9 +311,56 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               )}
             </div>
 
-            <p className="text-brand/70 mb-8 text-sm leading-relaxed border-l-4 border-brand-accent/20 pl-5 italic">
+             <p className="text-brand/70 mb-8 text-sm leading-relaxed border-l-4 border-brand-accent/20 pl-5 italic">
               {product.description}
             </p>
+
+            {/* Product Specifications & Details */}
+            {(product.style || product.fabricComposition || product.weave || product.neckStyle || product.keyWords) && (
+              <div className="mb-8 border-t border-brand/5 pt-6">
+                <h3 className="text-xs font-black text-brand uppercase tracking-widest mb-4">Product Details</h3>
+                
+                {/* Specifications Grid */}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs mb-5">
+                  {product.style && (
+                    <div className="flex flex-col border-b border-brand/5 pb-2">
+                      <span className="text-[10px] font-black text-brand/40 uppercase tracking-wider mb-0.5">Style</span>
+                      <span className="font-bold text-brand">{product.style}</span>
+                    </div>
+                  )}
+                  {product.fabricComposition && (
+                    <div className="flex flex-col border-b border-brand/5 pb-2">
+                      <span className="text-[10px] font-black text-brand/40 uppercase tracking-wider mb-0.5">Fabric Composition</span>
+                      <span className="font-bold text-brand">{product.fabricComposition}</span>
+                    </div>
+                  )}
+                  {product.weave && (
+                    <div className="flex flex-col border-b border-brand/5 pb-2">
+                      <span className="text-[10px] font-black text-brand/40 uppercase tracking-wider mb-0.5">Weave</span>
+                      <span className="font-bold text-brand">{product.weave}</span>
+                    </div>
+                  )}
+                  {product.neckStyle && (
+                    <div className="flex flex-col border-b border-brand/5 pb-2">
+                      <span className="text-[10px] font-black text-brand/40 uppercase tracking-wider mb-0.5">Neck Style</span>
+                      <span className="font-bold text-brand">{product.neckStyle}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Key Features Bullet List */}
+                {product.keyWords && (
+                  <div className="bg-brand/5 rounded-2xl p-5 border border-brand/10">
+                    <span className="text-[10px] font-black text-brand/40 uppercase tracking-wider block mb-3">Key Features</span>
+                    <ul className="list-disc pl-4 text-xs font-bold text-brand space-y-1.5">
+                      {product.keyWords.split('\n').filter(line => line.trim()).map((line, idx) => (
+                        <li key={idx}>{line.trim()}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Color Selector */}
             <div className="mb-10">

@@ -88,6 +88,11 @@ export default function ProductManagement() {
   const [isFeatured, setIsFeatured] = useState(false);
   const [isCustomizable, setIsCustomizable] = useState(false);
   const [tags, setTags] = useState("");
+  const [style, setStyle] = useState("");
+  const [fabricComposition, setFabricComposition] = useState("");
+  const [weave, setWeave] = useState("");
+  const [neckStyle, setNeckStyle] = useState("");
+  const [keyWords, setKeyWords] = useState("");
   const [enabledMeasurements, setEnabledMeasurements] = useState<string[]>([]);
   const [customMeasurements, setCustomMeasurements] = useState<string[]>([]);
   const [newMeasurementInput, setNewMeasurementInput] = useState("");
@@ -371,6 +376,7 @@ export default function ProductManagement() {
     setName(""); setDescription(""); setGender("unisex"); setCategory("");
     setAvgRating("4.3"); setNumReviews("1");
     setIsFeatured(false); setIsCustomizable(false); setTags("");
+    setStyle(""); setFabricComposition(""); setWeave(""); setNeckStyle(""); setKeyWords("");
     setColorImages({});
     setColorImageInputs({});
     setSelectedSizes([]); setSelectedColors([]); setVariations([]);
@@ -416,6 +422,11 @@ export default function ProductManagement() {
         setIsFeatured(!!p.isFeatured);
         setIsCustomizable(!!p.isCustomizable);
         setTags(p.tags || "");
+        setStyle(p.style || "");
+        setFabricComposition(p.fabricComposition || "");
+        setWeave(p.weave || "");
+        setNeckStyle(p.neckStyle || "");
+        setKeyWords(p.keyWords || "");
         
         let parsedImages: Record<string, string[]> = {};
         try {
@@ -533,7 +544,8 @@ export default function ProductManagement() {
         id: editingId, name, description, images: imagesToSave, variations, 
         avgRating, numReviews, category, gender, colors: selectedColors, tags, isFeatured,
         isCustomizable,
-        enabledMeasurements: JSON.stringify(enabledMeasurements)
+        enabledMeasurements: JSON.stringify(enabledMeasurements),
+        style, fabricComposition, weave, neckStyle, keyWords
       };
       
       const res = await fetch("/api/admin/products", {
@@ -775,6 +787,58 @@ export default function ProductManagement() {
                 <div>
                   <label className={LABEL}>Tags (comma-separated)</label>
                   <input value={tags} onChange={e => setTags(e.target.value)} placeholder="cotton, festive, handloom, bestseller…" className={INPUT} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className={LABEL}>Style</label>
+                    <input 
+                      type="text" 
+                      value={style} 
+                      onChange={e => setStyle(e.target.value)} 
+                      placeholder="e.g. Sophisticated, tailored power suit" 
+                      className={INPUT} 
+                    />
+                  </div>
+                  <div>
+                    <label className={LABEL}>Fabric Composition</label>
+                    <input 
+                      type="text" 
+                      value={fabricComposition} 
+                      onChange={e => setFabricComposition(e.target.value)} 
+                      placeholder="e.g. Wool Crepe" 
+                      className={INPUT} 
+                    />
+                  </div>
+                  <div>
+                    <label className={LABEL}>Weave</label>
+                    <input 
+                      type="text" 
+                      value={weave} 
+                      onChange={e => setWeave(e.target.value)} 
+                      placeholder="e.g. Ultra Fine" 
+                      className={INPUT} 
+                    />
+                  </div>
+                  <div>
+                    <label className={LABEL}>Neck Style</label>
+                    <input 
+                      type="text" 
+                      value={neckStyle} 
+                      onChange={e => setNeckStyle(e.target.value)} 
+                      placeholder="e.g. V" 
+                      className={INPUT} 
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className={LABEL}>Key Words / Features (one per line)</label>
+                  <textarea 
+                    value={keyWords} 
+                    onChange={e => setKeyWords(e.target.value)} 
+                    placeholder="Single-breasted tailored blazer with classic notched lapels.&#10;Matching V-neck inner top or vest.&#10;High-waisted, wide-leg or straight-cut trousers." 
+                    rows={3} 
+                    className={`${INPUT} resize-none`} 
+                  />
                 </div>
                 <div className="flex items-center justify-between p-6 bg-brand/5 rounded-[2.5rem] border border-brand/10 transition-all hover:bg-brand/[0.08]">
                   <div className="flex items-center space-x-4">

@@ -91,7 +91,8 @@ export async function POST(request: Request) {
     const { 
       name, description, salePrice, images, variations,
       avgRating, numReviews, category, gender, colors, tags, isFeatured, 
-      isCustomizable, enabledMeasurements
+      isCustomizable, enabledMeasurements,
+      style, fabricComposition, weave, neckStyle, keyWords
     } = body;
 
     // Validation
@@ -119,6 +120,11 @@ export async function POST(request: Request) {
         isFeatured: !!isFeatured,
         isCustomizable: !!isCustomizable,
         enabledMeasurements: enabledMeasurements || null,
+        style: style || null,
+        fabricComposition: fabricComposition || null,
+        weave: weave || null,
+        neckStyle: neckStyle || null,
+        keyWords: keyWords || null,
       }).returning();
 
       if (!productResult || productResult.length === 0) {
@@ -164,7 +170,8 @@ export async function PATCH(request: Request) {
     const { 
       id, name, description, salePrice, images, variations,
       avgRating, numReviews, category, gender, colors, tags, isFeatured, 
-      isCustomizable, enabledMeasurements
+      isCustomizable, enabledMeasurements,
+      style, fabricComposition, weave, neckStyle, keyWords
     } = body;
 
     if (!id) return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });
@@ -194,6 +201,11 @@ export async function PATCH(request: Request) {
     if (isFeatured !== undefined) updateData.isFeatured = !!isFeatured;
     if (isCustomizable !== undefined) updateData.isCustomizable = !!isCustomizable;
     if (enabledMeasurements !== undefined) updateData.enabledMeasurements = enabledMeasurements;
+    if (style !== undefined) updateData.style = style;
+    if (fabricComposition !== undefined) updateData.fabricComposition = fabricComposition;
+    if (weave !== undefined) updateData.weave = weave;
+    if (neckStyle !== undefined) updateData.neckStyle = neckStyle;
+    if (keyWords !== undefined) updateData.keyWords = keyWords;
 
     // 1 & 2. Update Product and Variations in a Transaction
     await db.transaction(async (tx) => {
