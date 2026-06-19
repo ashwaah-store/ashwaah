@@ -88,6 +88,7 @@ export default function ProductManagement() {
   const [gender, setGender] = useState("unisex");
   const [category, setCategory] = useState("");
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [navItems, setNavItems] = useState<any[]>([]);
   // Removed overall mrp and salePrice
   const [avgRating, setAvgRating] = useState("4.3");
   const [numReviews, setNumReviews] = useState("1");
@@ -143,15 +144,52 @@ export default function ProductManagement() {
   });
   const [customSizeInput, setCustomSizeInput] = useState("");
   
-  const existingFilterCategories = useMemo(() => {
+  const suggestedFilterCategories = useMemo(() => {
     const categoriesSet = new Set<string>();
     products.forEach((p) => {
       if (p.filterCategory && typeof p.filterCategory === "string" && p.filterCategory.trim()) {
         categoriesSet.add(p.filterCategory.trim());
       }
     });
+
+    if (navItems.length > 0) {
+      const matchedNavItems = [];
+
+      if (category) {
+        const cleanCat = category.trim().toLowerCase();
+        const catSlug = cleanCat.replace(/\s+/g, "-");
+        const matchedByCat = navItems.filter(item => {
+          const label = (item.label || "").toLowerCase();
+          const href = (item.href || "").toLowerCase();
+          return label === cleanCat || href.endsWith(`/${catSlug}`) || href.includes(`/${catSlug}/`);
+        });
+        matchedNavItems.push(...matchedByCat);
+      }
+
+      if (gender && gender !== "unisex") {
+        const cleanGender = gender.trim().toLowerCase();
+        const matchedByGender = navItems.filter(item => {
+          const label = (item.label || "").toLowerCase();
+          const href = (item.href || "").toLowerCase();
+          return label === cleanGender || href.endsWith(`/${cleanGender}`) || href.includes(`/${cleanGender}/`);
+        });
+        matchedNavItems.push(...matchedByGender);
+      }
+
+      matchedNavItems.forEach(item => {
+        if (item.filterTypes && typeof item.filterTypes === "string") {
+          item.filterTypes.split(",").forEach((t: string) => {
+            const trimmed = t.trim();
+            if (trimmed) {
+              categoriesSet.add(trimmed);
+            }
+          });
+        }
+      });
+    }
+
     return Array.from(categoriesSet).sort();
-  }, [products]);
+  }, [products, navItems, gender, category]);
   
   // States and Refs for inline size button reordering
   const [allSizesOrder, setAllSizesOrder] = useState<string[]>([]);
@@ -241,6 +279,7 @@ export default function ProductManagement() {
   useEffect(() => { 
     fetchProducts(); 
     fetchAvailableCategories();
+    fetchNavigationItems();
   }, []);
 
   const fetchProducts = async () => {
@@ -268,6 +307,18 @@ export default function ProductManagement() {
       setAvailableCategories(uniqueNames);
     } catch (error) {
       console.error("Failed to load categories for dropdown:", error);
+    }
+  };
+
+  const fetchNavigationItems = async () => {
+    try {
+      const res = await fetch("/api/admin/nav?all=true");
+      const data = await res.json();
+      if (data.success) {
+        setNavItems(data.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to load navigation items:", error);
     }
   };
 
@@ -817,7 +868,7 @@ export default function ProductManagement() {
                     className={INPUT} 
                   />
                   <datalist id="filter-categories-datalist">
-                    {existingFilterCategories.map(cat => (
+                    {suggestedFilterCategories.map(cat => (
                       <option key={cat} value={cat} />
                     ))}
                   </datalist>
