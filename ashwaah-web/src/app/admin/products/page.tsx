@@ -177,62 +177,6 @@ export default function ProductManagement() {
   });
   const [customSizeInput, setCustomSizeInput] = useState("");
   
-  const suggestedFilterCategories = useMemo(() => {
-    const categoriesSet = new Set<string>();
-    let hasConfiguredFilters = false;
-
-    // 1. Add configured filter categories from navigation menu settings matching gender/category
-    if (navItems.length > 0) {
-      const matchedNavItems = [];
-
-      if (category) {
-        const cleanCat = category.trim().toLowerCase();
-        const catSlug = cleanCat.replace(/\s+/g, "-");
-        const matchedByCat = navItems.filter(item => {
-          const label = (item.label || "").toLowerCase();
-          const href = (item.href || "").toLowerCase();
-          return label === cleanCat || href.endsWith(`/${catSlug}`) || href.includes(`/${catSlug}/`);
-        });
-        matchedNavItems.push(...matchedByCat);
-      }
-
-      if (gender && gender !== "unisex") {
-        const cleanGender = gender.trim().toLowerCase();
-        const matchedByGender = navItems.filter(item => {
-          const label = (item.label || "").toLowerCase();
-          const href = (item.href || "").toLowerCase();
-          return label === cleanGender || href.endsWith(`/${cleanGender}`) || href.includes(`/${cleanGender}/`);
-        });
-        matchedNavItems.push(...matchedByGender);
-      }
-
-      matchedNavItems.forEach(item => {
-        if (item.filterTypes && typeof item.filterTypes === "string") {
-          const types = item.filterTypes.split(",").map((t: string) => t.trim()).filter(Boolean);
-          if (types.length > 0) {
-            hasConfiguredFilters = true;
-            types.forEach((t: string) => categoriesSet.add(t));
-          }
-        }
-      });
-    }
-
-    // 2. If no filters are configured in the navigation menu, fallback to defaults for selected gender
-    if (!hasConfiguredFilters) {
-      const currentGender = (gender || "unisex").toLowerCase();
-      const defaults = DEFAULT_SUGGESTIONS[currentGender] || DEFAULT_SUGGESTIONS.unisex;
-      defaults.forEach(d => categoriesSet.add(d));
-    }
-
-    // 3. Always include any existing filter categories already used by products
-    products.forEach((p) => {
-      if (p.filterCategory && typeof p.filterCategory === "string" && p.filterCategory.trim()) {
-        categoriesSet.add(p.filterCategory.trim());
-      }
-    });
-
-    return Array.from(categoriesSet).sort();
-  }, [products, navItems, gender, category]);
 
   
   // States and Refs for inline size button reordering
@@ -946,17 +890,11 @@ export default function ProductManagement() {
                   <label className={LABEL}>Filter Category (Sidebar Category Filter Name)</label>
                   <input
                     type="text"
-                    list="suggested-filter-categories"
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
                     placeholder="e.g. Shirts, Blazers & Coats, Trousers"
                     className={INPUT}
                   />
-                  <datalist id="suggested-filter-categories">
-                    {suggestedFilterCategories.map((cat) => (
-                      <option key={cat} value={cat} />
-                    ))}
-                  </datalist>
                   <p className="mt-1.5 text-[10px] text-brand/50 font-medium leading-relaxed">
                     Determines which checkbox option in the storefront's sidebar categories filter this product belongs to. Type any custom category (e.g. Blazers & Coats).
                   </p>
