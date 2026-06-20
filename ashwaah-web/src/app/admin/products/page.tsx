@@ -114,10 +114,9 @@ export default function ProductManagement() {
     { id: "fabric-init", key: "Fabric", value: "", isCustom: false },
     { id: "weave-init", key: "Weave", value: "", isCustom: false },
     { id: "neck-style-init", key: "Neck Style", value: "", isCustom: false },
-    { id: "key-words-init", key: "Key Words", value: "", isCustom: false },
   ]);
 
-  const PRESET_SPEC_KEYS = ["Style", "Fabric", "Weave", "Neck Style", "Key Words"];
+  const PRESET_SPEC_KEYS = ["Style", "Fabric", "Weave", "Neck Style"];
 
   const handleAddPreset = (key: string) => {
     setSpecRows(prev => [
@@ -447,7 +446,6 @@ export default function ProductManagement() {
       { id: Math.random().toString(), key: "Fabric", value: "", isCustom: false },
       { id: Math.random().toString(), key: "Weave", value: "", isCustom: false },
       { id: Math.random().toString(), key: "Neck Style", value: "", isCustom: false },
-      { id: Math.random().toString(), key: "Key Words", value: "", isCustom: false },
     ]);
     setColorImages({});
     setColorImageInputs({});
@@ -516,7 +514,6 @@ export default function ProductManagement() {
           if (p.fabricComposition) specs["Fabric"] = p.fabricComposition;
           if (p.weave) specs["Weave"] = p.weave;
           if (p.neckStyle) specs["Neck Style"] = p.neckStyle;
-          if (p.keyWords) specs["Key Words"] = p.keyWords;
         }
 
         const rows = Object.entries(specs).map(([k, v]) => ({
