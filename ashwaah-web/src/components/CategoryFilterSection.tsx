@@ -132,7 +132,7 @@ export default function CategoryFilterSection({
   // 2. Classify product types dynamically
   const productsWithTypes = useMemo(() => {
     return allProducts.map((p) => {
-      let type = "Other";
+      let productTypes: string[] = [];
       const name = (p.name || "").toLowerCase();
       const category = (p.category || "").toLowerCase();
       const tags = (p.tags || "").toLowerCase();
@@ -152,22 +152,34 @@ export default function CategoryFilterSection({
       const rawFilterCat = (p.filterCategory || "").trim();
 
       if (rawFilterCat) {
-        if (adminFilterTypes && adminFilterTypes.length > 0) {
-          const matched = adminFilterTypes.find(t => isPluralInsensitiveEqual(t, rawFilterCat));
-          type = matched || rawFilterCat;
-        } else {
-          type = rawFilterCat;
-        }
+        // Split comma-separated filter categories to support adding to multiple filters
+        const parts = rawFilterCat.split(",").map(t => t.trim()).filter(Boolean);
+        parts.forEach((part) => {
+          if (adminFilterTypes && adminFilterTypes.length > 0) {
+            const matched = adminFilterTypes.find(t => isPluralInsensitiveEqual(t, part));
+            productTypes.push(matched || part);
+          } else {
+            productTypes.push(part);
+          }
+        });
       } else if (adminFilterTypes && adminFilterTypes.length > 0) {
         // Fall back to keyword matching using isTypeMatch
         const sortedAdminTypes = [...adminFilterTypes].sort((a, b) => b.length - a.length);
-        const matchedType = sortedAdminTypes.find((t) => isTypeMatch(t, name, category, tags, style, keyWords));
-        type = matchedType || "Other";
+        const matchedTypes = sortedAdminTypes.filter((t) => isTypeMatch(t, name, category, tags, style, keyWords));
+        if (matchedTypes.length > 0) {
+          productTypes = matchedTypes;
+        } else {
+          productTypes = ["Other"];
+        }
       } else {
-        type = p.category || "Other";
+        productTypes = [p.category || "Other"];
       }
 
-      return { ...p, classifiedType: type };
+      return { 
+        ...p, 
+        classifiedTypes: productTypes,
+        classifiedType: productTypes[0] || "Other" 
+      };
     });
   }, [allProducts, adminFilterTypes]);
 
@@ -182,22 +194,16 @@ export default function CategoryFilterSection({
     
     // 2. Add custom filter categories from products of this category (based on the product added)
     productsWithTypes.forEach((p) => {
-      if (p.filterCategory && typeof p.filterCategory === "string" && p.filterCategory.trim()) {
-        const trimmed = p.filterCategory.trim();
-        const matched = adminFilterTypes?.find(t => isPluralInsensitiveEqual(t, trimmed));
-        typesSet.add(matched || trimmed);
-      }
-      
-      // If no admin filter types are configured, fallback to classifiedType
-      if (!adminFilterTypes || adminFilterTypes.length === 0) {
-        if (p.classifiedType) typesSet.add(p.classifiedType);
-      }
+      p.classifiedTypes.forEach((t) => {
+        // Match existing adminFilterTypes to prevent case/plural duplicates
+        const matched = adminFilterTypes?.find(adminT => isPluralInsensitiveEqual(adminT, t));
+        typesSet.add(matched || t);
+      });
     });
 
     // 3. Include "Other" if there are any products classified as "Other"
     if (adminFilterTypes && adminFilterTypes.length > 0) {
-      const specificTypes = Array.from(typesSet);
-      const hasOther = productsWithTypes.some((p) => !specificTypes.includes(p.classifiedType));
+      const hasOther = productsWithTypes.some((p) => p.classifiedTypes.includes("Other"));
       if (hasOther) {
         typesSet.add("Other");
       }
@@ -295,8 +301,9 @@ export default function CategoryFilterSection({
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     productsWithTypes.forEach((p) => {
-      const type = p.classifiedType;
-      counts[type] = (counts[type] || 0) + 1;
+      p.classifiedTypes.forEach((type) => {
+        counts[type] = (counts[type] || 0) + 1;
+      });
     });
     return counts;
   }, [productsWithTypes]);
@@ -345,7 +352,7 @@ export default function CategoryFilterSection({
 
     // Filter by selected types (OR logic: show products matching any selected type)
     if (selectedTypes.length > 0) {
-      list = list.filter((p) => selectedTypes.includes(p.classifiedType));
+      list = list.filter((p) => p.classifiedTypes.some((t) => selectedTypes.includes(t)));
     }
 
     // Filter by selected colors (OR logic: show products matching any selected color)
