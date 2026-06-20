@@ -65,6 +65,16 @@ const COLOR_MAP: Record<string, string> = {
   yellow: "#EAB308",
 };
 
+const isPluralInsensitiveEqual = (a: string, b: string) => {
+  const clean = (s: string) => s.toLowerCase().trim();
+  const ca = clean(a);
+  const cb = clean(b);
+  if (ca === cb) return true;
+  if (ca + "s" === cb || cb + "s" === ca) return true;
+  if (ca.replace(/s$/, "") === cb.replace(/s$/, "")) return true;
+  return false;
+};
+
 export default function CategoryFilterSection({
   initialSections,
   initialDisplayProducts,
@@ -140,15 +150,24 @@ export default function CategoryFilterSection({
       const keyWords = resolvedKeyWords.toLowerCase();
 
       const rawFilterCat = (p.filterCategory || "").trim();
+      const rawCategory = (p.category || "").trim();
+
       if (rawFilterCat) {
         if (adminFilterTypes && adminFilterTypes.length > 0) {
-          const matched = adminFilterTypes.find(t => t.toLowerCase() === rawFilterCat.toLowerCase());
+          const matched = adminFilterTypes.find(t => isPluralInsensitiveEqual(t, rawFilterCat));
           type = matched || rawFilterCat;
         } else {
           type = rawFilterCat;
         }
+      } else if (rawCategory && rawCategory.toLowerCase() !== categoryName.toLowerCase() && rawCategory.toLowerCase() !== slug.toLowerCase()) {
+        if (adminFilterTypes && adminFilterTypes.length > 0) {
+          const matched = adminFilterTypes.find(t => isPluralInsensitiveEqual(t, rawCategory));
+          type = matched || rawCategory;
+        } else {
+          type = rawCategory;
+        }
       } else if (adminFilterTypes && adminFilterTypes.length > 0) {
-        // Sort types by length descending to match most specific first
+        // Fall back to keyword matching using isTypeMatch
         const sortedAdminTypes = [...adminFilterTypes].sort((a, b) => b.length - a.length);
         const matchedType = sortedAdminTypes.find((t) => isTypeMatch(t, name, category, tags, style, keyWords));
         type = matchedType || "Other";
@@ -158,7 +177,7 @@ export default function CategoryFilterSection({
 
       return { ...p, classifiedType: type };
     });
-  }, [allProducts, adminFilterTypes]);
+  }, [allProducts, adminFilterTypes, categoryName, slug]);
 
   // 3. Extract unique types and colors dynamically
   const availableTypes = useMemo(() => {
@@ -169,15 +188,22 @@ export default function CategoryFilterSection({
       adminFilterTypes.forEach(t => typesSet.add(t));
     }
     
-    // 2. Add custom filter categories from products of this category
+    // 2. Add custom filter categories and product categories from products in this view
     productsWithTypes.forEach((p) => {
       if (p.filterCategory && typeof p.filterCategory === "string" && p.filterCategory.trim()) {
         const trimmed = p.filterCategory.trim();
-        // Match existing adminFilterTypes case-insensitively to prevent duplicates
-        const matched = adminFilterTypes?.find(t => t.toLowerCase() === trimmed.toLowerCase());
+        const matched = adminFilterTypes?.find(t => isPluralInsensitiveEqual(t, trimmed));
         typesSet.add(matched || trimmed);
       }
       
+      if (p.category && typeof p.category === "string" && p.category.trim()) {
+        const trimmed = p.category.trim();
+        if (trimmed.toLowerCase() !== categoryName.toLowerCase() && trimmed.toLowerCase() !== slug.toLowerCase()) {
+          const matched = adminFilterTypes?.find(t => isPluralInsensitiveEqual(t, trimmed));
+          typesSet.add(matched || trimmed);
+        }
+      }
+
       // If no admin filter types are configured, fallback to classifiedType
       if (!adminFilterTypes || adminFilterTypes.length === 0) {
         if (p.classifiedType) typesSet.add(p.classifiedType);
@@ -194,7 +220,7 @@ export default function CategoryFilterSection({
     }
     
     return Array.from(typesSet);
-  }, [productsWithTypes, adminFilterTypes]);
+  }, [productsWithTypes, adminFilterTypes, categoryName, slug]);
 
   const availableColors = useMemo(() => {
     const colorsSet = new Set<string>();
