@@ -517,10 +517,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
         {/* Product Details & Specifications Section */}
         {(hasSpecs || legacySpecsExist) && (
-          <div className="mt-16 pt-12 border-t border-brand/10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="mt-6 pt-6 border-t border-brand/10 grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div className="lg:col-span-6 hidden lg:block" />
             <div className="lg:col-span-6">
-              <h2 className="text-xl md:text-2xl font-serif font-bold text-brand mb-8">Product Specifications</h2>
+              <h2 className="text-xl md:text-2xl font-serif font-bold text-brand mb-4">Product Specifications</h2>
               {/* Specifications List */}
               <div className="bg-brand/5 rounded-3xl p-8 border border-brand/5">
                 <h3 className="text-xs font-black text-brand uppercase tracking-widest mb-6">Details</h3>
