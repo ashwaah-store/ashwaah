@@ -197,7 +197,12 @@ export default function CategoryFilterSection({
       p.classifiedTypes.forEach((t) => {
         // Match existing adminFilterTypes to prevent case/plural duplicates
         const matched = adminFilterTypes?.find(adminT => isPluralInsensitiveEqual(adminT, t));
-        typesSet.add(matched || t);
+        const resolved = matched || t;
+        // Deduplicate case-insensitively and plural-insensitively
+        const alreadyInSet = Array.from(typesSet).find(existingT => isPluralInsensitiveEqual(existingT, resolved));
+        if (!alreadyInSet) {
+          typesSet.add(resolved);
+        }
       });
     });
 
@@ -297,16 +302,24 @@ export default function CategoryFilterSection({
       : ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
   }, [isShoesCategory]);
 
-  // 5. Calculate counts dynamically based on the current collection
+  // 5. Calculate counts dynamically based on the current collection (case and plural insensitive)
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
+    // Initialize counts for all unique available types to 0
+    availableTypes.forEach((type) => {
+      counts[type] = 0;
+    });
+
     productsWithTypes.forEach((p) => {
-      p.classifiedTypes.forEach((type) => {
-        counts[type] = (counts[type] || 0) + 1;
+      p.classifiedTypes.forEach((t) => {
+        const matchedAvailable = availableTypes.find(availT => isPluralInsensitiveEqual(availT, t));
+        if (matchedAvailable) {
+          counts[matchedAvailable] = (counts[matchedAvailable] || 0) + 1;
+        }
       });
     });
     return counts;
-  }, [productsWithTypes]);
+  }, [productsWithTypes, availableTypes]);
 
   const colorCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -350,9 +363,13 @@ export default function CategoryFilterSection({
   const filteredAndSortedProducts = useMemo(() => {
     let list = [...productsWithTypes];
 
-    // Filter by selected types (OR logic: show products matching any selected type)
+    // Filter by selected types (OR logic: show products matching any selected type, case and plural insensitively)
     if (selectedTypes.length > 0) {
-      list = list.filter((p) => p.classifiedTypes.some((t) => selectedTypes.includes(t)));
+      list = list.filter((p) => 
+        p.classifiedTypes.some((t) => 
+          selectedTypes.some((selT) => isPluralInsensitiveEqual(selT, t))
+        )
+      );
     }
 
     // Filter by selected colors (OR logic: show products matching any selected color)
