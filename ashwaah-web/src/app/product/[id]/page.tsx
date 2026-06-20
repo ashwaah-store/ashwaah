@@ -517,44 +517,45 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
         {/* Product Details & Specifications Section */}
         {(hasSpecs || legacySpecsExist) && (
-          <div className="mt-16 pt-12 border-t border-brand/10">
-            <h2 className="text-xl md:text-2xl font-serif font-bold text-brand mb-8">Product Specifications</h2>
-            <div className="max-w-3xl">
+          <div className="mt-16 pt-12 border-t border-brand/10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="lg:col-span-6 hidden lg:block" />
+            <div className="lg:col-span-6">
+              <h2 className="text-xl md:text-2xl font-serif font-bold text-brand mb-8">Product Specifications</h2>
               {/* Specifications List */}
               <div className="bg-brand/5 rounded-3xl p-8 border border-brand/5">
                 <h3 className="text-xs font-black text-brand uppercase tracking-widest mb-6">Details</h3>
                 <dl className="space-y-4">
                   {hasSpecs ? (
                     specDetailsList.map(([key, val]) => (
-                      <div key={key} className="flex justify-between py-3 border-b border-brand/5">
-                        <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">{key}</dt>
-                        <dd className="text-xs font-bold text-brand text-right pl-4">{val}</dd>
+                      <div key={key} className="flex py-3 border-b border-brand/5 text-left items-start">
+                        <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider w-28 sm:w-36 shrink-0">{key}</dt>
+                        <dd className="text-xs font-bold text-brand pl-4">{val}</dd>
                       </div>
                     ))
                   ) : (
                     <>
                       {product.style && (
-                        <div className="flex justify-between py-3 border-b border-brand/5">
-                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Style</dt>
-                          <dd className="text-xs font-bold text-brand text-right pl-4">{product.style}</dd>
+                        <div className="flex py-3 border-b border-brand/5 text-left items-start">
+                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider w-28 sm:w-36 shrink-0">Style</dt>
+                          <dd className="text-xs font-bold text-brand pl-4">{product.style}</dd>
                         </div>
                       )}
                       {product.fabricComposition && (
-                        <div className="flex justify-between py-3 border-b border-brand/5">
-                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Fabric Composition</dt>
-                          <dd className="text-xs font-bold text-brand text-right pl-4">{product.fabricComposition}</dd>
+                        <div className="flex py-3 border-b border-brand/5 text-left items-start">
+                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider w-28 sm:w-36 shrink-0">Fabric Composition</dt>
+                          <dd className="text-xs font-bold text-brand pl-4">{product.fabricComposition}</dd>
                         </div>
                       )}
                       {product.weave && (
-                        <div className="flex justify-between py-3 border-b border-brand/5">
-                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Weave</dt>
-                          <dd className="text-xs font-bold text-brand text-right pl-4">{product.weave}</dd>
+                        <div className="flex py-3 border-b border-brand/5 text-left items-start">
+                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider w-28 sm:w-36 shrink-0">Weave</dt>
+                          <dd className="text-xs font-bold text-brand pl-4">{product.weave}</dd>
                         </div>
                       )}
                       {product.neckStyle && (
-                        <div className="flex justify-between py-3 border-b border-brand/5">
-                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider">Neck Style</dt>
-                          <dd className="text-xs font-bold text-brand text-right pl-4">{product.neckStyle}</dd>
+                        <div className="flex py-3 border-b border-brand/5 text-left items-start">
+                          <dt className="text-xs font-bold text-brand/50 uppercase tracking-wider w-28 sm:w-36 shrink-0">Neck Style</dt>
+                          <dd className="text-xs font-bold text-brand pl-4">{product.neckStyle}</dd>
                         </div>
                       )}
                     </>
