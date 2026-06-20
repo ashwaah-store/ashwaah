@@ -324,7 +324,7 @@ export default function AdminNavigation() {
                   className="w-full bg-brand/5 border border-brand/10 rounded-xl py-3 px-4 text-sm font-bold text-brand focus:outline-none focus:border-[#C5A059]/30 focus:ring-4 focus:ring-[#C5A059]/10 transition-all"
                 />
                 <p className="mt-1.5 text-[10px] text-brand/50 font-medium leading-relaxed">
-                  Enter comma-separated product types to display in the sidebar filter for this category. Leave blank to automatically classify products dynamically based on default keywords.
+                  Enter comma-separated product types to display in the sidebar filter for this category. Leave blank to default classification to the products' main categories.
                 </p>
               </div>
             </div>

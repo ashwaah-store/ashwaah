@@ -98,7 +98,7 @@ export default function CategoryFilterSection({
       .filter((t) => t.length > 0);
   }, [filterTypes]);
 
-  // Helper to check if a product matches a type, with special handling for T-Shirt vs Shirt
+  // Helper to check if a product matches a type
   const isTypeMatch = (type: string, name: string, category: string, tags: string, style: string, keyWords: string) => {
     const lowerType = type.toLowerCase().trim();
     const lowerName = name.toLowerCase();
@@ -108,114 +108,16 @@ export default function CategoryFilterSection({
     const lowerKeyWords = keyWords.toLowerCase();
 
     // Check direct inclusion
-    const matchesInclusion = 
+    return (
       lowerCategory.includes(lowerType) ||
       lowerTags.includes(lowerType) ||
       lowerName.includes(lowerType) ||
       lowerStyle.includes(lowerType) ||
-      lowerKeyWords.includes(lowerType);
-
-    if (matchesInclusion) return true;
-
-    // Special handling: "T-Shirt" (or T-Shirts / Tshirt) covers Sweatshirts, Hoodies, Polos, Tees, and T-Shirts
-    if (
-      lowerType === "t-shirt" ||
-      lowerType === "t-shirts" ||
-      lowerType === "timages" ||
-      lowerType === "tshirts" ||
-      lowerType === "tshirt"
-    ) {
-      if (
-        lowerName.includes("sweatshirt") ||
-        lowerName.includes("hoodie") ||
-        lowerName.includes("t-shirt") ||
-        lowerName.includes("tshirt") ||
-        lowerName.includes("polo") ||
-        lowerName.includes("tee")
-      ) {
-        return true;
-      }
-    }
-
-    // Special handling: "Shirt" should NOT match "Sweatshirt"
-    if (lowerType === "shirt" || lowerType === "shirts") {
-      if (lowerName.includes("sweatshirt")) {
-        return false;
-      }
-    }
-
-    // Special logic for compound filter types (like "Blazers & Coats"): match if product's name/tags/style/category/keyWords has "blazer" or "coat"
-    if (lowerType.includes("&") || lowerType.includes("and") || lowerType.includes("/")) {
-      const parts = lowerType
-        .split(/[\s&/]|and/g)
-        .map(p => p.trim())
-        .filter(p => p.length > 2); // match words longer than 2 letters like "blazer", "coat"
-      
-      if (parts.length > 0) {
-        return parts.some(part => 
-          lowerCategory.includes(part) ||
-          lowerTags.includes(part) ||
-          lowerName.includes(part) ||
-          lowerStyle.includes(part) ||
-          lowerKeyWords.includes(part)
-        );
-      }
-    }
-
-    return false;
+      lowerKeyWords.includes(lowerType)
+    );
   };
 
-  // Helper for default type classification
-  const classifyTypeFallback = (name: string, category: string, style: string, keyWords: string) => {
-    const lowerName = name.toLowerCase();
-    const lowerCategory = category.toLowerCase();
-    const lowerStyle = style.toLowerCase();
-    const lowerKeyWords = keyWords.toLowerCase();
 
-    if (
-      lowerName.includes("sweatshirt") ||
-      lowerName.includes("hoodie") ||
-      lowerName.includes("t-shirt") ||
-      lowerName.includes("tshirt") ||
-      lowerName.includes("polo") ||
-      lowerName.includes("tee")
-    ) {
-      return "T-Shirt";
-    } else if (lowerName.includes("shirt")) {
-      return "Shirt";
-    } else if (
-      lowerCategory.includes("ethnic") ||
-      lowerName.includes("kurta") ||
-      lowerName.includes("kurti") ||
-      lowerName.includes("lehenga") ||
-      lowerName.includes("saree") ||
-      lowerName.includes("sharara") ||
-      lowerName.includes("anarkali")
-    ) {
-      return "Ethnic Wear";
-    } else if (
-      lowerCategory.includes("suitings") ||
-      lowerCategory.includes("work wear") ||
-      lowerCategory.includes("office wear") ||
-      lowerCategory.includes("corporate") ||
-      lowerName.includes("blazer") ||
-      lowerName.includes("suit") ||
-      lowerName.includes("formal") ||
-      lowerStyle.includes("blazer") ||
-      lowerStyle.includes("coat") ||
-      lowerStyle.includes("suit") ||
-      lowerKeyWords.includes("blazer") ||
-      lowerKeyWords.includes("coat") ||
-      lowerKeyWords.includes("suit")
-    ) {
-      return "Workwear";
-    } else if (lowerName.includes("dress") || lowerName.includes("gown") || lowerName.includes("bodycon") || lowerCategory.includes("dresses")) {
-      return "Dresses";
-    } else if (lowerName.includes("jogger") || lowerName.includes("pants") || lowerName.includes("cargo") || lowerName.includes("trousers")) {
-      return "Pants & Joggers";
-    }
-    return category || "Other";
-  };
 
   // 2. Classify product types dynamically
   const productsWithTypes = useMemo(() => {
@@ -251,7 +153,7 @@ export default function CategoryFilterSection({
         const matchedType = sortedAdminTypes.find((t) => isTypeMatch(t, name, category, tags, style, keyWords));
         type = matchedType || "Other";
       } else {
-        type = classifyTypeFallback(name, category, style, keyWords);
+        type = p.category || "Other";
       }
 
       return { ...p, classifiedType: type };

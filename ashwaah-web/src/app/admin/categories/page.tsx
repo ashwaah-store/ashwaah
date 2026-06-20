@@ -392,7 +392,7 @@ export default function CategorySettingsPage() {
                 className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
               />
               <p className="mt-1.5 text-[9px] text-brand/40 font-medium leading-relaxed">
-                Enter comma-separated product types to show in the category page sidebar filter. Leave blank to automatically classify products dynamically based on default keywords.
+                Enter comma-separated product types to show in the category page sidebar filter. Leave blank to default classification to the products' main categories.
               </p>
             </div>
 
