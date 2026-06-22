@@ -18,7 +18,8 @@ import {
   X,
   Settings,
   LayoutGrid,
-  Calendar
+  Calendar,
+  Menu
 } from "lucide-react";
 
 const sidebarLinks = [
@@ -37,6 +38,7 @@ const sidebarLinks = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Don't show sidebar on login/denied pages
   if (pathname === "/admin/login" || pathname === "/admin/denied") {
@@ -49,11 +51,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="flex h-screen bg-brand-light font-inter overflow-hidden">
+    <div className="flex h-screen bg-brand-light font-inter overflow-hidden relative">
+      {/* Sidebar Mobile Backdrop Overlay */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 z-40 bg-[#1B3022]/60 backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-60 bg-[#1B3022] text-white flex flex-col shadow-2xl fixed inset-y-0 z-50">
-        <div className="p-6 border-b border-white/5">
-          <Link href="/" className="flex items-center space-x-3 group">
+      <aside className={`w-60 bg-[#1B3022] text-white flex flex-col shadow-2xl fixed inset-y-0 z-50 transition-transform duration-300 md:translate-x-0 ${
+        isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      }`}>
+        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+          <Link href="/" className="flex items-center space-x-3 group" onClick={() => setIsMobileSidebarOpen(false)}>
             <div className="w-8 h-8 bg-[#C5A059] rounded-lg flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
               <span className="font-serif font-bold text-lg text-[#1B3022]">A</span>
             </div>
@@ -62,6 +74,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p className="text-[8px] uppercase tracking-[0.2em] text-[#C5A059] font-black mt-1">Admin Panel</p>
             </div>
           </Link>
+          <button 
+            onClick={() => setIsMobileSidebarOpen(false)} 
+            className="md:hidden p-1 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-all cursor-pointer"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto min-h-0 p-4 space-y-1 mt-4 custom-scrollbar">
@@ -73,6 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 key={link.name}
                 href={link.href}
+                onClick={() => setIsMobileSidebarOpen(false)}
                 className={`flex items-center justify-between px-3 py-3 rounded-xl transition-all group ${isActive
                     ? "bg-[#C5A059] text-[#1B3022] shadow-lg translate-x-1"
                     : "text-white/60 hover:text-white hover:bg-white/5"
@@ -99,12 +118,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-
       {/* Main Content */}
-      <main className="flex-1 ml-60 min-w-0 h-full overflow-hidden flex flex-col">
+      <main className="flex-grow md:ml-60 ml-0 min-w-0 h-full overflow-hidden flex flex-col relative">
+        {/* Mobile Header Bar */}
+        <div className="flex md:hidden items-center justify-between px-6 py-4 bg-[#1B3022] text-white border-b border-white/5 sticky top-0 z-30 shadow-sm flex-shrink-0">
+          <button
+            onClick={() => setIsMobileSidebarOpen(true)}
+            className="p-1.5 hover:bg-white/5 rounded-xl transition-all text-[#C5A059] cursor-pointer"
+          >
+            <Menu size={22} />
+          </button>
+          
+          <div className="flex items-center space-x-3">
+            <div className="w-7 h-7 bg-[#C5A059] rounded-lg flex items-center justify-center shadow-md">
+              <span className="font-serif font-bold text-sm text-[#1B3022]">A</span>
+            </div>
+            <h1 className="font-gabriola font-bold text-lg tracking-wide leading-none">Ashwaah</h1>
+          </div>
+          
+          <div className="w-8"></div> {/* Spacer to center title */}
+        </div>
+
         {/* Header decoration */}
         <div className="h-1 bg-gradient-to-r from-transparent via-[#C5A059]/20 to-transparent flex-shrink-0"></div>
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="flex-grow overflow-y-auto custom-scrollbar">
           {children}
         </div>
       </main>
