@@ -86,9 +86,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-10">
-      <div className="mb-10">
+      <div className="mb-10 text-center flex flex-col items-center">
         <h1 className="text-4xl font-playfair font-bold text-brand">Dashboard Overview</h1>
-        <p className="mt-2 text-brand/60 font-medium tracking-tight flex items-center">
+        <p className="mt-2 text-brand/60 font-medium tracking-tight flex items-center justify-center">
           <Sparkles size={16} className="text-[#C5A059] mr-2" />
           Welcome back to the Ashwaah management hub.
         </p>
