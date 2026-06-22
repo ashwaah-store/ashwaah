@@ -66,20 +66,20 @@ export default function CustomerManagement() {
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] shadow-sm border border-brand/5 overflow-hidden">
+      <div className="bg-white rounded-[2.5rem] shadow-sm border border-brand/5 overflow-x-auto custom-scrollbar">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-brand/5 border-b border-brand/10">
-              <th className="px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Customer Details</th>
-              <th className="px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Phone Number</th>
-              <th className="px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Role</th>
-              <th className="px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Joined On</th>
+              <th className="px-4 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Customer Details</th>
+              <th className="px-4 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Phone Number</th>
+              <th className="px-4 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Role</th>
+              <th className="px-4 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Joined On</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-brand/5">
             {filteredCustomers.map((customer) => (
               <tr key={customer.id} className="hover:bg-brand/5 transition-all group">
-                <td className="px-8 py-6">
+                <td className="px-4 md:px-8 py-6">
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 bg-[#C5A059]/10 rounded-xl flex items-center justify-center text-[#C5A059] font-black text-sm">
                       {customer.fullName?.charAt(0) || "U"}
@@ -90,20 +90,20 @@ export default function CustomerManagement() {
                     </div>
                   </div>
                 </td>
-                <td className="px-8 py-6">
+                <td className="px-4 md:px-8 py-6">
                   <div className="flex items-center space-x-2 text-brand/60 group-hover:text-brand transition-colors">
                     <Phone size={14} className="text-[#C5A059]" />
                     <span className="font-bold text-sm tracking-widest">+91 {customer.phoneNumber}</span>
                   </div>
                 </td>
-                <td className="px-8 py-6">
+                <td className="px-4 md:px-8 py-6">
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                     customer.role === "admin" ? "bg-[#1B3022] text-[#C5A059]" : "bg-brand/5 text-brand/60"
                   }`}>
                     {customer.role}
                   </span>
                 </td>
-                <td className="px-8 py-6 text-sm text-brand/40 font-bold tracking-tight">
+                <td className="px-4 md:px-8 py-6 text-sm text-brand/40 font-bold tracking-tight">
                   {new Date(customer.createdAt).toLocaleDateString('en-IN', {
                     day: '2-digit',
                     month: 'short',

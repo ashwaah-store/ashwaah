@@ -544,32 +544,39 @@ function SearchResults() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "tween", duration: 0.3 }}
-              className="lg:hidden fixed inset-y-0 left-0 z-[60] w-80 max-w-[85vw] bg-[#FFFDF6] shadow-2xl p-6 overflow-y-auto custom-scrollbar flex flex-col"
+              className="lg:hidden fixed inset-y-0 left-0 z-[60] w-80 max-w-[85vw] bg-[#FFFDF6] shadow-2xl p-6 flex flex-col"
             >
               {/* Drawer Header */}
               <div className="flex items-center justify-between pb-4 border-b border-[#064e3b]/5 mb-6 flex-shrink-0">
                 <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#064e3b]">Filters</h2>
-                <div className="flex items-center gap-4">
-                  {isFilterOrSortActive && (
-                    <button
-                      onClick={handleClearFilters}
-                      className="text-[10px] font-black uppercase text-red-600 hover:text-red-700 transition-colors cursor-pointer"
-                    >
-                      Clear All
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setIsMobileFiltersOpen(false)}
-                    className="p-1 hover:bg-brand/5 rounded-lg transition-all text-brand/60 hover:text-brand cursor-pointer"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
+                <button
+                  onClick={() => setIsMobileFiltersOpen(false)}
+                  className="p-1 hover:bg-brand/5 rounded-lg transition-all text-[#064e3b]/60 hover:text-[#064e3b] cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
               </div>
 
               {/* Filter Content */}
-              <div className="flex-grow overflow-y-auto pr-1 pb-10 custom-scrollbar">
+              <div className="flex-grow overflow-y-auto pr-1 pb-4 custom-scrollbar">
                 {renderFilters()}
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="pt-4 border-t border-[#064e3b]/5 mt-auto flex gap-4 flex-shrink-0 bg-[#FFFDF6]">
+                <button
+                  onClick={handleClearFilters}
+                  disabled={!isFilterOrSortActive}
+                  className="flex-1 py-3.5 rounded-xl border border-[#064e3b]/10 text-xs font-black uppercase tracking-widest text-[#064e3b] disabled:opacity-40 transition-all cursor-pointer text-center"
+                >
+                  Clear All
+                </button>
+                <button
+                  onClick={() => setIsMobileFiltersOpen(false)}
+                  className="flex-[2] py-3.5 rounded-xl bg-[#064e3b] text-white text-xs font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all cursor-pointer text-center"
+                >
+                  Apply & Close
+                </button>
               </div>
             </motion.div>
           </>
