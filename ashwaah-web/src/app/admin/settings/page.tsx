@@ -579,7 +579,7 @@ export default function SettingsPage() {
                       <button
                         onClick={() => handleDeleteOffer(offer.id)}
                         disabled={isSubmitting}
-                        className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
                       >
                         <Trash2 size={12} />
                       </button>
