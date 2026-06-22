@@ -293,35 +293,34 @@ export default function CategorySettingsPage() {
               <label className="block text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] mb-2 ml-1">
                 Category Image URL
               </label>
-              <div className="flex gap-3">
+              <input
+                type="text"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="e.g. https://images.unsplash.com/... or /images/..."
+                className="w-full bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
+                required
+              />
+              <div className="relative border-2 border-dashed border-brand/10 hover:border-[#C5A059]/40 bg-brand-light/50 hover:bg-white rounded-2xl h-24 transition-all flex flex-col items-center justify-center cursor-pointer mt-3">
                 <input
-                  type="text"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="e.g. https://images.unsplash.com/... or /images/..."
-                  className="flex-grow bg-brand/5 border border-transparent focus:border-[#C5A059]/50 rounded-2xl px-5 py-3.5 text-sm font-semibold text-brand outline-none transition-all placeholder:text-brand/20"
-                  required
+                  type="file"
+                  accept="image/*"
+                  disabled={isUploadingImage}
+                  onChange={handleImageUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
-                <label className="cursor-pointer bg-[#C5A059] text-white px-5 py-3 rounded-2xl font-bold text-xs hover:bg-[#B38E46] transition-all whitespace-nowrap flex items-center justify-center gap-1.5 shadow-sm">
-                  {isUploadingImage ? (
-                    <>
-                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Uploading...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Upload size={14} />
-                      <span>Upload</span>
-                    </>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    disabled={isUploadingImage}
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </label>
+                {isUploadingImage ? (
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="w-6 h-6 text-[#C5A059] animate-spin mb-1" />
+                    <span className="text-[9px] font-black text-brand/40 uppercase tracking-widest">Uploading image...</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center text-center p-3">
+                    <Upload className="w-5 h-5 text-[#C5A059] mb-1" />
+                    <p className="text-xs font-bold text-brand/60">Click or Drag Files here</p>
+                    <p className="text-[10px] text-brand/35 font-medium mt-0.5">Supports Images (PNG, JPG, WEBP)</p>
+                  </div>
+                )}
               </div>
             </div>
 
