@@ -43,7 +43,7 @@ export function SortableNavItem({ item, onEdit, onDelete }: Props) {
       style={style}
       className={`hover:bg-brand/5 transition-all group ${isDragging ? 'bg-white shadow-2xl opacity-50' : ''}`}
     >
-      <td className="px-4 md:px-8 py-5">
+      <td className="px-2 md:px-8 py-5">
         <button 
           {...attributes} 
           {...listeners}
@@ -52,10 +52,10 @@ export function SortableNavItem({ item, onEdit, onDelete }: Props) {
           <GripVertical size={20} />
         </button>
       </td>
-      <td className="px-4 md:px-8 py-5">
+      <td className="px-2 md:px-8 py-5">
         <span className="font-bold text-brand">{item.label}</span>
       </td>
-      <td className="px-4 md:px-8 py-5">
+      <td className="px-2 md:px-8 py-5">
         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
           item.isActive ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"
         }`}>
@@ -63,25 +63,25 @@ export function SortableNavItem({ item, onEdit, onDelete }: Props) {
         </span>
       </td>
 
-      <td className="px-4 md:px-8 py-5 text-right">
-        <div className="flex justify-end space-x-2">
+      <td className="px-2 md:px-8 py-5 text-right">
+        <div className="flex justify-end space-x-1.5 md:space-x-2">
           <Link 
             href={`/admin/navigation/design/${item.id}`}
             title="Design Page"
-            className="flex items-center justify-center p-2.5 rounded-lg bg-[#C5A059]/10 text-[#C5A059] hover:bg-[#C5A059] hover:text-white transition-all text-[10px] font-black uppercase tracking-widest space-x-1"
+            className="flex items-center justify-center p-2 md:p-2.5 rounded-lg bg-[#C5A059]/10 text-[#C5A059] hover:bg-[#C5A059] hover:text-white transition-all text-[10px] font-black uppercase tracking-widest space-x-1"
           >
             <Layout size={14} />
             <span className="hidden sm:inline">Design</span>
           </Link>
           <button 
             onClick={() => onEdit(item)}
-            className="p-2.5 rounded-lg bg-brand/5 text-brand/60 hover:bg-brand-accent hover:text-white transition-all"
+            className="p-2 md:p-2.5 rounded-lg bg-brand/5 text-brand/60 hover:bg-brand-accent hover:text-white transition-all"
           >
             <Edit2 size={14} />
           </button>
           <button 
             onClick={() => onDelete(item.id)}
-            className="p-2.5 rounded-lg bg-brand/5 text-brand/60 hover:bg-red-500 hover:text-white transition-all"
+            className="p-2 md:p-2.5 rounded-lg bg-brand/5 text-brand/60 hover:bg-red-500 hover:text-white transition-all"
           >
             <Trash2 size={14} />
           </button>

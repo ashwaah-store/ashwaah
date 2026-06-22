@@ -213,7 +213,7 @@ export default function AdminNavigation() {
   }
 
   return (
-    <div className="p-10">
+    <div className="p-4 md:p-10">
       <div className="mb-10 text-center flex flex-col items-center">
         <h1 className="text-4xl font-playfair font-bold text-brand">Navigation & Pages</h1>
         <p className="mt-2 text-brand/60 font-medium">Manage primary menu links and their page sections.</p>
@@ -359,10 +359,10 @@ export default function AdminNavigation() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-brand/5 border-b border-brand/10">
-                    <th className="w-16 px-4 md:px-8 py-6"></th>
-                    <th className="px-4 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Menu Label</th>
-                    <th className="px-4 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Status</th>
-                    <th className="px-4 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] text-right">Manage</th>
+                    <th className="w-12 px-2 md:px-8 py-6"></th>
+                    <th className="px-2 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Menu Label</th>
+                    <th className="px-2 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Status</th>
+                    <th className="px-2 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] text-right">Manage</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand/5 relative">
