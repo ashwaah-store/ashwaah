@@ -332,24 +332,26 @@ export default function DesignWorkspace() {
   return (
     <div className="max-w-5xl mx-auto p-10 pb-20">
       <div className="mb-8">
-        <Link 
-          href="/admin/navigation" 
-          className="inline-flex items-center space-x-2 text-brand/40 hover:text-brand transition-colors text-sm font-bold mb-6"
-        >
-          <ArrowLeft size={16} />
-          <span>Back to List</span>
-        </Link>
+        <div className="flex justify-start mb-6">
+          <Link 
+            href="/admin/navigation" 
+            className="inline-flex items-center space-x-2 text-brand/40 hover:text-brand transition-colors text-sm font-bold"
+          >
+            <ArrowLeft size={16} />
+            <span>Back to List</span>
+          </Link>
+        </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center space-x-3 mb-2">
+        <div className="flex flex-col items-center text-center gap-6">
+          <div className="flex flex-col items-center">
+            <div className="flex items-center space-x-3 mb-2 justify-center">
               <Layout className="text-[#C5A059]" size={24} />
               <h1 className="text-3xl font-playfair font-bold text-brand">Designing Page: {menuItem?.label}</h1>
             </div>
             <p className="text-brand/60 font-medium">Manage and reorder the product carousels displayed on this page.</p>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 justify-center">
             <button 
               onClick={handleAddSection}
               disabled={isAddingSection}
@@ -361,7 +363,7 @@ export default function DesignWorkspace() {
             <button 
               onClick={handleSaveAll}
               disabled={isSaving}
-              className="flex items-center space-x-2 bg-[#C5A059] text-white px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#b39150] transition-all shadow-lg disabled:opacity-50"
+              className="flex items-center space-x-2 bg-[#C5A059] text-[#1B3022] px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#b39150] transition-all shadow-lg disabled:opacity-50"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save size={16} />}
               <span>Save Changes</span>

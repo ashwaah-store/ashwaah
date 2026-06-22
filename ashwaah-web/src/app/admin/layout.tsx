@@ -63,7 +63,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Sidebar */}
       <aside className={`w-60 bg-[#1B3022] text-white flex flex-col shadow-2xl fixed inset-y-0 z-50 transition-transform duration-300 ${
-        isMobileSidebarOpen || isDesktopSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        isMobileSidebarOpen 
+          ? "translate-x-0" 
+          : isDesktopSidebarOpen 
+            ? "md:translate-x-0 -translate-x-full" 
+            : "-translate-x-full"
       }`}>
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group" onClick={() => setIsMobileSidebarOpen(false)}>
@@ -145,26 +149,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         )}
 
-        {/* Mobile Header Bar */}
-        <div className={`flex md:hidden items-center justify-between px-6 py-4 bg-[#1B3022] text-white border-b border-white/5 sticky top-0 z-30 shadow-sm flex-shrink-0 transition-all ${
-          isMobileSidebarOpen ? "hidden" : "flex"
-        }`}>
+        {/* Mobile Floating Icon (Only when sidebar is closed) */}
+        {!isMobileSidebarOpen && (
           <button
             onClick={() => setIsMobileSidebarOpen(true)}
-            className="p-1 hover:bg-white/5 rounded-xl transition-all text-[#C5A059] cursor-pointer flex items-center justify-center"
+            className="flex md:hidden absolute top-4 left-6 z-40 p-1 hover:bg-[#1B3022]/10 rounded-xl transition-all text-[#C5A059] cursor-pointer items-center justify-center animate-in fade-in duration-300"
           >
-            <LayoutDashboard size={22} />
-          </button>
-          
-          <div className="flex items-center space-x-3">
-            <div className="w-7 h-7 bg-black rounded-lg p-0.5 flex items-center justify-center shadow-md">
-              <img src="/images/logo.png" alt="Ashwaah Logo" className="w-full h-full rounded-md object-cover" />
+            <div className="relative w-8 h-8 group">
+              {/* Ashwaah Logo Icon */}
+              <div className="absolute inset-0 bg-black rounded-lg p-0.5 flex items-center justify-center shadow-md group-hover:scale-0 opacity-100 group-hover:opacity-0 transition-all duration-200">
+                <img src="/images/logo.png" alt="Ashwaah Logo" className="w-full h-full rounded-md object-cover" />
+              </div>
+              {/* Dashboard Icon on hover */}
+              <div className="absolute inset-0 scale-0 group-hover:scale-100 opacity-0 group-hover:opacity-100 flex items-center justify-center bg-[#1B3022] text-[#C5A059] rounded-lg transition-all duration-200">
+                <LayoutDashboard size={20} />
+              </div>
             </div>
-            <h1 className="font-gabriola font-bold text-lg tracking-wide leading-none">Ashwaah</h1>
-          </div>
-          
-          <div className="w-8"></div> {/* Spacer to center title */}
-        </div>
+          </button>
+        )}
 
         {/* Header decoration */}
         <div className="h-1 bg-gradient-to-r from-transparent via-[#C5A059]/20 to-transparent flex-shrink-0"></div>

@@ -152,14 +152,14 @@ export default function AdminOrders() {
   }
 
   return (
-    <div className="pb-20">
-      <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-playfair font-bold text-brand">Order Fulfillment</h1>
-          <p className="mt-2 text-brand/60 font-medium">Track and manage customer purchases and custom fits.</p>
-        </div>
+    <div className="pb-20 px-8 pt-8 font-inter">
+      <div className="mb-10 text-center flex flex-col items-center">
+        <h1 className="text-4xl font-playfair font-bold text-brand">Order Fulfillment</h1>
+        <p className="mt-2 text-brand/60 font-medium">Track and manage customer purchases and custom fits.</p>
+      </div>
 
-        <div className="relative group min-w-[300px]">
+      <div className="mb-10 flex justify-center">
+        <div className="relative group min-w-[300px] max-w-md w-full">
           <ShoppingBag className="absolute left-4 top-1/2 -translate-y-1/2 text-brand/30 group-focus-within:text-[#C5A059] transition-colors" size={18} />
           <input 
             type="text" 

@@ -244,9 +244,9 @@ export default function CategorySettingsPage() {
 
   return (
     <div className="p-10">
-      <div className="mb-10">
+      <div className="mb-10 text-center flex flex-col items-center">
         <h1 className="text-4xl font-playfair font-bold text-brand">Category Banner Settings</h1>
-        <p className="mt-2 text-brand/60 font-medium tracking-tight flex items-center">
+        <p className="mt-2 text-brand/60 font-medium tracking-tight flex items-center justify-center">
           <Sparkles size={16} className="text-[#C5A059] mr-2" />
           Add and manage promo category grid blocks positioned on your storefront home page.
         </p>

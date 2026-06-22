@@ -213,21 +213,21 @@ export default function AdminNavigation() {
   }
 
   return (
-    <>
-      <div>
-        <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div>
-            <h1 className="text-4xl font-playfair font-bold text-brand">Navigation & Pages</h1>
-            <p className="mt-2 text-brand/60 font-medium">Manage primary menu links and their page sections.</p>
-          </div>
-          <button 
-            onClick={handleAddNew}
-            className="flex items-center space-x-2 bg-[#C5A059] text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#b39150] transition-all shadow-lg"
-          >
-            <Plus size={16} />
-            <span>Add New Link</span>
-          </button>
-        </div>
+    <div className="p-10">
+      <div className="mb-10 text-center flex flex-col items-center">
+        <h1 className="text-4xl font-playfair font-bold text-brand">Navigation & Pages</h1>
+        <p className="mt-2 text-brand/60 font-medium">Manage primary menu links and their page sections.</p>
+      </div>
+
+      <div className="mb-10 flex justify-center">
+        <button 
+          onClick={handleAddNew}
+          className="flex items-center space-x-2 bg-[#C5A059] text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#b39150] transition-all shadow-lg"
+        >
+          <Plus size={16} />
+          <span>Add New Link</span>
+        </button>
+      </div>
 
         {/* Alerts */}
         {success && (
@@ -385,6 +385,5 @@ export default function AdminNavigation() {
           )}
         </div>
       </div>
-    </>
   );
 }

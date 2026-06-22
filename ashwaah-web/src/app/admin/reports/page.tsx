@@ -69,12 +69,12 @@ export default function ReportsPage() {
   return (
     <div className="pb-20 px-8 pt-8 font-inter">
       {/* Header section */}
-      <div className="mb-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-playfair font-bold text-brand">Business Analytics</h1>
-          <p className="mt-2 text-brand/60 font-medium">Deep dive into your shop's performance and growth metrics.</p>
-        </div>
+      <div className="mb-12 text-center flex flex-col items-center">
+        <h1 className="text-4xl font-playfair font-bold text-brand">Business Analytics</h1>
+        <p className="mt-2 text-brand/60 font-medium">Deep dive into your shop's performance and growth metrics.</p>
+      </div>
 
+      <div className="mb-10 flex justify-center">
         <button className="flex items-center space-x-3 bg-brand text-white px-8 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] hover:bg-brand-hover shadow-xl transition-all active:scale-95">
           <Download size={16} className="text-brand-accent" />
           <span>Export Full Report</span>

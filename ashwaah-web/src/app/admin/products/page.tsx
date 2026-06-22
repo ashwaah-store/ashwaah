@@ -833,9 +833,9 @@ export default function ProductManagement() {
         
         {/* ─── LEFT: FORM (Middle Workspace) ────────────────────────── */}
         <div className="flex-[3] h-full overflow-y-auto custom-scrollbar p-4 md:p-6 border-r border-brand/5">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-[#C5A059]/10 rounded-xl">
+          <div className="flex flex-col items-center text-center justify-center mb-6 pt-4">
+            <div className="flex flex-col items-center space-y-2">
+              <div className="p-2 bg-[#C5A059]/10 rounded-xl w-fit">
                 {editingId ? <Edit3 className="text-[#C5A059]" size={22} /> : <Plus className="text-[#C5A059]" size={22} />}
               </div>
               <div>
@@ -846,7 +846,7 @@ export default function ProductManagement() {
               </div>
             </div>
             {editingId && (
-              <button onClick={resetForm} className="px-4 py-2 bg-brand/5 text-brand/40 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-brand/10 transition-all">
+              <button onClick={resetForm} className="mt-4 px-4 py-2 bg-brand/5 text-brand/40 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-brand/10 transition-all">
                 Cancel Edit
               </button>
             )}

@@ -427,20 +427,21 @@ export default function AdminEventsPage() {
       )}
 
       {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-10">
-        <div>
-          <h1 className="text-4xl font-playfair font-bold text-brand flex items-center">
-            <Calendar className="mr-3 text-[#C5A059]" size={36} />
-            Manage Events
-          </h1>
-          <p className="mt-2 text-brand/60 font-medium tracking-tight flex items-center">
-            <Sparkles size={16} className="text-[#C5A059] mr-2" />
-            Create, edit, and publish company gatherings, workshops, and outdoor festivals.
-          </p>
-        </div>
+      <div className="mb-10 text-center flex flex-col items-center">
+        <h1 className="text-4xl font-playfair font-bold text-brand flex items-center justify-center">
+          <Calendar className="mr-3 text-[#C5A059]" size={36} />
+          Manage Events
+        </h1>
+        <p className="mt-2 text-brand/60 font-medium tracking-tight flex items-center justify-center">
+          <Sparkles size={16} className="text-[#C5A059] mr-2" />
+          Create, edit, and publish company gatherings, workshops, and outdoor festivals.
+        </p>
+      </div>
+
+      <div className="flex justify-center mb-10">
         <button
           onClick={openAddModal}
-          className="mt-4 md:mt-0 flex items-center justify-center bg-[#1B3022] hover:bg-[#1B3022]/90 text-white font-bold px-6 py-3.5 rounded-2xl transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+          className="flex items-center justify-center bg-[#1B3022] hover:bg-[#1B3022]/90 text-white font-bold px-6 py-3.5 rounded-2xl transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
         >
           <Plus size={18} className="mr-2" />
           Add New Event
