@@ -503,40 +503,44 @@ export default function CategorySettingsPage() {
                         </div>
 
                         {/* Control Actions */}
-                        <div className="flex items-center space-x-2 mt-4">
-                          <button
-                            onClick={() => handleEditClick(item)}
-                            className="p-2.5 bg-white text-brand hover:text-[#C5A059] rounded-xl shadow-sm border border-brand/5 hover:scale-105 transition-all"
-                            title="Edit Card"
-                          >
-                            <Edit3 size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            className="p-2.5 bg-white text-red-500 hover:bg-red-50 rounded-xl shadow-sm border border-brand/5 hover:scale-105 transition-all"
-                            title="Delete Card"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                        <div className="flex flex-col gap-2 mt-3">
+                          {/* Row 1: Edit / Delete */}
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleEditClick(item)}
+                              className="p-2.5 bg-white text-brand hover:text-[#C5A059] rounded-xl shadow-sm border border-brand/5 hover:scale-105 transition-all flex items-center justify-center w-9 h-9"
+                              title="Edit Card"
+                            >
+                              <Edit3 size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              className="p-2.5 bg-white text-red-500 hover:bg-red-50 rounded-xl shadow-sm border border-brand/5 hover:scale-105 transition-all flex items-center justify-center w-9 h-9"
+                              title="Delete Card"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
 
-                          {/* Order Buttons */}
-                          <div className="h-px w-4 bg-brand/5 ml-2 mr-1"></div>
-                          <button
-                            onClick={() => handleReorder(index, "up")}
-                            disabled={index === 0}
-                            className="p-2 bg-white text-brand hover:text-[#C5A059] rounded-xl shadow-sm border border-brand/5 disabled:opacity-30"
-                            title="Move Up"
-                          >
-                            <ArrowUp size={12} />
-                          </button>
-                          <button
-                            onClick={() => handleReorder(index, "down")}
-                            disabled={index === categories.length - 1}
-                            className="p-2 bg-white text-brand hover:text-[#C5A059] rounded-xl shadow-sm border border-brand/5 disabled:opacity-30"
-                            title="Move Down"
-                          >
-                            <ArrowDown size={12} />
-                          </button>
+                          {/* Row 2: Reorder */}
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleReorder(index, "up")}
+                              disabled={index === 0}
+                              className="p-2.5 bg-white text-brand hover:text-[#C5A059] rounded-xl shadow-sm border border-brand/5 disabled:opacity-30 flex items-center justify-center w-9 h-9"
+                              title="Move Up"
+                            >
+                              <ArrowUp size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleReorder(index, "down")}
+                              disabled={index === categories.length - 1}
+                              className="p-2.5 bg-white text-brand hover:text-[#C5A059] rounded-xl shadow-sm border border-brand/5 disabled:opacity-30 flex items-center justify-center w-9 h-9"
+                              title="Move Down"
+                            >
+                              <ArrowDown size={14} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
