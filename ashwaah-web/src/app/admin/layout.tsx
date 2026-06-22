@@ -153,18 +153,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {!isMobileSidebarOpen && (
           <button
             onClick={() => setIsMobileSidebarOpen(true)}
-            className="flex md:hidden absolute top-4 left-6 z-40 p-1 hover:bg-[#1B3022]/10 rounded-xl transition-all text-[#C5A059] cursor-pointer items-center justify-center animate-in fade-in duration-300"
+            className="flex md:hidden absolute top-4 left-6 z-40 p-2 bg-[#1B3022] text-[#C5A059] rounded-xl transition-all shadow-md items-center justify-center animate-in fade-in duration-300 active:scale-95"
           >
-            <div className="relative w-8 h-8 group">
-              {/* Ashwaah Logo Icon */}
-              <div className="absolute inset-0 bg-black rounded-lg p-0.5 flex items-center justify-center shadow-md group-hover:scale-0 opacity-100 group-hover:opacity-0 transition-all duration-200">
-                <img src="/images/logo.png" alt="Ashwaah Logo" className="w-full h-full rounded-md object-cover" />
-              </div>
-              {/* Dashboard Icon on hover */}
-              <div className="absolute inset-0 scale-0 group-hover:scale-100 opacity-0 group-hover:opacity-100 flex items-center justify-center bg-[#1B3022] text-[#C5A059] rounded-lg transition-all duration-200">
-                <LayoutDashboard size={20} />
-              </div>
-            </div>
+            <LayoutDashboard size={20} />
           </button>
         )}
 
