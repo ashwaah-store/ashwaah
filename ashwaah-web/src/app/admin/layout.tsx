@@ -126,10 +126,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className={`flex-grow min-w-0 h-full overflow-hidden flex flex-col relative transition-all duration-300 ${
         isDesktopSidebarOpen ? "md:ml-60 ml-0" : "ml-0"
       }`}>
-        {/* Header Bar */}
         <div className={`items-center justify-between px-6 py-3 bg-[#1B3022] text-white border-b border-white/5 sticky top-0 z-30 shadow-sm flex-shrink-0 transition-all ${
-          isDesktopSidebarOpen ? "hidden md:hidden" : "flex md:flex"
-        } ${isMobileSidebarOpen ? "hidden" : "flex md:hidden"}`}>
+          isDesktopSidebarOpen ? "md:hidden" : "md:flex"
+        } ${isMobileSidebarOpen ? "hidden" : "flex"}`}>
           <button
             onClick={() => {
               if (window.innerWidth >= 768) {
