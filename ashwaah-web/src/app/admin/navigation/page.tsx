@@ -348,7 +348,7 @@ export default function AdminNavigation() {
         )}
 
         {/* Sortable Table */}
-        <div className="bg-white rounded-[2.5rem] shadow-sm border border-brand/5 overflow-hidden">
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-brand/5 overflow-x-auto custom-scrollbar">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -359,10 +359,10 @@ export default function AdminNavigation() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-brand/5 border-b border-brand/10">
-                    <th className="w-16 px-8 py-6"></th>
-                    <th className="px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Menu Label</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Status</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] text-right">Manage</th>
+                    <th className="w-16 px-4 md:px-8 py-6"></th>
+                    <th className="px-4 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Menu Label</th>
+                    <th className="px-4 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em]">Status</th>
+                    <th className="px-4 md:px-8 py-6 text-[10px] font-black text-brand/40 uppercase tracking-[0.2em] text-right">Manage</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand/5 relative">
