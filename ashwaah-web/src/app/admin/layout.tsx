@@ -67,8 +67,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }`}>
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group" onClick={() => setIsMobileSidebarOpen(false)}>
-            <div className="w-8 h-8 bg-[#C5A059] rounded-lg flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
-              <span className="font-serif font-bold text-lg text-[#1B3022]">A</span>
+            <div className="w-8 h-8 bg-[#C5A059] rounded-lg p-0.5 flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
+              <img src="/images/logo.png" alt="Ashwaah Logo" className="w-full h-full rounded-md object-cover" />
             </div>
             <div>
               <h1 className="font-gabriola font-bold text-xl tracking-wide leading-none">Ashwaah</h1>
@@ -134,8 +134,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <div className="relative w-8 h-8 group">
               {/* Ashwaah Logo Icon */}
-              <div className="absolute inset-0 bg-[#C5A059] rounded-lg flex items-center justify-center shadow-md group-hover:scale-0 opacity-100 group-hover:opacity-0 transition-all duration-200">
-                <span className="font-serif font-bold text-lg text-[#1B3022]">A</span>
+              <div className="absolute inset-0 bg-[#C5A059] rounded-lg p-0.5 flex items-center justify-center shadow-md group-hover:scale-0 opacity-100 group-hover:opacity-0 transition-all duration-200">
+                <img src="/images/logo.png" alt="Ashwaah Logo" className="w-full h-full rounded-md object-cover" />
               </div>
               {/* Dashboard Icon on hover */}
               <div className="absolute inset-0 scale-0 group-hover:scale-100 opacity-0 group-hover:opacity-100 flex items-center justify-center bg-[#1B3022] text-[#C5A059] rounded-lg transition-all duration-200">
@@ -157,8 +157,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
           
           <div className="flex items-center space-x-3">
-            <div className="w-7 h-7 bg-[#C5A059] rounded-lg flex items-center justify-center shadow-md">
-              <span className="font-serif font-bold text-sm text-[#1B3022]">A</span>
+            <div className="w-7 h-7 bg-[#C5A059] rounded-lg p-0.5 flex items-center justify-center shadow-md">
+              <img src="/images/logo.png" alt="Ashwaah Logo" className="w-full h-full rounded-md object-cover" />
             </div>
             <h1 className="font-gabriola font-bold text-lg tracking-wide leading-none">Ashwaah</h1>
           </div>
