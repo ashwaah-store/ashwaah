@@ -667,18 +667,17 @@ export default function CategoryFilterSection({
     <div className="flex flex-col lg:flex-row w-full items-stretch relative z-30">
       
       {/* Mobile Show Filters Toggle Button */}
-      <div className="lg:hidden w-full sticky top-12 z-40 bg-brand-light/95 backdrop-blur-sm py-2 px-1 mb-2">
+      <div className="lg:hidden fixed top-16 left-4 z-40">
         <button
           onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
-          className="w-full flex items-center justify-between bg-white border border-brand/10 px-5 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-brand shadow-sm active:scale-99 transition-all cursor-pointer"
+          className="flex items-center justify-center bg-white border border-brand/10 p-3.5 rounded-full text-brand shadow-lg active:scale-95 transition-all cursor-pointer relative"
         >
-          <span className="flex items-center gap-2">
-            <SlidersHorizontal size={14} className="text-[#C5A059]" />
-            {isMobileFiltersOpen ? "Hide Filters" : "Show Filters"}
-          </span>
-          <span className="text-[#C5A059] font-black">
-            {isFilterOrSortActive ? `(${selectedTypes.length + selectedColors.length + selectedSizes.length + (isPriceFilterActive ? 1 : 0)} Active)` : ""}
-          </span>
+          <SlidersHorizontal size={20} className="text-[#C5A059]" />
+          {isFilterOrSortActive && (
+            <span className="absolute -top-1.5 -right-1.5 bg-[#C5A059] text-white font-bold text-[9px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+              {selectedTypes.length + selectedColors.length + selectedSizes.length + (isPriceFilterActive ? 1 : 0)}
+            </span>
+          )}
         </button>
       </div>
 
