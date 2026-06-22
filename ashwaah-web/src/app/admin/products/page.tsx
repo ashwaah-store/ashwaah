@@ -829,10 +829,10 @@ export default function ProductManagement() {
         </div>
       )}
 
-      <div className="flex h-full w-full overflow-hidden">
+      <div className="flex flex-col lg:flex-row h-full w-full lg:overflow-hidden overflow-y-auto">
         
         {/* ─── LEFT: FORM (Middle Workspace) ────────────────────────── */}
-        <div className="flex-[3] h-full overflow-y-auto custom-scrollbar p-4 md:p-6 border-r border-brand/5">
+        <div className="w-full lg:flex-[3] lg:h-full lg:overflow-y-auto custom-scrollbar p-4 md:p-6 lg:border-r border-b lg:border-b-0 border-brand/5">
           <div className="flex flex-col items-center text-center justify-center mb-6 pt-4">
             <div className="flex flex-col items-center space-y-2">
               <div className="p-2 bg-[#C5A059]/10 rounded-xl w-fit">
@@ -1499,7 +1499,7 @@ export default function ProductManagement() {
         </div>
 
         {/* ─── RIGHT: INVENTORY (Context Sidebar) ───────────────────── */}
-        <div className="flex-[1] min-w-[320px] h-full overflow-y-auto bg-brand/5 custom-scrollbar p-6">
+        <div className="w-full lg:flex-[1] lg:min-w-[320px] lg:h-full lg:overflow-y-auto bg-brand/5 custom-scrollbar p-6">
           <div className="flex flex-col space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
