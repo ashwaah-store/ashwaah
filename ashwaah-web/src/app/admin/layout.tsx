@@ -126,35 +126,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className={`flex-grow min-w-0 h-full overflow-hidden flex flex-col relative transition-all duration-300 ${
         isDesktopSidebarOpen ? "md:ml-60 ml-0" : "ml-0"
       }`}>
-        <div className={`items-center justify-between px-6 py-3 bg-[#1B3022] text-white border-b border-white/5 sticky top-0 z-30 shadow-sm flex-shrink-0 transition-all ${
-          isDesktopSidebarOpen ? "md:hidden" : "md:flex"
-        } ${isMobileSidebarOpen ? "hidden" : "flex"}`}>
+        {/* Desktop Floating Icon (Only when sidebar is collapsed) */}
+        {!isDesktopSidebarOpen && (
           <button
-            onClick={() => {
-              if (window.innerWidth >= 768) {
-                setIsDesktopSidebarOpen(true);
-              } else {
-                setIsMobileSidebarOpen(true);
-              }
-            }}
-            className="p-1 hover:bg-white/5 rounded-xl transition-all text-[#C5A059] cursor-pointer flex items-center justify-center"
+            onClick={() => setIsDesktopSidebarOpen(true)}
+            className="hidden md:flex absolute top-4 left-6 z-40 p-1 hover:bg-[#1B3022]/10 rounded-xl transition-all text-[#C5A059] cursor-pointer items-center justify-center animate-in fade-in duration-300"
           >
-            {/* Desktop: Hoverable Ashwaah Icon to Dashboard Icon */}
-            <div className="hidden md:block relative w-8 h-8 group">
+            <div className="relative w-8 h-8 group">
               {/* Ashwaah Logo Icon */}
               <div className="absolute inset-0 bg-[#C5A059] rounded-lg flex items-center justify-center shadow-md group-hover:scale-0 opacity-100 group-hover:opacity-0 transition-all duration-200">
                 <span className="font-serif font-bold text-lg text-[#1B3022]">A</span>
               </div>
               {/* Dashboard Icon on hover */}
-              <div className="absolute inset-0 scale-0 group-hover:scale-100 opacity-0 group-hover:opacity-100 flex items-center justify-center bg-white/10 rounded-lg text-[#C5A059] transition-all duration-200">
+              <div className="absolute inset-0 scale-0 group-hover:scale-100 opacity-0 group-hover:opacity-100 flex items-center justify-center bg-[#1B3022] text-[#C5A059] rounded-lg transition-all duration-200">
                 <LayoutDashboard size={20} />
               </div>
             </div>
-            
-            {/* Mobile: fixed dashboard icon directly */}
-            <div className="block md:hidden p-1">
-              <LayoutDashboard size={22} />
-            </div>
+          </button>
+        )}
+
+        {/* Mobile Header Bar */}
+        <div className={`flex md:hidden items-center justify-between px-6 py-4 bg-[#1B3022] text-white border-b border-white/5 sticky top-0 z-30 shadow-sm flex-shrink-0 transition-all ${
+          isMobileSidebarOpen ? "hidden" : "flex"
+        }`}>
+          <button
+            onClick={() => setIsMobileSidebarOpen(true)}
+            className="p-1 hover:bg-white/5 rounded-xl transition-all text-[#C5A059] cursor-pointer flex items-center justify-center"
+          >
+            <LayoutDashboard size={22} />
           </button>
           
           <div className="flex items-center space-x-3">
