@@ -80,9 +80,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               setIsMobileSidebarOpen(false);
               setIsDesktopSidebarOpen(false);
             }} 
-            className="p-1 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-all cursor-pointer animate-in fade-in duration-300"
+            className="p-2 text-[#C5A059] hover:text-white rounded-lg hover:bg-white/5 transition-all cursor-pointer animate-in fade-in duration-300"
           >
-            <X size={20} />
+            <LayoutDashboard size={20} />
           </button>
         </div>
 
@@ -127,7 +127,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         isDesktopSidebarOpen ? "md:ml-60 ml-0" : "ml-0"
       }`}>
         {/* Header Bar */}
-        <div className={`items-center justify-between px-6 py-4 bg-[#1B3022] text-white border-b border-white/5 sticky top-0 z-30 shadow-sm flex-shrink-0 transition-all ${
+        <div className={`items-center justify-between px-6 py-3 bg-[#1B3022] text-white border-b border-white/5 sticky top-0 z-30 shadow-sm flex-shrink-0 transition-all ${
           isDesktopSidebarOpen ? "hidden md:hidden" : "flex md:flex"
         } ${isMobileSidebarOpen ? "hidden" : "flex md:hidden"}`}>
           <button
@@ -138,9 +138,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 setIsMobileSidebarOpen(true);
               }
             }}
-            className="p-1.5 hover:bg-white/5 rounded-xl transition-all text-[#C5A059] cursor-pointer"
+            className="p-1 hover:bg-white/5 rounded-xl transition-all text-[#C5A059] cursor-pointer flex items-center justify-center"
           >
-            <Menu size={22} />
+            {/* Desktop: Hoverable Ashwaah Icon to Dashboard Icon */}
+            <div className="hidden md:block relative w-8 h-8 group">
+              {/* Ashwaah Logo Icon */}
+              <div className="absolute inset-0 bg-[#C5A059] rounded-lg flex items-center justify-center shadow-md group-hover:scale-0 opacity-100 group-hover:opacity-0 transition-all duration-200">
+                <span className="font-serif font-bold text-lg text-[#1B3022]">A</span>
+              </div>
+              {/* Dashboard Icon on hover */}
+              <div className="absolute inset-0 scale-0 group-hover:scale-100 opacity-0 group-hover:opacity-100 flex items-center justify-center bg-white/10 rounded-lg text-[#C5A059] transition-all duration-200">
+                <LayoutDashboard size={20} />
+              </div>
+            </div>
+            
+            {/* Mobile: fixed dashboard icon directly */}
+            <div className="block md:hidden p-1">
+              <LayoutDashboard size={22} />
+            </div>
           </button>
           
           <div className="flex items-center space-x-3">
