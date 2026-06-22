@@ -39,6 +39,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
 
   // Don't show sidebar on login/denied pages
   if (pathname === "/admin/login" || pathname === "/admin/denied") {
@@ -61,8 +62,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* Sidebar */}
-      <aside className={`w-60 bg-[#1B3022] text-white flex flex-col shadow-2xl fixed inset-y-0 z-50 transition-transform duration-300 md:translate-x-0 ${
-        isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      <aside className={`w-60 bg-[#1B3022] text-white flex flex-col shadow-2xl fixed inset-y-0 z-50 transition-transform duration-300 ${
+        isMobileSidebarOpen || isDesktopSidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}>
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group" onClick={() => setIsMobileSidebarOpen(false)}>
@@ -75,8 +76,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </Link>
           <button 
-            onClick={() => setIsMobileSidebarOpen(false)} 
-            className="md:hidden p-1 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-all cursor-pointer"
+            onClick={() => {
+              setIsMobileSidebarOpen(false);
+              setIsDesktopSidebarOpen(false);
+            }} 
+            className="p-1 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-all cursor-pointer animate-in fade-in duration-300"
           >
             <X size={20} />
           </button>
@@ -119,11 +123,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content */}
-      <main className="flex-grow md:ml-60 ml-0 min-w-0 h-full overflow-hidden flex flex-col relative">
-        {/* Mobile Header Bar */}
-        <div className="flex md:hidden items-center justify-between px-6 py-4 bg-[#1B3022] text-white border-b border-white/5 sticky top-0 z-30 shadow-sm flex-shrink-0">
+      <main className={`flex-grow min-w-0 h-full overflow-hidden flex flex-col relative transition-all duration-300 ${
+        isDesktopSidebarOpen ? "md:ml-60 ml-0" : "ml-0"
+      }`}>
+        {/* Header Bar */}
+        <div className={`items-center justify-between px-6 py-4 bg-[#1B3022] text-white border-b border-white/5 sticky top-0 z-30 shadow-sm flex-shrink-0 transition-all ${
+          isDesktopSidebarOpen ? "hidden md:hidden" : "flex md:flex"
+        } ${isMobileSidebarOpen ? "hidden" : "flex md:hidden"}`}>
           <button
-            onClick={() => setIsMobileSidebarOpen(true)}
+            onClick={() => {
+              if (window.innerWidth >= 768) {
+                setIsDesktopSidebarOpen(true);
+              } else {
+                setIsMobileSidebarOpen(true);
+              }
+            }}
             className="p-1.5 hover:bg-white/5 rounded-xl transition-all text-[#C5A059] cursor-pointer"
           >
             <Menu size={22} />
