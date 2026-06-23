@@ -692,7 +692,7 @@ export default function CategoryFilterSection({
   };
 
   return (
-    <div className="flex flex-col lg:flex-row w-full items-stretch relative z-30">
+    <div className="flex flex-col lg:flex-row w-full items-start relative z-30">
       
       {/* Mobile Show Filters Toggle Button */}
       <div className="lg:hidden fixed top-16 left-4 z-40">
