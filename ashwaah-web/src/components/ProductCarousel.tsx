@@ -1,10 +1,7 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef } from "react";
 import ProductCard from "./ProductCard";
 import { getFirstProductImageUrl, getProductImageUrls } from "@/utils/product";
-
 
 interface Product {
   id: any;
@@ -20,70 +17,36 @@ interface ProductCarouselProps {
 }
 
 export default function ProductCarousel({ title, products }: ProductCarouselProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === "left" ? scrollLeft - clientWidth : scrollLeft + clientWidth;
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
-    }
-  };
-
   if (products.length === 0) return null;
 
   return (
-    <section className="py-2">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-3xl font-playfair font-bold text-brand tracking-tight">{title}</h2>
-        <div className="flex space-x-2">
-          <button 
-            onClick={() => scroll("left")}
-            className="p-3 rounded-full bg-brand/5 text-brand hover:bg-brand hover:text-white transition-all shadow-sm border border-brand/10 active:scale-95"
-            aria-label="Previous"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button 
-            onClick={() => scroll("right")}
-            className="p-3 rounded-full bg-brand/5 text-brand hover:bg-brand hover:text-white transition-all shadow-sm border border-brand/10 active:scale-95"
-            aria-label="Next"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </div>
+    <section className="py-6 border-b border-brand/5 last:border-0">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl md:text-3xl font-playfair font-bold text-brand tracking-tight">{title}</h2>
       </div>
 
-      <div 
-        ref={scrollRef}
-        className="flex space-x-4 md:space-x-6 overflow-x-auto scrollbar-hide pb-8 snap-x snap-mandatory"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 animate-in fade-in duration-300">
         {products.map((product: any) => {
           const parsedImages = getProductImageUrls(product.images, product.colors);
           const firstImage = getFirstProductImageUrl(product.images, product.colors);
 
           return (
-            <div key={product.id} className="w-[220px] md:w-[240px] flex-shrink-0 snap-start h-auto flex">
-              <ProductCard 
-                product={{
-                  id: product.id.toString(),
-                  name: product.name,
-                  description: product.description || "",
-                  price: product.salePrice || product.basePrice || 0,
-                  basePrice: product.basePrice,
-                  salePrice: product.salePrice,
-                  imageUrl: firstImage,
-                  images: parsedImages,
-                  categorySlug: product.category || ""
-                }} 
-              />
-            </div>
+            <ProductCard 
+              key={product.id}
+              product={{
+                id: product.id.toString(),
+                name: product.name,
+                description: product.description || "",
+                price: product.salePrice || product.basePrice || 0,
+                basePrice: product.basePrice,
+                salePrice: product.salePrice,
+                imageUrl: firstImage,
+                images: parsedImages,
+                categorySlug: product.category || ""
+              }} 
+            />
           );
-
         })}
-
-
       </div>
     </section>
   );

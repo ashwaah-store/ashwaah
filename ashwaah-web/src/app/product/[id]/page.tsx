@@ -276,27 +276,35 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Left: Image Gallery (6 cols) - Grid View showing all images */}
-          <div className={`lg:col-span-6 grid gap-4 ${colorImages.length === 1 ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
-            {colorImages.map((img: string, idx: number) => (
-              <div 
-                key={idx} 
-                className="aspect-[4/5] relative rounded-2xl overflow-hidden bg-white shadow-md group border border-brand/5 hover:shadow-lg transition-all duration-300"
-              >
-                <img
-                  src={img}
-                  alt={`${product.name} ${idx}`}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                {idx === 0 && (
-                  <div className="absolute top-4 right-4">
-                    <div className="bg-white/95 backdrop-blur-sm p-2.5 rounded-full shadow-md border border-brand/5 text-brand-accent">
-                      <Sparkles size={16} />
-                    </div>
-                  </div>
-                )}
+          {/* Left: Image Gallery (6 cols - reduced from 7) */}
+          <div className="lg:col-span-6 flex flex-col-reverse md:flex-row gap-5">
+            {/* Thumbnails */}
+            <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-y-auto max-h-[600px] no-scrollbar">
+              {colorImages.map((img: string, idx: number) => (
+                <button
+                  key={idx}
+                  onClick={() => setMainImage(img)}
+                  className={`relative flex-shrink-0 w-20 h-24 md:w-24 md:h-32 rounded-lg overflow-hidden border-2 transition-all ${mainImage === img ? "border-brand-accent shadow-md scale-105" : "border-transparent hover:border-brand/20"
+                    }`}
+                >
+                  <img src={img} alt={`${product.name} ${idx}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+
+            {/* Main Image */}
+            <div className="flex-1 aspect-[4/5] relative rounded-2xl overflow-hidden bg-white shadow-xl group">
+              <img
+                src={mainImage}
+                alt={product.name}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute top-6 right-6">
+                <div className="bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg border border-brand/5 text-brand-accent">
+                  <Sparkles size={20} />
+                </div>
               </div>
-            ))}
+            </div>
           </div>
 
           {/* Right: Product Details (6 cols) */}
