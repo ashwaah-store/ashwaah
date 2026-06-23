@@ -63,11 +63,15 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-2 mt-10 pt-8 border-t border-brand/5">
+        <div className="flex items-center justify-center space-x-2.5 mt-12 pt-8 border-t border-brand/5">
           <button
             onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="px-3 py-1.5 rounded-xl border border-brand/10 text-xs font-bold text-brand hover:bg-brand/5 disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
+            className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+              currentPage === 1
+                ? "bg-brand/5 text-brand/30 border border-brand/5 cursor-not-allowed opacity-60"
+                : "bg-brand/5 text-brand border border-brand/10 hover:bg-brand/10 cursor-pointer active:scale-95"
+            }`}
           >
             Prev
           </button>
@@ -79,10 +83,10 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
               <button
                 key={pageNum}
                 onClick={() => handlePageChange(pageNum)}
-                className={`w-8 h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`w-10 h-10 rounded-2xl text-xs font-bold transition-all ${
                   isCurrent
                     ? "bg-brand text-[#C5A059] shadow-md scale-105"
-                    : "border border-brand/10 text-brand hover:bg-brand/5"
+                    : "bg-brand/5 text-brand border border-brand/10 hover:bg-brand/10 cursor-pointer active:scale-95"
                 }`}
               >
                 {pageNum}
@@ -93,7 +97,11 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
           <button
             onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
-            className="px-3 py-1.5 rounded-xl border border-brand/10 text-xs font-bold text-brand hover:bg-brand/5 disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
+            className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+              currentPage === totalPages
+                ? "bg-brand/5 text-brand/30 border border-brand/5 cursor-not-allowed opacity-60"
+                : "bg-brand/5 text-brand border border-brand/10 hover:bg-brand/10 cursor-pointer active:scale-95"
+            }`}
           >
             Next
           </button>
