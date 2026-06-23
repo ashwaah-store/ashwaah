@@ -428,6 +428,34 @@ export default function CategoryFilterSection({
     return filteredAndSortedProducts.slice(startIndex, startIndex + productsPerPage);
   }, [filteredAndSortedProducts, currentPage]);
 
+  // Pagination calculations for custom sections view
+  const totalSectionProductsCount = useMemo(() => {
+    return initialSections.reduce((sum, s) => sum + (s.products || []).length, 0);
+  }, [initialSections]);
+
+  const totalSectionPages = Math.ceil(totalSectionProductsCount / productsPerPage);
+
+  const paginatedSections = useMemo(() => {
+    let globalIndex = 0;
+    const startIndex = (currentPage - 1) * productsPerPage;
+    const endIndex = startIndex + productsPerPage;
+
+    return initialSections.map((section) => {
+      const sectionProducts: any[] = [];
+      (section.products || []).forEach((product: any) => {
+        if (globalIndex >= startIndex && globalIndex < endIndex) {
+          sectionProducts.push(product);
+        }
+        globalIndex++;
+      });
+
+      return {
+        ...section,
+        products: sectionProducts,
+      };
+    }).filter(section => section.products.length > 0);
+  }, [initialSections, currentPage]);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -791,13 +819,60 @@ export default function CategoryFilterSection({
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
-              {initialSections.map((section) => (
+              {paginatedSections.map((section) => (
                 <ProductCarousel
                   key={section.id}
                   title={section.title}
                   products={section.products}
                 />
               ))}
+
+              {/* Global Pagination Controls for Sections View */}
+              {totalSectionPages > 1 && (
+                <div className="flex items-center justify-center space-x-2.5 mt-12 pt-8 border-t border-brand/5">
+                  <button
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                      currentPage === 1
+                        ? "bg-brand/5 text-brand/30 border border-brand/5 cursor-not-allowed opacity-60"
+                        : "bg-brand/5 text-brand border border-brand/10 hover:bg-brand/10 cursor-pointer active:scale-95"
+                    }`}
+                  >
+                    Prev
+                  </button>
+                  
+                  {Array.from({ length: totalSectionPages }).map((_, i) => {
+                    const pageNum = i + 1;
+                    const isCurrent = pageNum === currentPage;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`w-10 h-10 rounded-2xl text-xs font-bold transition-all ${
+                          isCurrent
+                            ? "bg-brand text-[#C5A059] shadow-md scale-105"
+                            : "bg-brand/5 text-brand border border-brand/10 hover:bg-brand/10 cursor-pointer active:scale-95"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => handlePageChange(Math.min(totalSectionPages, currentPage + 1))}
+                    disabled={currentPage === totalSectionPages}
+                    className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                      currentPage === totalSectionPages
+                        ? "bg-brand/5 text-brand/30 border border-brand/5 cursor-not-allowed opacity-60"
+                        : "bg-brand/5 text-brand border border-brand/10 hover:bg-brand/10 cursor-pointer active:scale-95"
+                    }`}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </motion.div>
           ) : filteredAndSortedProducts.length > 0 ? (
             <motion.div
