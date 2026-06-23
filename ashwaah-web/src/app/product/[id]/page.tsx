@@ -267,8 +267,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   return (
     <div className="min-h-screen bg-brand-light text-brand font-sans selection:bg-brand-accent/30">
-      <main className="max-w-7xl mx-auto px-6 md:px-12 pt-16 pb-16">
-        <Link href="/" className="inline-flex items-center space-x-3 text-brand/60 hover:text-brand-accent transition-all mb-8 text-xs font-bold uppercase tracking-widest group">
+      <main className="max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-16">
+        <Link href="/" className="inline-flex items-center space-x-3 text-brand/60 hover:text-brand-accent transition-all mb-6 text-xs font-bold uppercase tracking-widest group">
           <div className="p-2 rounded-full bg-white shadow-sm border border-brand/5 group-hover:border-brand-accent/30 transition-all">
             <ArrowLeft size={14} />
           </div>
