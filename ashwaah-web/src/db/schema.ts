@@ -103,6 +103,8 @@ export const orders = sqliteTable("orders", {
   totalAmount: real("total_amount").notNull(),
   status: text("status").default("pending"), // pending, processing, shipped, delivered, cancelled
   shippingAddress: text("shipping_address"),
+  couponCode: text("coupon_code"),
+  discountAmount: real("discount_amount"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
@@ -178,6 +180,22 @@ export const eventRegistrations = sqliteTable("event_registrations", {
   phone: text("phone").notNull(),
   ticketsCount: integer("tickets_count").notNull().default(1),
   additionalNotes: text("additional_notes"),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
+
+export const coupons = sqliteTable("coupons", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  code: text("code").notNull().unique(),
+  description: text("description").notNull(),
+  discountType: text("discount_type").notNull(), // 'flat', 'percentage'
+  discountValue: real("discount_value").notNull(),
+  minPurchaseAmount: real("min_purchase_amount").notNull().default(0),
+  cutoffPrice: real("cutoff_price"),
+  targetType: text("target_type").notNull().default("all"), // 'all', 'first_order', 'category', 'product'
+  targetValue: text("target_value"), // e.g. "Ethnic Wear" or a comma-separated list of product IDs/SKUs
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  isVisible: integer("is_visible", { mode: "boolean" }).notNull().default(true),
+  expiresAt: text("expires_at"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 

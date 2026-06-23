@@ -19,6 +19,7 @@ import {
   Settings,
   LayoutGrid,
   Calendar,
+  Ticket,
   Menu
 } from "lucide-react";
 
@@ -31,6 +32,7 @@ const sidebarLinks = [
   { name: "Products", href: "/admin/products", icon: Shirt },
   { name: "Category Settings", href: "/admin/categories", icon: LayoutGrid },
   { name: "Customers", href: "/admin/customers", icon: Users },
+  { name: "Coupons", href: "/admin/coupons", icon: Ticket },
   { name: "Events", href: "/admin/events", icon: Calendar },
   { name: "Site Settings", href: "/admin/settings", icon: Settings },
 ];

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCartStore } from "@/store/useCartStore";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Loader2, CreditCard, ShieldCheck, CheckCircle2, Scissors, Sparkles, MapPin, AlertTriangle, ChevronDown, X } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Loader2, CreditCard, ShieldCheck, CheckCircle2, Scissors, Sparkles, MapPin, AlertTriangle, ChevronDown, X, Ticket } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function CartPage() {
@@ -28,6 +28,132 @@ export default function CartPage() {
   });
   const [orderId, setOrderId] = useState<number | null>(null);
   const router = useRouter();
+
+  // Coupon States
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [couponError, setCouponError] = useState("");
+  const [couponSuccess, setCouponSuccess] = useState("");
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
+  const [showPromoSection, setShowPromoSection] = useState(false);
+
+  // Fetch Available Coupons based on cart items
+  useEffect(() => {
+    async function fetchAvailableCoupons() {
+      if (items.length === 0) {
+        setAvailableCoupons([]);
+        return;
+      }
+      try {
+        const res = await fetch("/api/coupons", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: items.map(item => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price,
+              size: item.size,
+              color: item.color
+            }))
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setAvailableCoupons(data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching applicable coupons:", err);
+      }
+    }
+    fetchAvailableCoupons();
+  }, [items]);
+
+  // Apply Coupon Handler
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setIsValidatingCoupon(true);
+    setCouponError("");
+    setCouponSuccess("");
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          couponCode: couponInput.trim().toUpperCase(),
+          items: items.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price,
+            size: item.size,
+            color: item.color
+          }))
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAppliedCoupon(data.coupon);
+        setDiscountAmount(data.discountAmount);
+        setCouponSuccess(`Coupon "${data.coupon.code}" applied! Saved ₹${data.discountAmount.toLocaleString()}`);
+        setCouponInput("");
+      } else {
+        setCouponError(data.error || "Failed to validate coupon.");
+      }
+    } catch (err) {
+      setCouponError("Unable to apply coupon. Please try again.");
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  // Remove Coupon Handler
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setDiscountAmount(0);
+    setCouponSuccess("");
+    setCouponError("");
+    setCouponInput("");
+  };
+
+  // Revalidate coupon dynamically on cart item updates
+  useEffect(() => {
+    if (!appliedCoupon) return;
+    
+    const revalidateCoupon = async () => {
+      try {
+        const res = await fetch("/api/coupons/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            couponCode: appliedCoupon.code,
+            items: items.map(item => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price,
+              size: item.size,
+              color: item.color
+            }))
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setDiscountAmount(data.discountAmount);
+          setCouponSuccess(`Coupon "${data.coupon.code}" applied! Saved ₹${data.discountAmount.toLocaleString()}`);
+        } else {
+          setAppliedCoupon(null);
+          setDiscountAmount(0);
+          setCouponSuccess("");
+          setCouponError(`Coupon removed: ${data.error}`);
+        }
+      } catch (err) {
+        console.error("Error revalidating coupon:", err);
+      }
+    };
+    
+    revalidateCoupon();
+  }, [items, appliedCoupon?.code]);
 
   // Size/Qty Popups
   const [activeSizeItemId, setActiveSizeItemId] = useState<string | null>(null);
@@ -113,7 +239,7 @@ export default function CartPage() {
 
   const subtotal = getTotalPrice();
   const shipping = 0; 
-  const total = subtotal + shipping;
+  const total = Math.max(0, subtotal - discountAmount + shipping);
 
   const handleCheckout = async () => {
     setIsCheckoutModalOpen(true);
@@ -155,6 +281,7 @@ export default function CartPage() {
           items,
           totalAmount: total,
           paymentMethod: "online_prepaid",
+          couponCode: appliedCoupon?.code || null,
           shippingAddress: showNewAddressForm 
             ? `Name: ${address.fullName}, Street: ${address.street}, City: ${address.city}, State: ${address.state}, Pincode: ${address.pincode}, Contact: ${address.phone}`
             : savedAddresses[selectedAddressIndex || 0]
@@ -311,6 +438,12 @@ export default function CartPage() {
                 <span className="text-[10px] font-bold tracking-widest uppercase">Subtotal</span>
                 <span className="text-sm font-bold tracking-widest">₹{subtotal.toLocaleString()}</span>
               </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between items-center text-green-400">
+                  <span className="text-[10px] font-bold tracking-widest uppercase">Discount</span>
+                  <span className="text-sm font-bold tracking-widest">-₹{discountAmount.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center text-white/50 pb-3 border-b border-white/10">
                 <span className="text-[10px] font-bold tracking-widest uppercase">Shipping</span>
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FFFDF6]">Free</span>
@@ -320,6 +453,151 @@ export default function CartPage() {
                 <span className="text-lg font-black text-[#FFFDF6] tracking-widest">₹{total.toLocaleString()}</span>
               </div>
             </div>
+
+            {/* Toggle Coupon Section Link/Button */}
+            {!appliedCoupon && !showPromoSection && (
+              <button 
+                onClick={() => setShowPromoSection(true)}
+                className="w-full mt-4 py-3 border border-dashed border-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#C5A059] hover:bg-white/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Ticket size={14} className="text-[#C5A059]" /> Apply Coupons / Offers
+              </button>
+            )}
+
+            {/* Coupon Code Panel */}
+            {(showPromoSection || appliedCoupon) && (
+              <div className="border-t border-b border-white/10 py-4 my-6 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-bold tracking-widest uppercase text-white/50 flex items-center gap-1.5">
+                    <Ticket size={12} className="text-[#C5A059]" /> Promo Code
+                  </span>
+                  <div className="flex gap-3">
+                    {appliedCoupon && (
+                      <button 
+                        onClick={handleRemoveCoupon}
+                        className="text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 flex items-center gap-0.5"
+                      >
+                        Remove
+                      </button>
+                    )}
+                    {!appliedCoupon && (
+                      <button 
+                        onClick={() => setShowPromoSection(false)}
+                        className="text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white flex items-center gap-0.5"
+                      >
+                        Hide
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                {!appliedCoupon ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="ENTER CODE"
+                      value={couponInput}
+                      onChange={(e) => {
+                        setCouponInput(e.target.value.toUpperCase());
+                        setCouponError("");
+                        setCouponSuccess("");
+                      }}
+                      className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-[#C5A059] flex-1 placeholder:text-white/20 uppercase"
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={isValidatingCoupon || !couponInput.trim()}
+                      className="bg-[#C5A059] hover:bg-[#C5A059]/90 disabled:opacity-50 text-[#1B3022] font-black text-[9px] uppercase tracking-widest px-4 py-2 rounded-xl transition-all flex items-center justify-center min-w-[70px]"
+                    >
+                      {isValidatingCoupon ? <Loader2 size={12} className="animate-spin" /> : "Apply"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between bg-white/5 border border-white/15 px-3 py-2.5 rounded-xl">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs font-bold text-[#FFFDF6] font-mono tracking-wider">{appliedCoupon.code}</span>
+                      <span className="text-[9px] text-[#C5A059] font-medium max-w-[180px] truncate">{appliedCoupon.description}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-green-400 text-xs font-bold">
+                      <CheckCircle2 size={14} className="text-green-400" /> Applied
+                    </div>
+                  </div>
+                )}
+
+                {couponError && (
+                  <p className="text-red-400 text-[10px] font-bold flex items-center gap-1 animate-in fade-in duration-200">
+                    <AlertTriangle size={10} /> {couponError}
+                  </p>
+                )}
+                {couponSuccess && (
+                  <p className="text-green-400 text-[10px] font-bold flex items-center gap-1 animate-in fade-in duration-200">
+                    <CheckCircle2 size={10} /> {couponSuccess}
+                  </p>
+                )}
+
+                {/* List of Available Offers */}
+                {!appliedCoupon && availableCoupons.length > 0 && (
+                  <div className="pt-2 border-t border-white/5 space-y-2">
+                    <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">Available Offers:</p>
+                    <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10">
+                      {availableCoupons.map((c) => (
+                        <div 
+                          key={c.id} 
+                          onClick={() => {
+                            setCouponInput(c.code);
+                            // Auto-apply immediately
+                            setIsValidatingCoupon(true);
+                            setCouponError("");
+                            setCouponSuccess("");
+                            fetch("/api/coupons/validate", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                couponCode: c.code,
+                                items: items.map(item => ({
+                                  productId: item.productId,
+                                  quantity: item.quantity,
+                                  price: item.price,
+                                  size: item.size,
+                                  color: item.color
+                                }))
+                              })
+                            })
+                              .then(res => res.json())
+                              .then(data => {
+                                if (data.success) {
+                                  setAppliedCoupon(data.coupon);
+                                  setDiscountAmount(data.discountAmount);
+                                  setCouponSuccess(`Coupon "${data.coupon.code}" applied! Saved ₹${data.discountAmount.toLocaleString()}`);
+                                  setCouponInput("");
+                                } else {
+                                  setCouponError(data.error || "Failed to validate coupon.");
+                                }
+                              })
+                              .catch(() => setCouponError("Unable to apply coupon."))
+                              .finally(() => setIsValidatingCoupon(false));
+                          }}
+                          className="p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-[#C5A059]/40 hover:bg-white/10 transition-all cursor-pointer flex items-center justify-between text-left group"
+                        >
+                          <div className="flex-1 min-w-0 pr-2">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[10px] font-bold text-[#FFFDF6] font-mono tracking-wider">{c.code}</span>
+                              <span className="text-[8px] font-black uppercase text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded border border-green-500/20">
+                                Save ₹{c.discountAmount.toLocaleString()}
+                              </span>
+                            </div>
+                            <p className="text-[9px] text-white/50 mt-1 leading-tight">{c.description}</p>
+                          </div>
+                          <span className="text-[8px] font-black uppercase text-[#C5A059] group-hover:underline flex-shrink-0">
+                            Apply
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <button 
               onClick={handleCheckout}

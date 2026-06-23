@@ -3,10 +3,11 @@ import { db } from "@/db";
 import { orders, orderItems, users } from "@/db/schema";
 import { getVerifiedPhoneFromCookie } from "@/db/auth-helper";
 import { eq } from "drizzle-orm";
+import { validateAndCalculateCoupon } from "@/utils/coupon";
 
 export async function POST(req: Request) {
   try {
-    const { items, totalAmount, paymentMethod, shippingAddress } = await req.json();
+    const { items, totalAmount, paymentMethod, shippingAddress, couponCode } = await req.json();
     const phoneNumber = await getVerifiedPhoneFromCookie("auth_session");
 
     if (!phoneNumber) {
@@ -19,6 +20,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
     const user = userRows[0];
+
+    // Validate Coupon securely if provided
+    let discountAmount = 0;
+    if (couponCode) {
+      const couponValidation = await validateAndCalculateCoupon(couponCode, items, user.id);
+      if (!couponValidation.valid) {
+        return NextResponse.json({ success: false, error: couponValidation.error || "Invalid coupon" }, { status: 400 });
+      }
+      discountAmount = couponValidation.discountAmount;
+    }
+
+    // Recalculate subtotal and verify expected total
+    const subtotal = items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
+    const expectedTotal = Math.max(0, subtotal - discountAmount);
+
+    if (Math.abs(totalAmount - expectedTotal) > 0.01) {
+      return NextResponse.json({
+        success: false,
+        error: `Total amount mismatch. Expected: ₹${expectedTotal}, Received: ₹${totalAmount}`
+      }, { status: 400 });
+    }
 
     // Append new address to user's saved addresses
     if (shippingAddress) {
@@ -45,6 +67,8 @@ export async function POST(req: Request) {
       totalAmount: totalAmount,
       status: "pending", // Initial status after payment
       shippingAddress: shippingAddress,
+      couponCode: couponCode || null,
+      discountAmount: discountAmount || 0,
       createdAt: new Date().toISOString(),
     }).returning();
 
@@ -67,3 +91,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
   }
 }
+
