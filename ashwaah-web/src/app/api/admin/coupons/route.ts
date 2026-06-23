@@ -70,9 +70,7 @@ export async function POST(request: Request) {
       cutoffPrice,
       targetType,
       targetValue,
-      isActive,
-      isVisible,
-      expiresAt
+      isActive
     } = body;
 
     if (!code || !description || !discountType || discountValue === undefined) {
@@ -110,8 +108,6 @@ export async function POST(request: Request) {
         targetType: targetType || "all",
         targetValue: targetValue ? targetValue.trim() : null,
         isActive: isActive !== undefined ? !!isActive : true,
-        isVisible: isVisible !== undefined ? !!isVisible : true,
-        expiresAt: expiresAt || null,
       })
       .returning();
 
@@ -143,9 +139,7 @@ export async function PUT(request: Request) {
       cutoffPrice,
       targetType,
       targetValue,
-      isActive,
-      isVisible,
-      expiresAt
+      isActive
     } = body;
 
     if (!id) {
@@ -180,8 +174,6 @@ export async function PUT(request: Request) {
     if (targetType !== undefined) updates.targetType = targetType;
     if (targetValue !== undefined) updates.targetValue = targetValue ? targetValue.trim() : null;
     if (isActive !== undefined) updates.isActive = !!isActive;
-    if (isVisible !== undefined) updates.isVisible = !!isVisible;
-    if (expiresAt !== undefined) updates.expiresAt = expiresAt || null;
 
     const result = await db
       .update(coupons)

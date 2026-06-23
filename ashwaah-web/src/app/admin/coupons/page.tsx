@@ -13,9 +13,7 @@ import {
   Ticket, 
   Power, 
   PowerOff,
-  X,
-  Eye,
-  EyeOff
+  X 
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -30,8 +28,6 @@ interface Coupon {
   targetType: string;
   targetValue: string | null;
   isActive: boolean;
-  isVisible: boolean;
-  expiresAt: string | null;
   createdAt: string;
 }
 
@@ -56,8 +52,6 @@ export default function CouponsAdminPage() {
   const [targetType, setTargetType] = useState("all"); // all, first_order, category, product
   const [targetValue, setTargetValue] = useState("");
   const [isActive, setIsActive] = useState(true);
-  const [isVisible, setIsVisible] = useState(true);
-  const [expiresAt, setExpiresAt] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [categoriesList, setCategoriesList] = useState<string[]>([]);
 
@@ -99,8 +93,6 @@ export default function CouponsAdminPage() {
     setTargetType("all");
     setTargetValue("");
     setIsActive(true);
-    setIsVisible(true);
-    setExpiresAt("");
     setShowForm(false);
   };
 
@@ -115,8 +107,6 @@ export default function CouponsAdminPage() {
     setTargetType(coupon.targetType);
     setTargetValue(coupon.targetValue || "");
     setIsActive(coupon.isActive);
-    setIsVisible(coupon.isVisible !== undefined ? coupon.isVisible : true);
-    setExpiresAt(coupon.expiresAt || "");
     setShowForm(true);
     // Scroll to top or form container
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -141,8 +131,6 @@ export default function CouponsAdminPage() {
       targetType,
       targetValue: targetValue.trim() || null,
       isActive,
-      isVisible,
-      expiresAt: expiresAt || null,
     };
 
     try {
@@ -196,36 +184,6 @@ export default function CouponsAdminPage() {
       }
     } catch (err) {
       setError("Failed to toggle coupon status.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const toggleCouponVisibility = async (coupon: Coupon) => {
-    setIsSubmitting(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      const res = await fetch("/api/admin/coupons", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: coupon.id,
-          isVisible: !coupon.isVisible
-        }),
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        setSuccess(`Coupon ${coupon.code} visibility changed to ${!coupon.isVisible ? 'Public' : 'Private'} successfully!`);
-        fetchCoupons();
-        router.refresh();
-      } else {
-        setError(data.error || "Failed to update visibility.");
-      }
-    } catch (err) {
-      setError("Failed to toggle coupon visibility.");
     } finally {
       setIsSubmitting(false);
     }
@@ -457,52 +415,18 @@ export default function CouponsAdminPage() {
               </div>
             </div>
 
-            {/* Expiry Date & Visibility / Active Status Checkboxes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              {/* Expiry Date */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-[#1B3022]/40 uppercase tracking-widest block ml-1">Expiry Date (Optional)</label>
-                <input
-                  type="date"
-                  value={expiresAt}
-                  onChange={(e) => setExpiresAt(e.target.value)}
-                  className="w-full bg-brand-light border border-brand/5 rounded-2xl py-3.5 px-4 text-sm font-bold text-[#1B3022] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 transition-all cursor-pointer"
-                />
-              </div>
-
-              {/* Status checkboxes */}
-              <div className="flex flex-col justify-center space-y-4 pt-4 md:pt-6">
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    id="isActiveCheckbox"
-                    checked={isActive}
-                    onChange={(e) => setIsActive(e.target.checked)}
-                    className="w-5 h-5 rounded border-[#1B3022]/20 text-[#1B3022] focus:ring-[#C5A059]/20 cursor-pointer"
-                  />
-                  <label htmlFor="isActiveCheckbox" className="text-xs font-bold text-[#1B3022]/80 uppercase tracking-widest cursor-pointer select-none">
-                    Enable Coupon (Active)
-                  </label>
-                </div>
-
-                <div className="flex flex-col space-y-1">
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="isVisibleCheckbox"
-                      checked={isVisible}
-                      onChange={(e) => setIsVisible(e.target.checked)}
-                      className="w-5 h-5 rounded border-[#1B3022]/20 text-[#1B3022] focus:ring-[#C5A059]/20 cursor-pointer"
-                    />
-                    <label htmlFor="isVisibleCheckbox" className="text-xs font-bold text-[#1B3022]/80 uppercase tracking-widest cursor-pointer select-none">
-                      Show publicly in storefront
-                    </label>
-                  </div>
-                  <p className="text-[9px] text-[#1B3022]/45 font-semibold ml-8 leading-normal">
-                    * If unchecked, this coupon is hidden from the public "Available Offers" list, but remains valid when manually entered.
-                  </p>
-                </div>
-              </div>
+            {/* Active Status Checkbox */}
+            <div className="flex items-center space-x-3 pt-2">
+              <input
+                type="checkbox"
+                id="isActiveCheckbox"
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+                className="w-5 h-5 rounded border-[#1B3022]/20 text-[#1B3022] focus:ring-[#C5A059]/20 cursor-pointer"
+              />
+              <label htmlFor="isActiveCheckbox" className="text-xs font-bold text-[#1B3022]/80 uppercase tracking-widest cursor-pointer select-none">
+                Enable Coupon Immediately
+              </label>
             </div>
 
             <div className="flex gap-4 pt-4 border-t border-brand/5">
@@ -570,8 +494,6 @@ export default function CouponsAdminPage() {
                   <th className="py-4 px-6 text-[10px] font-black text-[#1B3022]/40 uppercase tracking-widest">Min Purchase</th>
                   <th className="py-4 px-6 text-[10px] font-black text-[#1B3022]/40 uppercase tracking-widest">Cutoff Cap</th>
                   <th className="py-4 px-6 text-[10px] font-black text-[#1B3022]/40 uppercase tracking-widest">Target</th>
-                  <th className="py-4 px-6 text-[10px] font-black text-[#1B3022]/40 uppercase tracking-widest">Visibility</th>
-                  <th className="py-4 px-6 text-[10px] font-black text-[#1B3022]/40 uppercase tracking-widest">Expiry</th>
                   <th className="py-4 px-6 text-[10px] font-black text-[#1B3022]/40 uppercase tracking-widest">Status</th>
                   <th className="py-4 px-6 text-[10px] font-black text-[#1B3022]/40 uppercase tracking-widest text-right">Actions</th>
                 </tr>
@@ -618,39 +540,6 @@ export default function CouponsAdminPage() {
                           </span>
                         )}
                       </div>
-                    </td>
-
-                    {/* Visibility */}
-                    <td className="py-4 px-6">
-                      <button
-                        onClick={() => toggleCouponVisibility(coupon)}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm cursor-pointer hover:scale-105 active:scale-95 transition-all ${
-                          coupon.isVisible 
-                            ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                            : 'bg-amber-100 text-amber-700 border border-amber-200'
-                        }`}
-                      >
-                        {coupon.isVisible ? (
-                          <>
-                            <Eye size={10} /> Public
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff size={10} /> Private
-                          </>
-                        )}
-                      </button>
-                    </td>
-
-                    {/* Expiry */}
-                    <td className="py-4 px-6 text-sm font-semibold text-[#1B3022]/70 font-mono">
-                      {coupon.expiresAt ? (
-                        <span className={new Date(coupon.expiresAt + (coupon.expiresAt.length === 10 ? "T23:59:59" : "")) < new Date() ? "text-red-500 line-through" : ""}>
-                          {coupon.expiresAt}
-                        </span>
-                      ) : (
-                        <span className="text-[#1B3022]/30 italic font-sans text-xs">No Expiry</span>
-                      )}
                     </td>
 
                     {/* Status Toggle Badge */}

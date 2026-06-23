@@ -536,66 +536,92 @@ export default function CartPage() {
                 )}
 
                 {/* List of Available Offers */}
-                {!appliedCoupon && availableCoupons.length > 0 && (
-                  <div className="pt-2 border-t border-white/5 space-y-2">
-                    <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">Available Offers:</p>
-                    <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10">
-                      {availableCoupons.map((c) => (
-                        <div 
-                          key={c.id} 
-                          onClick={() => {
-                            setCouponInput(c.code);
-                            // Auto-apply immediately
-                            setIsValidatingCoupon(true);
-                            setCouponError("");
-                            setCouponSuccess("");
-                            fetch("/api/coupons/validate", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                couponCode: c.code,
-                                items: items.map(item => ({
-                                  productId: item.productId,
-                                  quantity: item.quantity,
-                                  price: item.price,
-                                  size: item.size,
-                                  color: item.color
-                                }))
+                {!appliedCoupon && availableCoupons.length > 0 && (() => {
+                  const sortedCoupons = [...availableCoupons].sort((a, b) => {
+                    if (a.applicable && !b.applicable) return -1;
+                    if (!a.applicable && b.applicable) return 1;
+                    return 0;
+                  });
+
+                  return (
+                    <div className="pt-2 border-t border-white/5 space-y-2">
+                      <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">Available Offers:</p>
+                      <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10">
+                        {sortedCoupons.map((c) => (
+                          <div 
+                            key={c.id} 
+                            onClick={() => {
+                              if (!c.applicable) return;
+                              setCouponInput(c.code);
+                              // Auto-apply immediately
+                              setIsValidatingCoupon(true);
+                              setCouponError("");
+                              setCouponSuccess("");
+                              fetch("/api/coupons/validate", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                  couponCode: c.code,
+                                  items: items.map(item => ({
+                                    productId: item.productId,
+                                    quantity: item.quantity,
+                                    price: item.price,
+                                    size: item.size,
+                                    color: item.color
+                                  }))
+                                })
                               })
-                            })
-                              .then(res => res.json())
-                              .then(data => {
-                                if (data.success) {
-                                  setAppliedCoupon(data.coupon);
-                                  setDiscountAmount(data.discountAmount);
-                                  setCouponSuccess(`Coupon "${data.coupon.code}" applied! Saved ₹${data.discountAmount.toLocaleString()}`);
-                                  setCouponInput("");
-                                } else {
-                                  setCouponError(data.error || "Failed to validate coupon.");
-                                }
-                              })
-                              .catch(() => setCouponError("Unable to apply coupon."))
-                              .finally(() => setIsValidatingCoupon(false));
-                          }}
-                          className="p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-[#C5A059]/40 hover:bg-white/10 transition-all cursor-pointer flex items-center justify-between text-left group"
-                        >
-                          <div className="flex-1 min-w-0 pr-2">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[10px] font-bold text-[#FFFDF6] font-mono tracking-wider">{c.code}</span>
-                              <span className="text-[8px] font-black uppercase text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded border border-green-500/20">
-                                Save ₹{c.discountAmount.toLocaleString()}
-                              </span>
+                                .then(res => res.json())
+                                .then(data => {
+                                  if (data.success) {
+                                    setAppliedCoupon(data.coupon);
+                                    setDiscountAmount(data.discountAmount);
+                                    setCouponSuccess(`Coupon "${data.coupon.code}" applied! Saved ₹${data.discountAmount.toLocaleString()}`);
+                                    setCouponInput("");
+                                  } else {
+                                    setCouponError(data.error || "Failed to validate coupon.");
+                                  }
+                                })
+                                .catch(() => setCouponError("Unable to apply coupon."))
+                                .finally(() => setIsValidatingCoupon(false));
+                            }}
+                            className={`p-2.5 rounded-xl border transition-all text-left group flex items-center justify-between ${
+                              c.applicable 
+                                ? "bg-white/5 border-white/5 hover:border-[#C5A059]/40 hover:bg-white/10 cursor-pointer" 
+                                : "bg-white/[0.02] border-white/5 opacity-55 cursor-not-allowed"
+                            }`}
+                          >
+                            <div className="flex-grow min-w-0 pr-2">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-[10px] font-bold text-[#FFFDF6] font-mono tracking-wider">{c.code}</span>
+                                {c.applicable ? (
+                                  <span className="text-[8px] font-black uppercase text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded border border-green-500/20">
+                                    Save ₹{c.discountAmount.toLocaleString()}
+                                  </span>
+                                ) : (
+                                  <span className="text-[8px] font-black uppercase text-white/30 bg-white/5 px-1.5 py-0.5 rounded border border-white/5">
+                                    Locked
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[9px] text-white/50 mt-1 leading-tight">{c.description}</p>
+                              {!c.applicable && c.error && (
+                                <p className="text-[8.5px] text-amber-400/80 font-bold mt-1 flex items-center gap-1">
+                                  <AlertTriangle size={8} /> {c.error}
+                                </p>
+                              )}
                             </div>
-                            <p className="text-[9px] text-white/50 mt-1 leading-tight">{c.description}</p>
+                            {c.applicable && (
+                              <span className="text-[8px] font-black uppercase text-[#C5A059] group-hover:underline flex-shrink-0">
+                                Apply
+                              </span>
+                            )}
                           </div>
-                          <span className="text-[8px] font-black uppercase text-[#C5A059] group-hover:underline flex-shrink-0">
-                            Apply
-                          </span>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             )}
 

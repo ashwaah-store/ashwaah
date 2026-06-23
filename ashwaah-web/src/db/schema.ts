@@ -194,8 +194,6 @@ export const coupons = sqliteTable("coupons", {
   targetType: text("target_type").notNull().default("all"), // 'all', 'first_order', 'category', 'product'
   targetValue: text("target_value"), // e.g. "Ethnic Wear" or a comma-separated list of product IDs/SKUs
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  isVisible: integer("is_visible", { mode: "boolean" }).notNull().default(true),
-  expiresAt: text("expires_at"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 

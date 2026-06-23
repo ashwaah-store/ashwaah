@@ -11,45 +11,40 @@ export interface CartItem {
 }
 
 export async function validateAndCalculateCoupon(
-  code: string,
+  codeOrCoupon: string | any,
   items: CartItem[],
-  userId?: number | null
+  userId?: number | null,
+  options?: {
+    existingOrdersCount?: number;
+    productMap?: Map<number, string>;
+    variationRows?: any[];
+  }
 ) {
-  if (!code || !items || items.length === 0) {
+  if (!codeOrCoupon || !items || items.length === 0) {
     return { valid: false, discountAmount: 0, error: "Invalid request parameters." };
   }
 
-  const cleanCode = code.trim().toUpperCase();
+  const cleanCode = typeof codeOrCoupon === "string" ? codeOrCoupon.trim().toUpperCase() : codeOrCoupon.code;
 
-  // 1. Fetch coupon
-  const couponRows = await db
-    .select()
-    .from(coupons)
-    .where(eq(coupons.code, cleanCode))
-    .limit(1);
+  let coupon: any;
+  if (typeof codeOrCoupon === "string") {
+    // 1. Fetch coupon
+    const couponRows = await db
+      .select()
+      .from(coupons)
+      .where(eq(coupons.code, cleanCode))
+      .limit(1);
 
-  if (couponRows.length === 0) {
-    return { valid: false, discountAmount: 0, error: "Coupon code does not exist." };
+    if (couponRows.length === 0) {
+      return { valid: false, discountAmount: 0, error: "Coupon code does not exist." };
+    }
+    coupon = couponRows[0];
+  } else {
+    coupon = codeOrCoupon;
   }
-
-  const coupon = couponRows[0];
 
   if (!coupon.isActive) {
     return { valid: false, discountAmount: 0, error: "This coupon is no longer active." };
-  }
-
-  // Check Expiry Date
-  if (coupon.expiresAt) {
-    let expiryStr = coupon.expiresAt;
-    if (expiryStr.length === 10) {
-      // If it's a date-only string like YYYY-MM-DD, treat it as valid until the end of the day
-      expiryStr += "T23:59:59";
-    }
-    const expiryDate = new Date(expiryStr);
-    const currentDate = new Date();
-    if (expiryDate < currentDate) {
-      return { valid: false, discountAmount: 0, error: "This coupon code has expired." };
-    }
   }
 
   // Calculate overall subtotal
@@ -76,12 +71,16 @@ export async function validateAndCalculateCoupon(
       };
     }
     // Count non-cancelled orders for user
-    const existingOrders = await db
-      .select()
-      .from(orders)
-      .where(and(eq(orders.userId, userId), ne(orders.status, "cancelled")));
+    let existingOrdersCount = options?.existingOrdersCount;
+    if (existingOrdersCount === undefined) {
+      const existingOrders = await db
+        .select()
+        .from(orders)
+        .where(and(eq(orders.userId, userId), ne(orders.status, "cancelled")));
+      existingOrdersCount = existingOrders.length;
+    }
 
-    if (existingOrders.length > 0) {
+    if (existingOrdersCount > 0) {
       return {
         valid: false,
         discountAmount: 0,
@@ -93,31 +92,38 @@ export async function validateAndCalculateCoupon(
       return { valid: false, discountAmount: 0, error: "Coupon target restriction is misconfigured." };
     }
 
-    const targetCriteria = coupon.targetValue
+    const targetCriteria = (coupon.targetValue as string)
       .toLowerCase()
       .split(",")
-      .map((c) => c.trim())
+      .map((c: string) => c.trim())
       .filter(Boolean);
 
     // Fetch product details (including category) for all items in the cart
     const productIds = Array.from(new Set(items.map((i) => i.productId)));
-    const productRows = await db
-      .select({ id: products.id, category: products.category })
-      .from(products)
-      .where(inArray(products.id, productIds));
+    let productMap = options?.productMap;
+    if (!productMap) {
+      const newProductMap = new Map<number, string>();
+      const productRows = await db
+        .select({ id: products.id, category: products.category })
+        .from(products)
+        .where(inArray(products.id, productIds));
 
-    const productMap = new Map<number, string>();
-    productRows.forEach((p) => {
-      if (p.category) {
-        productMap.set(p.id, p.category.toLowerCase().trim());
-      }
-    });
+      productRows.forEach((p) => {
+        if (p.category) {
+          newProductMap.set(p.id, p.category.toLowerCase().trim());
+        }
+      });
+      productMap = newProductMap;
+    }
 
     // Fetch all variation SKUs for these products to match
-    const variationRows = await db
-      .select({ id: productVariations.id, productId: productVariations.productId, sku: productVariations.sku })
-      .from(productVariations)
-      .where(inArray(productVariations.productId, productIds));
+    let variationRows = options?.variationRows;
+    if (!variationRows) {
+      variationRows = await db
+        .select({ id: productVariations.id, productId: productVariations.productId, sku: productVariations.sku })
+        .from(productVariations)
+        .where(inArray(productVariations.productId, productIds));
+    }
 
     let qualifyingCount = 0;
     qualifyingSubtotal = 0;
