@@ -70,6 +70,21 @@ export async function validateAndCalculateCoupon(
         error: "Please sign in to apply this first-purchase coupon.",
       };
     }
+
+    // Check if the user has ever placed an order using this coupon code (including cancelled ones)
+    const usedCouponOrders = await db
+      .select()
+      .from(orders)
+      .where(and(eq(orders.userId, userId), eq(orders.couponCode, cleanCode)));
+
+    if (usedCouponOrders.length > 0) {
+      return {
+        valid: false,
+        discountAmount: 0,
+        error: "This first-purchase coupon has already been claimed/used by you.",
+      };
+    }
+
     // Count non-cancelled orders for user
     let existingOrdersCount = options?.existingOrdersCount;
     if (existingOrdersCount === undefined) {

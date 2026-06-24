@@ -71,6 +71,13 @@ export async function POST(req: Request) {
         productMap,
         variationRows,
       });
+
+      // If it is a first_order coupon and the user is logged in, and validation fails,
+      // hide it completely so it's no longer visible to them.
+      if (coupon.targetType === "first_order" && userId && !validation.valid) {
+        continue;
+      }
+
       couponsList.push({
         id: coupon.id,
         code: coupon.code,
