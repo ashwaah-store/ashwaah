@@ -151,19 +151,19 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
     <>
       <div 
         onClick={() => setIsLightboxOpen(true)}
-        className="relative w-full h-full group bg-brand-light/20 overflow-hidden rounded-3xl border border-brand/10 shadow-lg cursor-pointer"
+        className="relative w-full h-full group bg-white overflow-hidden rounded-3xl border border-brand/10 shadow-lg cursor-pointer"
       >
         {isVid ? (
           <video 
             src={currentUrl} 
             preload="metadata"
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
+            className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-103" 
           />
         ) : (
           <img 
             src={currentUrl} 
             alt="Event Slide" 
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
+            className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-103" 
           />
         )}
 
@@ -173,7 +173,7 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
             e.stopPropagation();
             setIsLightboxOpen(true);
           }}
-          className="absolute top-4 right-4 z-20 p-2.5 bg-black/55 backdrop-blur-md border border-white/10 rounded-xl text-white hover:bg-brand-accent hover:text-brand-dark hover:scale-105 transition-all shadow-md opacity-0 group-hover:opacity-100 duration-300 flex items-center justify-center"
+          className="absolute top-4 right-4 z-20 p-2.5 bg-white/70 backdrop-blur-md border border-brand/10 rounded-xl text-brand hover:bg-brand hover:text-white hover:scale-105 transition-all shadow-md opacity-0 group-hover:opacity-100 duration-300 flex items-center justify-center cursor-pointer"
           title="View Enlarged"
         >
           <Maximize2 size={14} className="font-bold" />
@@ -216,20 +216,20 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
         )}
       </div>
 
-      {/* FULLSCREEN LIGHTBOX MODAL */}
+      {/* LIGHT-THEMED LIGHTBOX MODAL */}
       {isLightboxOpen && mounted && createPortal(
         <div 
-          className="fixed inset-0 z-[150] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300"
+          className="fixed inset-0 z-[150] bg-[#FAF6F0]/90 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300"
           onClick={() => setIsLightboxOpen(false)}
         >
           {/* Top Panel Controls */}
-          <div className="absolute top-6 left-6 right-6 flex items-center justify-between text-white z-10">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">
+          <div className="absolute top-6 left-6 right-6 flex items-center justify-between text-brand z-10">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand/60">
               Media Gallery ({slideIndex + 1} / {mediaList.length})
             </span>
             <button
               onClick={() => setIsLightboxOpen(false)}
-              className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/5 transition-all hover:scale-105 active:scale-95"
+              className="p-3 bg-white hover:bg-brand/5 text-brand rounded-full border border-brand/10 transition-all hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
               title="Close Gallery"
             >
               <X size={20} />
@@ -238,7 +238,7 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
 
           {/* Center Stage Media Container */}
           <div 
-            className="relative flex items-center justify-center w-full max-w-5xl h-[70vh] px-4"
+            className="relative w-full h-full flex items-center justify-center pt-20 pb-20 px-4 sm:px-20"
             onClick={(e) => e.stopPropagation()}
           >
             {isVid ? (
@@ -247,13 +247,13 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
                 controls 
                 autoPlay
                 preload="metadata"
-                className="max-w-full max-h-full object-contain rounded-2xl border border-white/5 shadow-2xl" 
+                className="w-full h-full object-contain" 
               />
             ) : (
               <img 
                 src={currentUrl} 
                 alt="Enlarged Slide" 
-                className="max-w-full max-h-full object-contain rounded-2xl border border-white/5 shadow-2xl" 
+                className="w-full h-full object-contain" 
               />
             )}
 
@@ -262,14 +262,14 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
               <>
                 <button
                   onClick={handlePrev}
-                  className="absolute -left-4 sm:left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/5 transition-all hover:scale-105 active:scale-95"
+                  className="absolute -left-4 sm:left-4 top-1/2 -translate-y-1/2 p-3 bg-white hover:bg-brand/5 text-brand rounded-full border border-brand/10 transition-all hover:scale-105 active:scale-95 shadow-md cursor-pointer"
                   title="Previous Media"
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button
                   onClick={handleNext}
-                  className="absolute -right-4 sm:right-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/5 transition-all hover:scale-105 active:scale-95"
+                  className="absolute -right-4 sm:right-4 top-1/2 -translate-y-1/2 p-3 bg-white hover:bg-brand/5 text-brand rounded-full border border-brand/10 transition-all hover:scale-105 active:scale-95 shadow-md cursor-pointer"
                   title="Next Media"
                 >
                   <ChevronRight size={24} />
@@ -280,7 +280,7 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
 
           {/* Bottom indicators */}
           {mediaList.length > 1 && (
-            <div className="absolute bottom-8 flex items-center space-x-2.5 z-10 bg-white/10 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/5">
+            <div className="absolute bottom-8 flex items-center space-x-2.5 z-10 bg-white/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-brand/10 shadow-sm">
               {mediaList.map((_, idx) => (
                 <button
                   key={idx}
@@ -289,7 +289,7 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
                     setSlideIndex(idx);
                   }}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    idx === slideIndex ? "bg-brand-accent w-4" : "bg-white/40"
+                    idx === slideIndex ? "bg-brand w-4" : "bg-brand/35"
                   }`}
                 />
               ))}

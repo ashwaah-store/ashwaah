@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { orders, orderItems, products, users } from "@/db/schema";
+import { orders, orderItems, products, users, coupons, productVariations } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getVerifiedPhoneFromCookie } from "@/db/auth-helper";
 
@@ -25,8 +25,13 @@ export async function GET() {
       status: orders.status,
       shippingAddress: orders.shippingAddress,
       createdAt: orders.createdAt,
+      couponCode: orders.couponCode,
+      discountAmount: orders.discountAmount,
+      couponTargetType: coupons.targetType,
+      couponTargetValue: coupons.targetValue,
     })
     .from(orders)
+    .leftJoin(coupons, eq(orders.couponCode, coupons.code))
     .where(eq(orders.userId, user.id))
     .orderBy(desc(orders.createdAt));
 
@@ -37,14 +42,17 @@ export async function GET() {
         productId: orderItems.productId,
         productName: products.name,
         productImage: products.images,
+        productCategory: products.category,
         quantity: orderItems.quantity,
         price: orderItems.price,
         size: orderItems.size,
         color: orderItems.color,
         customizations: orderItems.customizations,
+        variationSku: productVariations.sku,
       })
       .from(orderItems)
       .leftJoin(products, eq(orderItems.productId, products.id))
+      .leftJoin(productVariations, eq(orderItems.variationId, productVariations.id))
       .where(eq(orderItems.orderId, order.id));
 
       return {

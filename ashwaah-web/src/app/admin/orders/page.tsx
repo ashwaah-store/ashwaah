@@ -6,6 +6,7 @@ import { ShoppingBag, Clock, CheckCircle2, Truck, Loader2, User, Phone, Ruler, C
 interface OrderItem {
   id: number;
   productName: string;
+  productImages: string | null;
   quantity: number;
   price: number;
   size: string;
@@ -24,7 +25,19 @@ interface Order {
   customerName: string;
   customerPhone: string;
   shippingAddress: string;
+  couponCode: string | null;
+  discountAmount: number | null;
   items: OrderItem[];
+}
+
+function getProductImage(imagesStr: string | null) {
+  try {
+    if (imagesStr) {
+      const parsed = JSON.parse(imagesStr);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+    }
+  } catch (e) {}
+  return "/images/placeholder.png";
 }
 
 export default function AdminOrders() {
@@ -369,42 +382,86 @@ export default function AdminOrders() {
                         <Ruler size={14} className="text-brand-accent" /> Customizations & Items
                       </h4>
                       <div className="space-y-4">
-                        {order.items.map((item) => (
-                          <div key={item.id} className="bg-white p-6 rounded-3xl border border-brand/5 shadow-sm">
-                            <div className="flex justify-between items-start mb-6">
-                              <div>
-                                <h5 className="text-sm font-black text-brand">{item.productName}</h5>
-                                <p className="text-[10px] text-brand/40 font-bold mt-1 uppercase tracking-widest">
-                                  {item.size} / {item.color} — Qty: {item.quantity}
-                                </p>
-                              </div>
-                              <span className="text-sm font-bold text-brand">₹{item.price.toLocaleString()}</span>
-                            </div>
-
-                            {item.customizations && item.customizations.measurements && Object.keys(item.customizations.measurements).length > 0 && (
-                              <div className="bg-[#1B3022]/5 rounded-2xl p-5 border border-[#1B3022]/10">
-                                <div className="flex items-center space-x-2 mb-4">
-                                  <Sparkles size={12} className="text-[#C5A059]" />
-                                  <span className="text-[10px] font-black text-[#1B3022] uppercase tracking-[0.2em]">Bespoke Measurements (Inches)</span>
+                        {order.items.map((item) => {
+                          const imgUrl = getProductImage(item.productImages);
+                          return (
+                            <div key={item.id} className="bg-white p-6 rounded-3xl border border-brand/5 shadow-sm">
+                              <div className="flex gap-4 items-start mb-6">
+                                <div className="w-16 h-20 rounded-xl overflow-hidden border border-brand/5 bg-brand-light/20 flex-shrink-0 relative">
+                                  <img 
+                                    src={imgUrl} 
+                                    alt={item.productName} 
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.src = "/images/placeholder.png";
+                                    }}
+                                  />
                                 </div>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                  {Object.entries(item.customizations.measurements).map(([key, val]) => (
-                                    <div key={key} className="bg-white/80 p-3 rounded-xl border border-[#1B3022]/5">
-                                      <p className="text-[8px] font-black text-brand/40 uppercase tracking-widest mb-1">{key}</p>
-                                      <p className="text-xs font-black text-brand">{val}"</p>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <h5 className="text-sm font-black text-brand line-clamp-1">{item.productName}</h5>
+                                      <p className="text-[10px] text-brand/40 font-bold mt-1 uppercase tracking-widest">
+                                        {item.size} / {item.color} — Qty: {item.quantity}
+                                      </p>
                                     </div>
-                                  ))}
+                                    <span className="text-sm font-bold text-brand flex-shrink-0">₹{item.price.toLocaleString()}</span>
+                                  </div>
                                 </div>
                               </div>
-                            )}
+
+                              {item.customizations && item.customizations.measurements && Object.keys(item.customizations.measurements).length > 0 && (
+                                <div className="bg-[#1B3022]/5 rounded-2xl p-5 border border-[#1B3022]/10">
+                                  <div className="flex items-center space-x-2 mb-4">
+                                    <Sparkles size={12} className="text-[#C5A059]" />
+                                    <span className="text-[10px] font-black text-[#1B3022] uppercase tracking-[0.2em]">Bespoke Measurements (Inches)</span>
+                                  </div>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {Object.entries(item.customizations.measurements).map(([key, val]) => (
+                                      <div key={key} className="bg-white/80 p-3 rounded-xl border border-[#1B3022]/5">
+                                        <p className="text-[8px] font-black text-brand/40 uppercase tracking-widest mb-1">{key}</p>
+                                        <p className="text-xs font-black text-brand">{val}"</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {!item.customizations?.measurements && (
+                                <div className="py-2 px-4 bg-brand/5 rounded-full inline-block">
+                                  <p className="text-[10px] font-bold text-brand/40 uppercase tracking-widest">Standard Fit — No Customizations</p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+
+                        {/* Order Summary / Pricing Breakdown */}
+                        <div className="bg-brand/5 border border-brand/10 rounded-3xl p-6 mt-4 space-y-4 text-brand">
+                          <h5 className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
+                            <ShoppingBag size={12} className="text-brand-accent" /> Order Summary
+                          </h5>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="font-semibold text-brand/60">Actual Price (Subtotal)</span>
+                              <span className="font-bold text-brand">₹{(order.totalAmount + (order.discountAmount || 0)).toLocaleString()}</span>
+                            </div>
                             
-                            {!item.customizations?.measurements && (
-                              <div className="py-2 px-4 bg-brand/5 rounded-full inline-block">
-                                <p className="text-[10px] font-bold text-brand/40 uppercase tracking-widest">Standard Fit — No Customizations</p>
+                            {order.couponCode && (
+                              <div className="flex justify-between items-center text-xs text-green-600 bg-green-50 px-3 py-2 rounded-xl border border-green-100">
+                                <span className="font-bold flex items-center gap-1">
+                                  🏷️ Coupon Applied: <span className="uppercase bg-green-200/50 px-1.5 py-0.5 rounded text-[10px]">{order.couponCode}</span>
+                                </span>
+                                <span className="font-black">-₹{order.discountAmount?.toLocaleString()}</span>
                               </div>
                             )}
+
+                            <div className="border-t border-brand/10 pt-2 flex justify-between items-center text-sm font-black mt-2">
+                              <span>Grand Total</span>
+                              <span className="text-brand-accent">₹{order.totalAmount.toLocaleString()}</span>
+                            </div>
                           </div>
-                        ))}
+                        </div>
                       </div>
                     </div>
                   </div>

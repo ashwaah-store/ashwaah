@@ -546,7 +546,7 @@ export default function CartPage() {
                   return (
                     <div className="pt-2 border-t border-white/5 space-y-2">
                       <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">Available Offers:</p>
-                      <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10">
+                      <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1 dark-scrollbar">
                         {sortedCoupons.map((c) => (
                           <div 
                             key={c.id} 

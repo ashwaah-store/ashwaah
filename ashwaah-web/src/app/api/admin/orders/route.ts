@@ -22,6 +22,8 @@ export async function GET(request: Request) {
       shippingAddress: orders.shippingAddress,
       customerName: users.fullName,
       customerPhone: users.phoneNumber,
+      couponCode: orders.couponCode,
+      discountAmount: orders.discountAmount,
     })
     .from(orders)
     .leftJoin(users, eq(orders.userId, users.id))
@@ -33,6 +35,7 @@ export async function GET(request: Request) {
         id: orderItems.id,
         productId: orderItems.productId,
         productName: products.name,
+        productImages: products.images,
         quantity: orderItems.quantity,
         price: orderItems.price,
         size: orderItems.size,

@@ -6,8 +6,11 @@ import Link from "next/link";
 
 interface OrderItem {
   id: number;
+  productId: number;
   productName: string;
   productImage: string;
+  productCategory: string | null;
+  variationSku: string | null;
   quantity: number;
   price: number;
   size: string;
@@ -24,8 +27,72 @@ interface Order {
   status: string;
   shippingAddress: string | null;
   createdAt: string;
+  couponCode: string | null;
+  discountAmount: number | null;
+  couponTargetType: string | null;
+  couponTargetValue: string | null;
   items: OrderItem[];
 }
+
+const isProductCouponMatch = (item: OrderItem, couponCode: string | null, targetType: string | null, targetValue: string | null) => {
+  if (!couponCode || !targetType || !targetValue) return false;
+  if (targetType === "all" || targetType === "first_order") return false;
+  
+  const targetCriteria = targetValue
+    .toLowerCase()
+    .split(",")
+    .map(c => c.trim())
+    .filter(Boolean);
+    
+  const prodIdStr = item.productId.toString();
+  const prodCategory = (item.productCategory || "").toLowerCase().trim();
+  const varSku = (item.variationSku || "").toLowerCase().trim();
+  
+  return targetCriteria.some(criterion => 
+    criterion === prodIdStr || 
+    prodCategory === criterion || 
+    prodCategory.includes(criterion) || 
+    varSku === criterion
+  );
+};
+
+const parseAddress = (addrString: string | null) => {
+  if (!addrString) return null;
+
+  const getSubstringBetween = (str: string, startKey: string, endKey: string | null) => {
+    const startIndex = str.indexOf(startKey);
+    if (startIndex === -1) return "";
+    const startValIndex = startIndex + startKey.length;
+    if (!endKey) {
+      return str.slice(startValIndex).trim();
+    }
+    const endIndex = str.indexOf(endKey);
+    if (endIndex === -1 || endIndex < startValIndex) {
+      return str.slice(startValIndex).trim();
+    }
+    
+    let res = str.slice(startValIndex, endIndex).trim();
+    if (res.endsWith(",")) {
+      res = res.slice(0, -1).trim();
+    }
+    return res;
+  };
+
+  const hasKeys = ["Name:", "Street:", "City:", "State:", "Pincode:", "Contact:"].every(k => addrString.includes(k));
+  
+  if (hasKeys) {
+    return {
+      name: getSubstringBetween(addrString, "Name:", "Street:"),
+      street: getSubstringBetween(addrString, "Street:", "City:"),
+      city: getSubstringBetween(addrString, "City:", "State:"),
+      state: getSubstringBetween(addrString, "State:", "Pincode:"),
+      pincode: getSubstringBetween(addrString, "Pincode:", "Contact:"),
+      contact: getSubstringBetween(addrString, "Contact:", null),
+    };
+  }
+  
+  return null;
+};
 
 const MILESTONES = [
   "confirmed",
@@ -119,214 +186,300 @@ export default function MyOrdersPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {orders.map((order) => (
-            <div key={order.id} className="bg-white rounded-[2rem] border border-brand/5 shadow-lg overflow-hidden hover:shadow-xl transition-all group">
-              <div className="p-4 md:p-6 bg-[#1B3022] flex flex-col md:flex-row md:items-center justify-between border-b border-brand/5 gap-4 text-white">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-white group-hover:scale-110 transition-transform">
-                    <Package size={20} />
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-3 mb-0.5">
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Order ID</p>
-                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest px-2 py-0.5 bg-white/5 rounded-full border border-white/5">#AS-{order.id}</span>
-                    </div>
-                    <h4 className="text-lg font-bold text-white leading-tight">Ashwaah Custom Fit</h4>
-                  </div>
-                </div>
+          {orders.map((order) => {
+            const hasBespokeItems = order.items.some(
+              (item) =>
+                item.customizations &&
+                item.customizations.measurements &&
+                Object.keys(item.customizations.measurements).length > 0
+            );
 
-                <div className="flex flex-wrap items-start gap-4 md:gap-8">
-                  <div className="flex flex-col justify-center min-w-[100px]">
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Status</p>
-                    <div className="flex items-center h-6">
-                      <span className={`inline-flex items-center px-3 py-0 h-6 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm border ${
-                        order.status === 'delivered' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 
-                        order.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border-red-500/30' : 
-                        'bg-[#C5A059]/20 text-[#C5A059] border-[#C5A059]/30'
-                      }`}>
-                        {order.status}
-                      </span>
+            return (
+              <div key={order.id} className="bg-white rounded-[2rem] border border-brand/5 shadow-lg overflow-hidden hover:shadow-xl transition-all group">
+                <div className="p-4 md:p-6 bg-[#1B3022] flex flex-col md:flex-row md:items-center justify-between border-b border-brand/5 gap-4 text-white">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-white group-hover:scale-110 transition-transform">
+                      <Package size={20} />
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-3 mb-0.5">
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Order ID</p>
+                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest px-2 py-0.5 bg-white/5 rounded-full border border-white/5">#AS-{order.id}</span>
+                        {hasBespokeItems && (
+                          <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 bg-[#C5A059] text-black rounded-full shadow-[0_0_10px_rgba(197,160,89,0.3)]">
+                            Bespoke
+                          </span>
+                        )}
+                      </div>
+                      <h4 className="text-lg font-bold text-white leading-tight">
+                        {hasBespokeItems ? "Ashwaah Bespoke Fit" : "Ashwaah Custom Fit"}
+                      </h4>
                     </div>
                   </div>
-                  <div className="flex flex-col justify-center min-w-[80px]">
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Date</p>
-                    <div className="flex items-center h-6">
-                      <span className="text-[10px] font-bold text-white">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col justify-center text-right min-w-[80px]">
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Total</p>
-                    <div className="flex items-center justify-end h-6">
-                      <span className="text-lg font-black text-white tracking-tighter">₹{order.totalAmount.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              {/* Delivery Milestones Tracker */}
-              {order.status !== "cancelled" && (
-                <div className="px-10 md:px-24 lg:px-32 pb-8 pt-4">
-                  <div className="relative">
-                    {/* Background Line */}
-                    <div className="absolute top-1/2 left-0 w-full h-[1px] bg-brand/10 -translate-y-1/2 rounded-full" />
-                    
-                    {/* Active Progress Line */}
-                    <div 
-                      className="absolute top-1/2 left-0 h-[2px] bg-[#C5A059] -translate-y-1/2 rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(197,160,89,0.4)]" 
-                      style={{ 
-                        width: `${(MILESTONES.indexOf(order.status) / (MILESTONES.length - 1)) * 100}%` 
-                      }} 
-                    />
-
-                    {/* Milestone Dots */}
-                    <div className="relative flex justify-between">
-                      {MILESTONES.map((m, idx) => {
-                        const isCompleted = MILESTONES.indexOf(order.status) >= idx;
-                        const isCurrent = order.status === m;
-                        return (
-                          <div key={m} className="flex flex-col items-center">
-                            <div className={`w-2 h-2 rounded-full border-2 transition-all duration-500 ${
-                              isCompleted 
-                                ? "bg-[#C5A059] border-[#C5A059] scale-150" 
-                                : "bg-white border-brand/20"
-                            } ${isCurrent ? "animate-pulse ring-4 ring-[#C5A059]/20" : ""}`} />
-                            <span className={`absolute mt-6 text-[10px] font-bold uppercase tracking-[0.15em] text-center whitespace-nowrap transition-colors duration-500 ${
-                              isCompleted ? "text-brand" : "text-brand/20"
-                            }`}>
-                              {m}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="p-6 md:px-8 md:py-6 space-y-6">
-                {order.items.map((item, idx) => (
-                  <div key={item.id} className="flex flex-row gap-6 items-start pb-6 border-b border-brand/5 last:border-0 last:pb-0">
-                    <div className="w-24 h-32 bg-brand/5 rounded-2xl overflow-hidden flex-shrink-0 border border-brand/5 shadow-sm relative group/img">
-                      {item.productImage ? (
-                        <img 
-                          src={item.productImage} 
-                          alt={item.productName} 
-                          className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = ""; // Clear src to show fallback
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-brand/20">
-                          <ImageIcon size={24} />
-                        </div>
-                      )}
-                      {/* Fallback for broken images */}
-                      <div className="absolute inset-0 flex items-center justify-center text-brand/10 -z-10 bg-brand/5">
-                        <ImageIcon size={24} />
+                  <div className="flex flex-wrap items-start gap-4 md:gap-8">
+                    <div className="flex flex-col justify-center min-w-[100px]">
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Status</p>
+                      <div className="flex items-center h-6">
+                        <span className={`inline-flex items-center px-3 py-0 h-6 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm border ${
+                          order.status === 'delivered' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 
+                          order.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border-red-500/30' : 
+                          'bg-[#C5A059]/20 text-[#C5A059] border-[#C5A059]/30'
+                        }`}>
+                          {order.status}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-1">
-                        <h5 className="text-base font-bold text-brand">{item.productName}</h5>
-                        
-                        {/* Inline Cancel Confirmation */}
-                        {idx === 0 && ["pending"].includes(order.status) && (
-                          <div className="flex items-center space-x-2">
-                            {confirmingCancelId === order.id ? (
-                              <div className="flex items-center space-x-2 animate-in fade-in slide-in-from-right-2 duration-300">
-                                <span className="text-[8px] font-black uppercase tracking-widest text-red-500 bg-red-50 px-2 py-1 rounded-md">Confirm?</span>
-                                <button 
-                                  disabled={isCancelling}
-                                  onClick={() => handleCancelOrder(order.id)}
-                                  className="p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all shadow-sm flex items-center justify-center"
-                                  title="Confirm Cancel"
-                                >
-                                  {isCancelling ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
-                                </button>
-                                <button 
-                                  disabled={isCancelling}
-                                  onClick={() => setConfirmingCancelId(null)}
-                                  className="p-1.5 bg-brand/5 text-brand/40 rounded-lg hover:bg-brand/10 transition-all"
-                                  title="Keep Order"
-                                >
-                                  <X size={12} />
-                                </button>
+                    <div className="flex flex-col justify-center min-w-[80px]">
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Date</p>
+                      <div className="flex items-center h-6">
+                        <span className="text-[10px] font-bold text-white">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col justify-center text-right min-w-[80px]">
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Total</p>
+                      <div className="flex items-center justify-end h-6">
+                        <span className="text-lg font-black text-white tracking-tighter">₹{order.totalAmount.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delivery Milestones Tracker */}
+                {order.status !== "cancelled" && (
+                  <div className="px-10 md:px-24 lg:px-32 pb-8 pt-4">
+                    <div className="relative">
+                      {/* Background Line */}
+                      <div className="absolute top-1/2 left-0 w-full h-[1px] bg-brand/10 -translate-y-1/2 rounded-full" />
+                      
+                      {/* Active Progress Line */}
+                      <div 
+                        className="absolute top-1/2 left-0 h-[2px] bg-[#C5A059] -translate-y-1/2 rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(197,160,89,0.4)]" 
+                        style={{ 
+                          width: `${(MILESTONES.indexOf(order.status) / (MILESTONES.length - 1)) * 100}%` 
+                        }} 
+                      />
+
+                      {/* Milestone Dots */}
+                      <div className="relative flex justify-between">
+                        {MILESTONES.map((m, idx) => {
+                          const isCompleted = MILESTONES.indexOf(order.status) >= idx;
+                          const isCurrent = order.status === m;
+                          return (
+                            <div key={m} className="flex flex-col items-center">
+                              <div className={`w-2 h-2 rounded-full border-2 transition-all duration-500 ${
+                                isCompleted 
+                                  ? "bg-[#C5A059] border-[#C5A059] scale-150" 
+                                  : "bg-white border-brand/20"
+                              } ${isCurrent ? "animate-pulse ring-4 ring-[#C5A059]/20" : ""}`} />
+                              <span className={`absolute mt-6 text-[10px] font-bold uppercase tracking-[0.15em] text-center whitespace-nowrap transition-colors duration-500 ${
+                                isCompleted ? "text-brand" : "text-brand/20"
+                              }`}>
+                                {m}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="p-6 md:p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Left Column: Product Details & Coupon Applied */}
+                    <div className="lg:col-span-8 space-y-6">
+                      <div className="space-y-6">
+                        {order.items.map((item) => {
+                          const isBespoke = item.customizations && item.customizations.measurements && Object.keys(item.customizations.measurements).length > 0;
+                          const isProductCoupon = isProductCouponMatch(item, order.couponCode, order.couponTargetType, order.couponTargetValue);
+
+                          return (
+                            <div key={item.id} className="flex flex-row gap-6 items-start pb-6 border-b border-brand/5 last:border-0 last:pb-0">
+                              <div className="w-24 h-32 bg-brand/5 rounded-2xl overflow-hidden flex-shrink-0 border border-brand/5 shadow-sm relative group/img">
+                                {item.productImage ? (
+                                  <img 
+                                    src={item.productImage} 
+                                    alt={item.productName} 
+                                    className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).src = "";
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-brand/20">
+                                    <ImageIcon size={24} />
+                                  </div>
+                                )}
+                                <div className="absolute inset-0 flex items-center justify-center text-brand/10 -z-10 bg-brand/5">
+                                  <ImageIcon size={24} />
+                                </div>
                               </div>
-                            ) : (
-                              <button 
-                                onClick={() => setConfirmingCancelId(order.id)}
-                                className="flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-red-100 text-red-500 hover:bg-red-50 transition-all group/cancel"
-                              >
-                                <XCircle size={14} className="group-hover/cancel:rotate-90 transition-transform duration-300" />
-                                <span className="text-[9px] font-black uppercase tracking-widest">Cancel</span>
-                              </button>
-                            )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-col mb-1">
+                                  <h5 className="text-base font-bold text-brand">{item.productName}</h5>
+                                  {isBespoke ? (
+                                    <span className="bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full inline-block w-fit mt-1">
+                                      Bespoke / Custom Fit
+                                    </span>
+                                  ) : (
+                                    <span className="bg-brand/5 text-brand/40 border border-brand/5 text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full inline-block w-fit mt-1">
+                                      Standard Fit
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center space-x-3 mb-4 mt-2">
+                                  <span className="text-xs font-medium text-brand/40 uppercase tracking-widest">Size: {item.size}</span>
+                                  <div className="w-1.5 h-1.5 rounded-full bg-brand/10"></div>
+                                  <span className="text-xs font-medium text-brand/40 uppercase tracking-widest">Qty: {item.quantity}</span>
+                                </div>
+                                
+                                {isBespoke && (
+                                  <div className="bg-brand/5 rounded-2xl p-4 border border-brand/5 mb-4">
+                                    <div className="flex items-center space-x-2 mb-3">
+                                      <Ruler size={12} className="text-[#C5A059]" />
+                                      <span className="text-[9px] font-black text-brand uppercase tracking-widest">Your Custom Fit (Inches)</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                      {Object.entries(item.customizations!.measurements).map(([key, val]) => (
+                                        <div key={key}>
+                                          <p className="text-[8px] font-bold text-brand/40 uppercase tracking-tighter mb-0.5">{key}</p>
+                                          <p className="text-[10px] font-black text-brand">{val}"</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Product-specific Coupon Badge */}
+                                {isProductCoupon && (
+                                  <div className="flex items-center space-x-1.5 bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-xl w-fit mt-2">
+                                    <span className="text-[10px] font-black uppercase tracking-widest">🏷️ Coupon Claimed: {order.couponCode}</span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-right self-center min-w-[80px]">
+                                <span className="text-sm font-black text-brand">₹{item.price.toLocaleString()}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Pricing Summary (including coupon) */}
+                      <div className="bg-brand/5 border border-brand/10 rounded-2xl p-5 space-y-3 text-brand">
+                        <div className="flex justify-between items-center text-xs font-bold">
+                          <span className="text-brand/55">Actual Price (Subtotal)</span>
+                          <span>₹{(order.totalAmount + (order.discountAmount || 0)).toLocaleString()}</span>
+                        </div>
+                        
+                        {order.couponCode && (
+                          <div className="flex justify-between items-center text-xs text-green-700 bg-green-50/50 px-3.5 py-2.5 rounded-xl border border-green-100 font-bold">
+                            <span className="flex items-center gap-1.5">
+                              🏷️ Coupon Applied: <span className="uppercase bg-green-100 text-green-800 px-2 py-0.5 rounded text-[10px] tracking-wider">{order.couponCode}</span>
+                              {order.couponTargetType && (order.couponTargetType === "product" || order.couponTargetType === "category") && (
+                                <span className="text-[9px] text-green-600/70 font-normal normal-case">(Product-specific)</span>
+                              )}
+                            </span>
+                            <span>-₹{order.discountAmount?.toLocaleString()}</span>
+                          </div>
+                        )}
+
+                        <div className="border-t border-brand/10 pt-2 flex justify-between items-center text-sm font-black">
+                          <span>Paid Total</span>
+                          <span className="text-[#C5A059]">₹{order.totalAmount.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Delivery Address & Cancel Option */}
+                    <div className="lg:col-span-4 lg:border-l border-brand/5 lg:pl-8 space-y-6 pt-6 lg:pt-0">
+                      <div className="space-y-6">
+                        {/* Shipping Address */}
+                        <div className="space-y-2">
+                          <h5 className="text-[9px] font-black uppercase tracking-widest text-brand/40 flex items-center gap-1.5">
+                            <MapPin size={12} className="text-[#C5A059]" /> Delivery Address
+                          </h5>
+                          <div className="bg-brand/5 border border-brand/5 rounded-2xl p-4">
+                            {(() => {
+                              const parsedAddr = parseAddress(order.shippingAddress);
+                              if (parsedAddr) {
+                                return (
+                                  <div className="space-y-1.5 text-xs text-brand/80 leading-relaxed">
+                                    <p><strong className="text-brand font-black uppercase tracking-wider text-[10px]">Name:</strong> {parsedAddr.name}</p>
+                                    <p><strong className="text-brand font-black uppercase tracking-wider text-[10px]">Address:</strong> {parsedAddr.street}</p>
+                                    <p><strong className="text-brand font-black uppercase tracking-wider text-[10px]">City:</strong> {parsedAddr.city}</p>
+                                    <p><strong className="text-brand font-black uppercase tracking-wider text-[10px]">State:</strong> {parsedAddr.state}</p>
+                                    <p><strong className="text-brand font-black uppercase tracking-wider text-[10px]">Pincode:</strong> {parsedAddr.pincode}</p>
+                                    <p><strong className="text-brand font-black uppercase tracking-wider text-[10px]">Contact:</strong> {parsedAddr.contact}</p>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <p className="text-xs font-semibold text-brand/80 leading-relaxed">
+                                  {order.shippingAddress || "No address provided"}
+                                </p>
+                              );
+                            })()}
+                          </div>
+                        </div>
+
+                        {/* Cancel Order Action */}
+                        {order.status === "pending" && (
+                          <div className="space-y-2">
+                            <h5 className="text-[9px] font-black uppercase tracking-widest text-brand/40">Manage Order</h5>
+                            <div className="bg-brand/5 border border-brand/5 rounded-2xl p-4">
+                              {confirmingCancelId === order.id ? (
+                                <div className="space-y-3">
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-red-500">Confirm cancellation?</p>
+                                  <div className="flex items-center space-x-2">
+                                    <button 
+                                      disabled={isCancelling}
+                                      onClick={() => handleCancelOrder(order.id)}
+                                      className="flex-1 py-2 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-1"
+                                    >
+                                      {isCancelling ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                                      Yes, Cancel
+                                    </button>
+                                    <button 
+                                      disabled={isCancelling}
+                                      onClick={() => setConfirmingCancelId(null)}
+                                      className="flex-1 py-2 bg-brand/5 text-brand/70 font-bold rounded-xl hover:bg-brand/10 transition-all text-[10px] uppercase tracking-widest border border-brand/10"
+                                    >
+                                      No, Keep
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button 
+                                  onClick={() => setConfirmingCancelId(order.id)}
+                                  className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition-all font-bold text-[10px] uppercase tracking-widest"
+                                >
+                                  <XCircle size={14} />
+                                  <span>Cancel Order</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {order.status === "cancelled" && (
+                          <div className="flex items-center space-x-3 px-6 py-4 rounded-2xl bg-red-50 border border-red-100 text-red-600">
+                            <AlertTriangle size={18} />
+                            <div>
+                              <p className="text-[10px] font-black uppercase tracking-widest">Order Cancelled</p>
+                              <p className="text-[9px] font-medium opacity-70">A refund will be initiated if payment was captured. Amount will be credited within 7 to 9 business days.</p>
+                            </div>
                           </div>
                         )}
                       </div>
-
-                      <div className="flex items-center space-x-3 mb-4">
-                        <span className="text-xs font-medium text-brand/40 uppercase tracking-widest">Size: {item.size}</span>
-                        <div className="w-1.5 h-1.5 rounded-full bg-brand/10"></div>
-                        <span className="text-xs font-medium text-brand/40 uppercase tracking-widest">Qty: {item.quantity}</span>
-                      </div>
-                      
-                      {item.customizations && item.customizations.measurements && Object.keys(item.customizations.measurements).length > 0 && (
-                        <div className="bg-brand/5 rounded-2xl p-4 border border-brand/5 mb-4">
-                          <div className="flex items-center space-x-2 mb-3">
-                            <Ruler size={12} className="text-[#C5A059]" />
-                            <span className="text-[9px] font-black text-brand uppercase tracking-widest">Your Custom Fit (Inches)</span>
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {Object.entries(item.customizations.measurements).map(([key, val]) => (
-                              <div key={key}>
-                                <p className="text-[8px] font-bold text-brand/40 uppercase tracking-tighter mb-0.5">{key}</p>
-                                <p className="text-[10px] font-black text-brand">{val}"</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Shipping Address Moved Here */}
-                      {idx === 0 && (
-                        <div className="mt-4">
-                          <div className="flex items-start space-x-3 px-4 py-3 rounded-2xl bg-brand/5 border border-brand/5 w-full md:w-3/4">
-                            <MapPin size={14} className="text-[#C5A059] mt-0.5 flex-shrink-0" />
-                            <div className="flex-1">
-                              <p className="text-[9px] font-black uppercase tracking-widest mb-1 text-brand/40">Delivery Address</p>
-                              <p className="text-[11px] font-bold text-brand leading-relaxed">
-                                {order.shippingAddress || "No address provided"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
-                      <div className="text-right self-center min-w-[80px]">
-                        <span className="text-sm font-black text-brand">₹{item.price.toLocaleString()}</span>
-                      </div>
-                    </div>
-                  ))}
-
-
-
-                  {/* Status Messages */}
-                  {order.status === "cancelled" && (
-                    <div className="pt-6 border-t border-brand/5">
-                      <div className="flex items-center space-x-3 px-6 py-4 rounded-2xl bg-red-50 border border-red-100 text-red-600">
-                        <AlertTriangle size={18} />
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest">Order Cancelled</p>
-                          <p className="text-[9px] font-medium opacity-70">A refund will be initiated if payment was captured. Amount will be credited within 7 to 9 business days.</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
-          ))}
+            );
+          })}
         </div>
       )}
       {/* Floating Toast Notification */}
