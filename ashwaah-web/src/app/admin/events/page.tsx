@@ -312,7 +312,7 @@ export default function AdminEventsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !category || !date.trim() || !time.trim() || !location.trim() || !cost.trim()) {
+    if (!title.trim() || !category || !date.trim() || !time.trim() || !location.trim()) {
       showToast("Please fill in all required fields.");
       return;
     }
@@ -535,7 +535,6 @@ export default function AdminEventsPage() {
                   <th className="py-4 px-6">Event Details</th>
                   <th className="py-4 px-6">Category</th>
                   <th className="py-4 px-6">Location & Date</th>
-                  <th className="py-4 px-6">Pricing</th>
                   <th className="py-4 px-6 text-center">Actions</th>
                 </tr>
               </thead>
@@ -596,9 +595,6 @@ export default function AdminEventsPage() {
                             {evt.location}
                           </p>
                         </div>
-                      </td>
-                      <td className="py-5 px-6">
-                        <span className="font-bold text-brand text-sm">{evt.cost}</span>
                       </td>
                       <td className="py-5 px-6">
                         <div className="flex items-center justify-center space-x-2">
@@ -718,10 +714,10 @@ export default function AdminEventsPage() {
                   </div>
                 </div>
 
-                {/* Section 2: Date, Location & Pricing */}
+                {/* Section 2: Date & Location */}
                 <div className="bg-gray-50/50 p-6 rounded-2xl border border-brand/5 space-y-4">
-                  <h3 className="text-xs font-black text-brand/35 uppercase tracking-wider mb-2">Schedule, Location & Cost</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <h3 className="text-xs font-black text-brand/35 uppercase tracking-wider mb-2">Schedule & Location</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-brand mb-1.5">Date *</label>
                       <input
@@ -741,17 +737,6 @@ export default function AdminEventsPage() {
                         value={time}
                         onChange={(e) => setTime(e.target.value)}
                         placeholder="e.g. 7:00 PM"
-                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-brand mb-1.5">Cost *</label>
-                      <input
-                        type="text"
-                        required
-                        value={cost}
-                        onChange={(e) => setCost(e.target.value)}
-                        placeholder="e.g. ₹299 onwards or Free"
                         className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand"
                       />
                     </div>

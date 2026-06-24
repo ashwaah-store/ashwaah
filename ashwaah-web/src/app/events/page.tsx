@@ -376,11 +376,10 @@ function EventCard({ item, onRegisterClick }: { item: EventItem; onRegisterClick
                 </div>
               </div>
 
-              {/* Separator line & Bottom pricing/action row */}
+              {/* Separator line & Bottom action row */}
               <div className="border-t border-gray-200 pt-4 mt-2 flex items-center justify-between gap-4">
                 <div className="flex flex-col">
-                  <span className="text-sm font-black text-gray-800 tracking-tight leading-tight">{item.cost}</span>
-                  <span className="text-[10px] font-bold text-green-600 mt-0.5 uppercase tracking-wider">Available</span>
+                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Available</span>
                 </div>
 
                 <button

@@ -54,9 +54,9 @@ export async function POST(request: Request) {
       disclaimer
     } = body;
 
-    if (!title || !category || !date || !time || !location || !cost) {
+    if (!title || !category || !date || !time || !location) {
       return NextResponse.json(
-        { success: false, error: "Title, Category, Date, Time, Location, and Cost are required" },
+        { success: false, error: "Title, Category, Date, Time, and Location are required" },
         { status: 400 }
       );
     }
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
         language: language || null,
         genre: genre || null,
         location,
-        cost,
+        cost: cost || "",
         bookingUrl: bookingUrl || null,
         disclaimer: disclaimer || null,
       })
