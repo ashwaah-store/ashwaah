@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { 
   Calendar, 
   Clock, 
@@ -119,6 +120,11 @@ function isVideo(url: string) {
 function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
   const [slideIndex, setSlideIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   if (mediaList.length === 0) {
     return (
@@ -211,7 +217,7 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
       </div>
 
       {/* FULLSCREEN LIGHTBOX MODAL */}
-      {isLightboxOpen && (
+      {isLightboxOpen && mounted && createPortal(
         <div 
           className="fixed inset-0 z-[150] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300"
           onClick={() => setIsLightboxOpen(false)}
@@ -289,7 +295,8 @@ function EventMediaSlideshow({ mediaList }: { mediaList: string[] }) {
               ))}
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
